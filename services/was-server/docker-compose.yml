@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # FastAPI 애플리케이션
+  app:
+    build: .
+    container_name: iot-care-app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+      - ./logs:/app/logs
+      - ./config:/app/config
+    env_file:
+      - env.local
+    depends_on:
+      - redis
+    networks:
+      - iot-care-network
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Redis (캐시, 세션, 태스크 큐)
+  redis:
+    image: redis:7-alpine
+    container_name: iot-care-redis
+    restart: unless-stopped
+    ports:
+      - "16379:6379"
+    volumes:
+      - redis_data:/data
+      - ./config/redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - iot-care-network
+
+  # Caddy 웹서버 (리버스 프록시 + SSL)
+  caddy:
+    image: caddy:2-alpine
+    container_name: iot-care-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+    networks:
+      - iot-care-network
+
+volumes:
+  redis_data:
+    driver: local
+  caddy_data:
+    driver: local
+  caddy_config:
+    driver: local
+
+networks:
+  iot-care-network:
+    driver: bridge

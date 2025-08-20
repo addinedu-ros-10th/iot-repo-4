@@ -1,0 +1,47 @@
+# Production Environment Caddyfile
+# Automatic SSL with Let's Encrypt
+
+# Replace with your actual domain
+iot-care.example.com {
+    # Automatic HTTPS with Let's Encrypt
+    tls {
+        on_demand
+    }
+
+    # Reverse proxy to FastAPI application
+    reverse_proxy app:8000 {
+        header_up Host {host}
+        header_up X-Real-IP {remote}
+        header_up X-Forwarded-For {remote}
+        header_up X-Forwarded-Proto {scheme}
+    }
+
+    # Security headers
+    header {
+        # Security headers
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy strict-origin-when-cross-origin
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
+        
+        # Performance headers
+        Cache-Control "public, max-age=3600"
+    }
+
+    # Logging
+    log {
+        output file /data/access_prod.log
+        format json
+    }
+
+    # Health check endpoint
+    @health {
+        path /health
+    }
+    respond @health 200
+
+    # Gzip compression
+    encode gzip
+}
+
