@@ -20,7 +20,20 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = Field(default="INFO", env="LOG_LEVEL")
     
     # 데이터베이스 설정
-    DATABASE_URL: str = Field(..., env="DATABASE_URL")
+    DB_USER: str = Field(..., env="DB_USER")
+    DB_PASSWORD: str = Field(..., env="DB_PASSWORD")
+    DB_HOST: str = Field(..., env="DB_HOST")
+    DB_PORT: int = Field(..., env="DB_PORT")
+    DB_NAME: str = Field(..., env="DB_NAME")
+    
+    @property
+    def DATABASE_URL(self) -> str:
+        """데이터베이스 URL을 동적으로 생성합니다."""
+        from urllib.parse import quote_plus
+        
+        # 비밀번호에 포함된 특수문자를 URL 인코딩
+        encoded_password = quote_plus(self.DB_PASSWORD)
+        return f"postgresql://{self.DB_USER}:{encoded_password}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
     
     # Redis 설정
     REDIS_URL: str = Field(..., env="REDIS_URL")
@@ -41,6 +54,9 @@ class Settings(BaseSettings):
     API_V1_STR: str = Field(default="/api/v1", env="API_V1_STR")
     PROJECT_NAME: str = Field(default="IoT Care Backend", env="PROJECT_NAME")
     VERSION: str = Field(default="1.0.0", env="VERSION")
+    
+    # CORS 설정
+    ALLOWED_HOSTS: list = Field(default=["*"], env="ALLOWED_HOSTS")
     
     # 로깅 설정
     LOG_FILE_PATH: str = Field(default="./logs/app.log", env="LOG_FILE_PATH")

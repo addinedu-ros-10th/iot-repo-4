@@ -1,12 +1,19 @@
 """
-API Layer - API 라우터 및 엔드포인트
+API 패키지 초기화
 
-이 레이어는 FastAPI의 라우터와 API 엔드포인트를 정의합니다.
-각 도메인별 API 그룹과 공통 미들웨어를 포함합니다.
+API 버전 관리 및 라우터 등록을 담당합니다.
 """
 
-# API 라우터들을 여기서 import
-# from .v1 import *
-# from .middleware import *
-# from .dependencies import *
+from fastapi import APIRouter
+from app.api.v1 import users, devices, sensors
+
+# API 버전별 라우터 등록
+api_router = APIRouter()
+
+# v1 API 등록
+api_router.include_router(users.router, prefix="/v1/users", tags=["users"])
+api_router.include_router(devices.router, prefix="/v1/devices", tags=["devices"])
+api_router.include_router(sensors.router, prefix="/v1/sensors", tags=["sensors"])
+
+__all__ = ["api_router"]
 

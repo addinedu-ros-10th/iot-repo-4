@@ -9,13 +9,17 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./app:/app
+      - ./app:/app/app:delegated  # 소스 코드 동기화를 위한 마운트 추가
+      - ./tests:/app/tests:delegated  # 테스트 코드 동기화
       - ./logs:/app/logs
       - ./config:/app/config
     env_file:
       - env.local
     depends_on:
       - redis
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
     networks:
       - iot-care-network
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload

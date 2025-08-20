@@ -18,7 +18,7 @@ from alembic import context
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # 환경 변수에서 데이터베이스 URL 가져오기
-from app.core.config import get_database_url
+from app.core.config import get_settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -43,7 +43,7 @@ target_metadata = None
 
 def get_url():
     """환경 변수에서 데이터베이스 URL을 가져옵니다."""
-    return get_database_url()
+    return get_settings().DATABASE_URL
 
 
 def run_migrations_offline() -> None:
@@ -80,11 +80,13 @@ def run_migrations_online() -> None:
     # 환경 변수에서 데이터베이스 URL 가져오기
     url = get_url()
     
-    # alembic.ini의 sqlalchemy.url를 동적으로 업데이트
-    config.set_main_option("sqlalchemy.url", url)
-    
+    # URL 인코딩 문제를 우회하기 위해 직접 엔진 생성
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        {
+            "sqlalchemy.url": url,
+            "sqlalchemy.echo": "false",
+            "sqlalchemy.poolclass": "NullPool"
+        },
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )

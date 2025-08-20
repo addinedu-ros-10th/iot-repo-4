@@ -8,6 +8,7 @@ from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import QueuePool
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from typing import Generator
 import logging
 
@@ -66,6 +67,38 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 
+async def get_session() -> AsyncSession:
+    """
+    비동기 데이터베이스 세션을 생성하는 함수
+    
+    PostgreSQL 리포지토리에서 사용됩니다.
+    """
+    # 동기 엔진을 사용하여 비동기 세션 생성
+    # 실제 프로덕션에서는 asyncpg를 사용한 비동기 엔진을 권장
+    from sqlalchemy.ext.asyncio import create_async_engine
+    
+    # 동기 URL을 비동기 URL로 변환
+    async_database_url = DATABASE_URL.replace('postgresql://', 'postgresql+asyncpg://')
+    
+    async_engine = create_async_engine(
+        async_database_url,
+        poolclass=QueuePool,
+        pool_size=5,
+        max_overflow=10,
+        pool_pre_ping=True,
+        pool_recycle=3600,
+        echo=settings.DEBUG,
+    )
+    
+    async_session = async_sessionmaker(
+        async_engine,
+        class_=AsyncSession,
+        expire_on_commit=False
+    )
+    
+    return async_session()
+
+
 def create_tables():
     """데이터베이스 테이블을 생성합니다."""
     try:
@@ -94,7 +127,8 @@ def test_connection() -> bool:
     """데이터베이스 연결을 테스트합니다."""
     try:
         with engine.connect() as connection:
-            result = connection.execute("SELECT 1")
+            from sqlalchemy import text
+            result = connection.execute(text("SELECT 1"))
             logger.info("데이터베이스 연결 테스트 성공")
             return True
     except Exception as e:
@@ -106,12 +140,13 @@ def get_table_names() -> list:
     """데이터베이스의 모든 테이블 이름을 반환합니다."""
     try:
         with engine.connect() as connection:
-            result = connection.execute("""
+            from sqlalchemy import text
+            result = connection.execute(text("""
                 SELECT table_name 
                 FROM information_schema.tables 
                 WHERE table_schema = 'public'
                 ORDER BY table_name
-            """)
+            """))
             table_names = [row[0] for row in result]
             logger.info(f"테이블 목록 조회 성공: {len(table_names)}개 테이블")
             return table_names
@@ -125,7 +160,8 @@ def get_table_schema(table_name: str) -> dict:
     try:
         with engine.connect() as connection:
             # 컬럼 정보 조회
-            columns_result = connection.execute(f"""
+            from sqlalchemy import text
+            columns_result = connection.execute(text(f"""
                 SELECT 
                     column_name,
                     data_type,
@@ -135,7 +171,7 @@ def get_table_schema(table_name: str) -> dict:
                 WHERE table_name = '{table_name}' 
                 AND table_schema = 'public'
                 ORDER BY ordinal_position
-            """)
+            """))
             
             columns = []
             for row in columns_result:
@@ -147,14 +183,15 @@ def get_table_schema(table_name: str) -> dict:
                 })
             
             # 제약조건 정보 조회
-            constraints_result = connection.execute(f"""
+            from sqlalchemy import text
+            constraints_result = connection.execute(text(f"""
                 SELECT 
                     constraint_name,
                     constraint_type
                 FROM information_schema.table_constraints 
                 WHERE table_name = '{table_name}' 
                 AND table_schema = 'public'
-            """)
+            """))
             
             constraints = []
             for row in constraints_result:

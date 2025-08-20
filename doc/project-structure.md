@@ -1,133 +1,149 @@
-# 🏗️ 프로젝트 구조 가이드
+# IoT Care Project Structure
 
-이 문서는 IoT 프로젝트 4조의 모노레포 구조와 각 프로젝트의 역할에 대한 상세한 설명입니다.
+## Overview
+독거노인 통합 돌봄 서비스를 위한 IoT 백엔드 시스템입니다.
 
-## 📁 전체 프로젝트 구조
+## Architecture
+- **Clean Architecture**: 도메인 중심의 계층화된 아키텍처
+- **Dependency Injection**: 의존성 역전 원칙 구현
+- **Repository Pattern**: 데이터 접근 추상화
+- **TDD**: 테스트 주도 개발 방식
 
+## Directory Structure
+
+### Root Level
 ```
 iot-repo-4/
-├── README.md                 # 프로젝트 메인 문서
-├── doc/                      # 프로젝트 문서들
-│   ├── monorepo-guide.md    # 모노레포 관리 가이드
-│   ├── project-structure.md # 프로젝트 구조 설명 (현재 문서)
-│   └── ...
-├── apps/                     # 애플리케이션 프로젝트들
-│   ├── user-app/            # 사용자 모바일/웹 애플리케이션
-│   └── pyqt-admin-service/  # PyQt 기반 관제 서비스
-├── services/                 # 서버 및 백엔드 서비스들
-│   ├── was-server/          # WAS (Web Application Server)
-│   └── que-alert-server/    # QUE & ALERT 서버
-├── iot-device/              # IoT 디바이스 관련 코드
-│   └── arduino/             # 아두이노 펌웨어
-├── shared/                   # 공통 라이브러리 및 유틸리티
-├── tests/                    # 테스트 코드
-└── config/                   # 설정 파일들
+├── doc/                    # 프로젝트 문서
+├── services/               # 마이크로서비스들
+│   └── was-server/        # Web Application Server
+└── task/                   # 개발 작업 관리
 ```
 
-## 🎯 각 프로젝트 상세 설명
-
-### 📱 apps/user-app
-**사용자 모바일/웹 애플리케이션**
-
-- **목적**: 취약계층 사용자가 서비스를 이용할 수 있는 인터페이스
-- **기술 스택**: React Native, Flutter, 또는 웹 기술
-- **주요 기능**:
-  - 사용자 인증 및 프로필 관리
-  - IoT 디바이스 상태 모니터링
-  - 긴급 상황 알림 및 신고
-  - 돌봄 서비스 요청 및 관리
-
-### 🖥️ apps/pyqt-admin-service
-**PyQt 기반 관제 서비스**
-
-- **목적**: 관리자가 전체 시스템을 모니터링하고 제어할 수 있는 데스크톱 애플리케이션
-- **기술 스택**: Python, PyQt5/PyQt6
-- **주요 기능**:
-  - IoT 디바이스 실시간 모니터링
-  - 사용자 관리 및 권한 설정
-  - 시스템 상태 대시보드
-  - 알림 및 이벤트 관리
-
-### 🌐 services/was-server
-**Web Application Server**
-
-- **목적**: 전체 시스템의 중앙 서버 역할
-- **기술 스택**: Node.js, Python Flask/Django, 또는 Java Spring
-- **주요 기능**:
-  - RESTful API 제공
-  - 데이터베이스 연동 및 관리
-  - 사용자 인증 및 권한 관리
-  - IoT 디바이스와의 통신 중계
-
-### 🔔 services/que-alert-server
-**QUE & ALERT 서버**
-
-- **목적**: 메시지 큐 관리 및 알림 서비스
-- **기술 스택**: Redis, RabbitMQ, 또는 Apache Kafka
-- **주요 기능**:
-  - 메시지 큐 관리
-  - 실시간 알림 전송
-  - 이벤트 스트림 처리
-  - 긴급 상황 대응 시스템
-
-### 🔌 iot-device
-**IoT 디바이스 관련 코드**
-
-- **목적**: 실제 IoT 하드웨어와 연동되는 코드
-- **기술 스택**: Arduino, ESP32, 또는 Raspberry Pi
-- **주요 기능**:
-  - 센서 데이터 수집
-  - 데이터 전송 및 수신
-  - 디바이스 상태 모니터링
-  - 펌웨어 업데이트
-
-## 🔗 프로젝트 간 의존성
-
+### WAS Server (`services/was-server/`)
 ```
-user-app ←→ was-server ←→ que-alert-server
-    ↑           ↑              ↑
-    └─── iot-device ──────────┘
+app/
+├── __init__.py
+├── main.py                 # FastAPI 애플리케이션 진입점
+├── api/                    # API 레이어 (외부 인터페이스)
+│   └── __init__.py
+├── core/                   # 핵심 설정 및 유틸리티
+│   ├── __init__.py
+│   ├── config.py          # 환경 설정 관리
+│   └── container.py       # 의존성 주입 컨테이너 ✅
+├── domain/                 # 도메인 레이어 (비즈니스 로직)
+│   ├── __init__.py
+│   ├── entities/          # 도메인 엔티티
+│   │   ├── user.py        # 사용자 엔티티 ✅
+│   │   └── device.py      # 디바이스 엔티티 ✅
+│   └── services/          # 도메인 서비스
+│       └── user_service.py # 사용자 비즈니스 로직 ✅
+├── infrastructure/         # 인프라스트럭처 레이어
+│   ├── __init__.py
+│   ├── database.py        # 데이터베이스 연결 관리 ✅
+│   ├── redis_client.py    # Redis 클라이언트 ✅
+│   └── repositories/      # 리포지토리 구현체
+│       ├── memory_user_repository.py      # 메모리 사용자 리포지토리 ✅
+│       └── memory_device_repository.py    # 메모리 디바이스 리포지토리 ✅
+├── interfaces/             # 인터페이스 레이어 (추상화)
+│   ├── __init__.py
+│   ├── repositories/      # 리포지토리 인터페이스
+│   │   ├── user_repository.py     # 사용자 리포지토리 인터페이스 ✅
+│   │   └── device_repository.py   # 디바이스 리포지토리 인터페이스 ✅
+│   └── services/          # 서비스 인터페이스
+│       └── user_service_interface.py # 사용자 서비스 인터페이스 ✅
+├── use_cases/              # 유스케이스 레이어
+│   └── __init__.py
+└── logs/                   # 로그 파일들
+
+tests/                      # 테스트 코드
+├── domain/                 # 도메인 모델 테스트
+│   └── entities/          # 엔티티 테스트
+└── core/                   # 핵심 기능 테스트
+    └── test_container.py  # 의존성 주입 컨테이너 테스트 ✅
+
+alembic/                    # 데이터베이스 마이그레이션
+├── env.py                 # Alembic 환경 설정 ✅
+└── script.py.mako         # 마이그레이션 스크립트 템플릿
+
+config/                     # 설정 파일들
+├── redis.conf             # Redis 설정
+└── ...
+
+docker-compose.yml          # Docker Compose 설정 ✅
+Dockerfile                  # Docker 이미지 설정 ✅
+requirements.txt            # Python 패키지 의존성 ✅
 ```
 
-### 의존성 설명
+## Key Components
 
-1. **user-app ↔ was-server**: 사용자 인증, 데이터 요청/응답
-2. **pyqt-admin-service ↔ was-server**: 관리자 기능, 시스템 모니터링
-3. **iot-device ↔ was-server**: 센서 데이터 전송, 명령 수신
-4. **was-server ↔ que-alert-server**: 알림 및 이벤트 처리
+### 1. Domain Layer ✅
+- **User Entity**: 사용자 관리, 역할 기반 권한
+- **Device Entity**: IoT 디바이스 관리, 사용자 할당
+- **UserService**: 사용자 비즈니스 로직, 권한 검증
 
-## 📋 개발 환경 설정
+### 2. Interface Layer ✅
+- **Repository Interfaces**: 데이터 접근 추상화
+- **Service Interfaces**: 비즈니스 로직 추상화
 
-### 필수 요구사항
+### 3. Infrastructure Layer ✅
+- **Database**: PostgreSQL 연결 및 관리
+- **Redis**: 캐싱 및 세션 관리
+- **Memory Repositories**: 테스트용 인메모리 저장소
 
-- **Git**: 버전 관리
-- **Node.js**: 웹 애플리케이션 개발
-- **Python**: PyQt 및 서버 개발
-- **Arduino IDE**: IoT 디바이스 개발
-- **Docker**: 서비스 컨테이너화 (선택사항)
+### 4. Dependency Injection ✅
+- **Container**: 중앙 집중식 의존성 관리
+- **Service Registry**: 서비스 및 리포지토리 등록
+- **Type Safety**: 타입 안전성 보장
 
-### 권장 개발 도구
+## Technology Stack
 
-- **VS Code**: 통합 개발 환경
-- **Postman**: API 테스트
-- **GitHub Desktop**: Git GUI 클라이언트
-- **Arduino IDE**: IoT 디바이스 개발
+### Backend
+- **Framework**: FastAPI 0.104.1
+- **Language**: Python 3.11
+- **Database**: PostgreSQL (via SSH tunnel)
+- **Cache**: Redis 5.0.1
+- **ORM**: SQLAlchemy 2.0.23
+- **Migration**: Alembic 1.12.1
 
-## 🚀 배포 및 운영
+### Development Tools
+- **Testing**: pytest 7.4.3
+- **Code Quality**: black, flake8, mypy
+- **Container**: Docker & Docker Compose
 
-### 개발 환경
-- 각 프로젝트별 독립적인 개발 서버
-- 로컬 데이터베이스 사용
-- 테스트용 IoT 디바이스
+### Architecture Patterns
+- **Clean Architecture**: 계층화된 아키텍처
+- **Repository Pattern**: 데이터 접근 추상화
+- **Dependency Injection**: 의존성 역전 원칙
+- **TDD**: 테스트 주도 개발
 
-### 운영 환경
-- AWS 또는 클라우드 서비스 활용
-- 프로덕션 데이터베이스
-- 실제 IoT 디바이스 연동
+## Current Status
 
-## 📚 추가 문서
+### ✅ Completed
+- Phase 1-3: PostgreSQL 연결 및 Alembic 초기화
+- Phase 2-1: 도메인 모델 구현
+- Phase 2-2: 의존성 주입 시스템 구현
 
-- [모노레포 관리 가이드](./monorepo-guide.md)
-- [API 문서](./api-docs.md)
-- [배포 가이드](./deployment-guide.md)
-- [문제 해결 가이드](./troubleshooting.md)
+### 🔄 In Progress
+- Phase 2-3: 리포지토리 패턴 구현 (데이터베이스 연동)
+
+### 📋 Planned
+- Phase 3: API 엔드포인트 구현
+- Phase 4: 고급 기능 구현
+
+## Development Guidelines
+
+### Code Organization
+- 각 레이어는 명확한 책임을 가짐
+- 의존성은 항상 내부 레이어를 향함
+- 인터페이스를 통한 추상화
+
+### Testing Strategy
+- TDD 방식으로 개발
+- 단위 테스트 우선
+- 통합 테스트로 검증
+
+### Database Management
+- Alembic을 통한 스키마 관리
+- 마이그레이션 기반 배포
+- 롤백 지원
