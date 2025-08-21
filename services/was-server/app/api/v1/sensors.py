@@ -7,19 +7,21 @@
 from typing import List, Optional
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.schemas import (
     SensorDataResponse, SuccessResponse, PaginationParams
 )
 from app.core.container import container
+from app.infrastructure.database import get_db_session
 from app.interfaces.repositories.device_repository import IDeviceRepository
 
 router = APIRouter()
 
 
-def get_device_repository() -> IDeviceRepository:
+def get_device_repository(db_session: AsyncSession = Depends(get_db_session)) -> IDeviceRepository:
     """디바이스 리포지토리 의존성 주입"""
-    return container.get_device_repository()
+    return container.get_device_repository(db_session)
 
 
 @router.get("/", response_model=List[SensorDataResponse])

@@ -8,8 +8,10 @@ from typing import List, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.container import container
+from app.infrastructure.database import get_db_session
 from app.interfaces.services.sensor_service_interface import IEdgeReedService
 from app.api.v1.schemas import (
     EdgeReedDataCreate,
@@ -20,9 +22,9 @@ from app.api.v1.schemas import (
 router = APIRouter(prefix="/edge-reed", tags=["Edge Reed 센서"])
 
 
-def get_edge_reed_service() -> IEdgeReedService:
+def get_edge_reed_service(db_session: AsyncSession = Depends(get_db_session)) -> IEdgeReedService:
     """Edge Reed 서비스 의존성 주입"""
-    return container.get_edge_reed_service()
+    return container.get_edge_reed_service(db_session)
 
 
 @router.post("/", response_model=EdgeReedDataResponse, status_code=201)

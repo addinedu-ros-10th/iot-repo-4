@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 
-from app.infrastructure.database import get_db
+from app.infrastructure.database import get_db_session
 from app.infrastructure.models import SensorRawDHT
 from app.api.v1.schemas import DHTDataCreate, DHTDataResponse, DHTDataUpdate
 
@@ -20,15 +20,16 @@ router = APIRouter(prefix="/dht", tags=["DHT Sensor"])
 @router.post("/", response_model=DHTDataResponse, status_code=201)
 async def create_dht_data(
     dht_data: DHTDataCreate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """DHT 센서 데이터 생성"""
     try:
         db_dht = SensorRawDHT(
             time=dht_data.time,
             device_id=dht_data.device_id,
-            temperature_c=dht_data.temperature_c,
-            humidity_percent=dht_data.humidity_percent,
+            temperature=dht_data.temperature,
+            humidity=dht_data.humidity,
+            heat_index=dht_data.heat_index,
             raw_payload=dht_data.raw_payload
         )
         db.add(db_dht)
@@ -38,8 +39,9 @@ async def create_dht_data(
         return DHTDataResponse(
             time=db_dht.time,
             device_id=db_dht.device_id,
-            temperature_c=db_dht.temperature_c,
-            humidity_percent=db_dht.humidity_percent,
+            temperature=db_dht.temperature,
+            humidity=db_dht.humidity,
+            heat_index=db_dht.heat_index,
             raw_payload=db_dht.raw_payload
         )
     except Exception as e:
@@ -53,7 +55,7 @@ async def get_dht_data_list(
     start_time: Optional[datetime] = Query(None, description="시작 시간"),
     end_time: Optional[datetime] = Query(None, description="종료 시간"),
     limit: int = Query(100, description="조회 개수 제한"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """DHT 센서 데이터 목록 조회"""
     try:
@@ -79,8 +81,9 @@ async def get_dht_data_list(
             DHTDataResponse(
                 time=dht.time,
                 device_id=dht.device_id,
-                temperature_c=dht.temperature_c,
-                humidity_percent=dht.humidity_percent,
+                temperature=dht.temperature,
+                humidity=dht.humidity,
+                heat_index=dht.heat_index,
                 raw_payload=dht.raw_payload
             )
             for dht in dht_list
@@ -93,7 +96,7 @@ async def get_dht_data_list(
 async def get_dht_data(
     device_id: str,
     timestamp: datetime,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """특정 시간의 DHT 센서 데이터 조회"""
     try:
@@ -113,8 +116,8 @@ async def get_dht_data(
         return DHTDataResponse(
             time=dht_data.time,
             device_id=dht_data.device_id,
-            temperature_c=dht_data.temperature_c,
-            humidity_percent=dht_data.humidity_percent,
+            temperature=dht_data.temperature,
+            humidity=dht_data.humidity,
             raw_payload=dht_data.raw_payload
         )
     except HTTPException:
@@ -128,7 +131,7 @@ async def update_dht_data(
     device_id: str,
     timestamp: datetime,
     dht_data: DHTDataUpdate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """DHT 센서 데이터 수정"""
     try:
@@ -146,10 +149,12 @@ async def update_dht_data(
             raise HTTPException(status_code=404, detail="DHT 데이터를 찾을 수 없습니다")
         
         # 업데이트할 필드만 수정
-        if dht_data.temperature_c is not None:
-            db_dht.temperature_c = dht_data.temperature_c
-        if dht_data.humidity_percent is not None:
-            db_dht.humidity_percent = dht_data.humidity_percent
+        if dht_data.temperature is not None:
+            db_dht.temperature = dht_data.temperature
+        if dht_data.humidity is not None:
+            db_dht.humidity = dht_data.humidity
+        if dht_data.heat_index is not None:
+            db_dht.heat_index = dht_data.heat_index
         if dht_data.raw_payload is not None:
             db_dht.raw_payload = dht_data.raw_payload
         
@@ -159,8 +164,9 @@ async def update_dht_data(
         return DHTDataResponse(
             time=db_dht.time,
             device_id=db_dht.device_id,
-            temperature_c=db_dht.temperature_c,
-            humidity_percent=db_dht.humidity_percent,
+            temperature=db_dht.temperature,
+            humidity=db_dht.humidity,
+            heat_index=db_dht.heat_index,
             raw_payload=db_dht.raw_payload
         )
     except HTTPException:
@@ -174,7 +180,7 @@ async def update_dht_data(
 async def delete_dht_data(
     device_id: str,
     timestamp: datetime,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """DHT 센서 데이터 삭제"""
     try:
@@ -205,7 +211,7 @@ async def delete_dht_data(
 @router.get("/{device_id}/latest", response_model=DHTDataResponse)
 async def get_latest_dht_data(
     device_id: str,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """특정 디바이스의 최신 DHT 센서 데이터 조회"""
     try:
@@ -222,8 +228,8 @@ async def get_latest_dht_data(
         return DHTDataResponse(
             time=dht_data.time,
             device_id=dht_data.device_id,
-            temperature_c=dht_data.temperature_c,
-            humidity_percent=dht_data.humidity_percent,
+            temperature=dht_data.temperature,
+            humidity=dht_data.humidity,
             raw_payload=dht_data.raw_payload
         )
     except HTTPException:
@@ -237,7 +243,7 @@ async def get_dht_stats_summary(
     device_id: str,
     start_time: Optional[datetime] = Query(None, description="시작 시간"),
     end_time: Optional[datetime] = Query(None, description="종료 시간"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """DHT 센서 데이터 통계 요약"""
     try:
@@ -260,8 +266,8 @@ async def get_dht_stats_summary(
             raise HTTPException(status_code=404, detail="DHT 데이터를 찾을 수 없습니다")
         
         # 온도 통계
-        temperatures = [dht.temperature_c for dht in dht_list if dht.temperature_c is not None]
-        humidity_values = [dht.humidity_percent for dht in dht_list if dht.humidity_percent is not None]
+        temperatures = [dht.temperature for dht in dht_list if dht.temperature is not None]
+        humidity_values = [dht.humidity for dht in dht_list if dht.humidity is not None]
         
         stats = {
             "device_id": device_id,

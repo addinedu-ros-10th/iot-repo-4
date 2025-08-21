@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 
-from app.infrastructure.database import get_db
+from app.infrastructure.database import get_db_session
 from app.infrastructure.models import SensorRawCDS
 from app.api.v1.schemas import CDSDataCreate, CDSDataResponse, CDSDataUpdate
 
@@ -20,7 +20,7 @@ router = APIRouter(prefix="/cds", tags=["CDS Sensor"])
 @router.post("/", response_model=CDSDataResponse, status_code=201)
 async def create_cds_data(
     cds_data: CDSDataCreate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """CDS 센서 데이터 생성"""
     try:
@@ -53,7 +53,7 @@ async def get_cds_data_list(
     start_time: Optional[datetime] = Query(None, description="시작 시간"),
     end_time: Optional[datetime] = Query(None, description="종료 시간"),
     limit: int = Query(100, description="조회 개수 제한"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """CDS 센서 데이터 목록 조회"""
     try:
@@ -93,7 +93,7 @@ async def get_cds_data_list(
 async def get_cds_data(
     device_id: str,
     timestamp: datetime,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """특정 시간의 CDS 센서 데이터 조회"""
     try:
@@ -128,7 +128,7 @@ async def update_cds_data(
     device_id: str,
     timestamp: datetime,
     cds_data: CDSDataUpdate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """CDS 센서 데이터 수정"""
     try:
@@ -174,7 +174,7 @@ async def update_cds_data(
 async def delete_cds_data(
     device_id: str,
     timestamp: datetime,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """CDS 센서 데이터 삭제"""
     try:
@@ -205,7 +205,7 @@ async def delete_cds_data(
 @router.get("/{device_id}/latest", response_model=CDSDataResponse)
 async def get_latest_cds_data(
     device_id: str,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """특정 디바이스의 최신 CDS 센서 데이터 조회"""
     try:

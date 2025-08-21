@@ -7,12 +7,14 @@
 from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.schemas import (
     DeviceCreate, DeviceUpdate, DeviceResponse, DeviceListResponse,
     DeviceAssignmentRequest, SuccessResponse
 )
 from app.core.container import container
+from app.infrastructure.database import get_db_session
 from app.interfaces.repositories.device_repository import IDeviceRepository
 from app.interfaces.repositories.user_repository import IUserRepository
 from app.domain.entities.device import Device
@@ -20,14 +22,14 @@ from app.domain.entities.device import Device
 router = APIRouter()
 
 
-def get_device_repository() -> IDeviceRepository:
+def get_device_repository(db_session: AsyncSession = Depends(get_db_session)) -> IDeviceRepository:
     """디바이스 리포지토리 의존성 주입"""
-    return container.get_device_repository()
+    return container.get_device_repository(db_session)
 
 
-def get_user_repository() -> IUserRepository:
+def get_user_repository(db_session: AsyncSession = Depends(get_db_session)) -> IUserRepository:
     """사용자 리포지토리 의존성 주입"""
-    return container.get_user_repository()
+    return container.get_user_repository(db_session)
 
 
 @router.post("/", response_model=DeviceResponse, status_code=status.HTTP_201_CREATED)

@@ -7,7 +7,7 @@ Clean Architecture 원칙에 따라 RFID 센서 데이터에 대한 데이터 �
 from datetime import datetime
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_, order_by, limit
+from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
 
 from app.interfaces.repositories.sensor_repository import IRFIDRepository
@@ -59,11 +59,10 @@ class RFIDRepository(IRFIDRepository):
             select(SensorRawRFID)
             .where(SensorRawRFID.device_id == device_id)
             .order_by(SensorRawRFID.time.desc())
-            .limit(1)
         )
         
         result = await self.db.execute(query)
-        data = result.scalar_one_or_none()
+        data = result.scalars().first()
         
         if data:
             return RFIDDataResponse.from_orm(data)
@@ -88,12 +87,13 @@ class RFIDRepository(IRFIDRepository):
             query = query.where(SensorRawRFID.time <= end_time)
         
         # 시간 역순으로 정렬하고 제한
-        query = query.order_by(SensorRawRFID.time.desc()).limit(limit_count)
+        query = query.order_by(SensorRawRFID.time.desc())
         
         result = await self.db.execute(query)
         data_list = result.scalars().all()
         
-        return [RFIDDataResponse.from_orm(data) for data in data_list]
+        # limit_count만큼만 반환
+        return [RFIDDataResponse.from_orm(data) for data in data_list[:limit_count]]
     
     async def update(
         self,

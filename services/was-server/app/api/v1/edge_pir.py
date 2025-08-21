@@ -8,8 +8,10 @@ from typing import List, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.container import container
+from app.infrastructure.database import get_db_session
 from app.interfaces.services.sensor_service_interface import IEdgePIRService
 from app.api.v1.schemas import (
     EdgePIRDataCreate,
@@ -20,9 +22,9 @@ from app.api.v1.schemas import (
 router = APIRouter(prefix="/edge-pir", tags=["Edge PIR 센서"])
 
 
-def get_edge_pir_service() -> IEdgePIRService:
+def get_edge_pir_service(db_session: AsyncSession = Depends(get_db_session)) -> IEdgePIRService:
     """Edge PIR 서비스 의존성 주입"""
-    return container.get_edge_pir_service()
+    return container.get_edge_pir_service(db_session)
 
 
 @router.post("/", response_model=EdgePIRDataResponse, status_code=201)

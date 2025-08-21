@@ -94,6 +94,10 @@ async def root():
 # API 라우터 등록
 app.include_router(api_router, prefix="/api")
 
+# User API 그룹화 등록
+from app.api.v1.user_router import user_router
+app.include_router(user_router, prefix="/api/v1")
+
 
 if __name__ == "__main__":
     import uvicorn

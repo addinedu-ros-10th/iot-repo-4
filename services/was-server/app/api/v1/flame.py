@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
 
-from app.infrastructure.database import get_db
+from app.infrastructure.database import get_db_session
 from app.infrastructure.models import SensorRawFlame
 from app.api.v1.schemas import FlameDataCreate, FlameDataResponse, FlameDataUpdate
 
@@ -20,7 +20,7 @@ router = APIRouter(prefix="/flame", tags=["Flame Sensor"])
 @router.post("/", response_model=FlameDataResponse, status_code=201)
 async def create_flame_data(
     flame_data: FlameDataCreate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """Flame 센서 데이터 생성"""
     try:
@@ -53,7 +53,7 @@ async def get_flame_data_list(
     start_time: Optional[datetime] = Query(None, description="시작 시간"),
     end_time: Optional[datetime] = Query(None, description="종료 시간"),
     limit: int = Query(100, description="조회 개수 제한"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """Flame 센서 데이터 목록 조회"""
     try:
@@ -93,7 +93,7 @@ async def get_flame_data_list(
 async def get_flame_data(
     device_id: str,
     timestamp: datetime,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """특정 시간의 Flame 센서 데이터 조회"""
     try:
@@ -128,7 +128,7 @@ async def update_flame_data(
     device_id: str,
     timestamp: datetime,
     flame_data: FlameDataUpdate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """Flame 센서 데이터 수정"""
     try:
@@ -174,7 +174,7 @@ async def update_flame_data(
 async def delete_flame_data(
     device_id: str,
     timestamp: datetime,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """Flame 센서 데이터 삭제"""
     try:
@@ -205,7 +205,7 @@ async def delete_flame_data(
 @router.get("/{device_id}/latest", response_model=FlameDataResponse)
 async def get_latest_flame_data(
     device_id: str,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """특정 디바이스의 최신 Flame 센서 데이터 조회"""
     try:
@@ -237,7 +237,7 @@ async def get_flame_alerts(
     device_id: str,
     start_time: Optional[datetime] = Query(None, description="시작 시간"),
     end_time: Optional[datetime] = Query(None, description="종료 시간"),
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db_session)
 ):
     """Flame 센서 알림 데이터 조회"""
     try:

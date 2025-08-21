@@ -28,11 +28,12 @@ class EdgeFlameService(IEdgeFlameService):
                 detail="신뢰도는 0과 1 사이의 값이어야 합니다."
             )
         
-        if data.processing_time is not None and data.processing_time < 0:
-            raise HTTPException(
-                status_code=400,
-                detail="처리 시간은 0 이상이어야 합니다."
-            )
+        # processing_time은 Edge Flame 센서에서 사용하지 않음
+        # if data.processing_time is not None and data.processing_time < 0:
+        #     raise HTTPException(
+        #         status_code=400,
+        #         detail="처리 시간은 0 이상이어야 합니다."
+        #     )
         
         if data.alert_level not in ["low", "medium", "high"]:
             raise HTTPException(

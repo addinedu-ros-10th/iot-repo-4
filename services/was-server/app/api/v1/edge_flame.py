@@ -8,8 +8,10 @@ from typing import List, Optional
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.container import container
+from app.infrastructure.database import get_db_session
 from app.interfaces.services.sensor_service_interface import IEdgeFlameService
 from app.api.v1.schemas import (
     EdgeFlameDataCreate,
@@ -20,9 +22,9 @@ from app.api.v1.schemas import (
 router = APIRouter(prefix="/edge-flame", tags=["Edge Flame 센서"])
 
 
-def get_edge_flame_service() -> IEdgeFlameService:
+def get_edge_flame_service(db_session: AsyncSession = Depends(get_db_session)) -> IEdgeFlameService:
     """Edge Flame 서비스 의존성 주입"""
-    return container.get_edge_flame_service()
+    return container.get_edge_flame_service(db_session)
 
 
 @router.post("/", response_model=EdgeFlameDataResponse, status_code=201)

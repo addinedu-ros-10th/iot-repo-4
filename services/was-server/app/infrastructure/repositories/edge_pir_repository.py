@@ -266,7 +266,7 @@ class EdgePIRRepository(IEdgePIRRepository):
             "processing_time_stats": processing_time_stats
         }
 
-    async def get_motion_patterns(
+    async def analyze_motion_patterns(
         self,
         device_id: str,
         analysis_window: int = 3600
