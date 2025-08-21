@@ -9,7 +9,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import QueuePool
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from typing import Generator
+from typing import Generator, AsyncGenerator
 import logging
 
 from app.core.config import get_settings
@@ -97,6 +97,25 @@ async def get_session() -> AsyncSession:
     )
     
     return async_session()
+
+
+async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
+    """
+    비동기 데이터베이스 세션을 생성하는 의존성 함수
+    
+    FastAPI의 Depends에서 사용됩니다.
+    """
+    async_session = await get_session()
+    try:
+        logger.debug("비동기 데이터베이스 세션 생성")
+        yield async_session
+    except Exception as e:
+        logger.error(f"비동기 데이터베이스 세션 오류: {e}")
+        await async_session.rollback()
+        raise
+    finally:
+        logger.debug("비동기 데이터베이스 세션 종료")
+        await async_session.close()
 
 
 def create_tables():

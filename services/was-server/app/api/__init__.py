@@ -1,19 +1,41 @@
 """
-API 패키지 초기화
+API 라우터 등록
 
-API 버전 관리 및 라우터 등록을 담당합니다.
+모든 API 라우터를 메인 애플리케이션에 등록합니다.
 """
 
 from fastapi import APIRouter
-from app.api.v1 import users, devices, sensors
 
-# API 버전별 라우터 등록
+from app.api.v1 import users, loadcell, mq5, mq7, rfid, sound, tcrt5000, ultrasonic
+from app.api.v1 import edge_flame, edge_pir, edge_reed, edge_tilt
+from app.api.v1 import actuator_buzzer, actuator_irtx, actuator_relay, actuator_servo
+
+# 메인 API 라우터
 api_router = APIRouter()
 
-# v1 API 등록
-api_router.include_router(users.router, prefix="/v1/users", tags=["users"])
-api_router.include_router(devices.router, prefix="/v1/devices", tags=["devices"])
-api_router.include_router(sensors.router, prefix="/v1/sensors", tags=["sensors"])
+# v1 API 라우터 등록
+api_router.include_router(users.router, prefix="/v1")
+
+# 센서 데이터 API 라우터 등록
+api_router.include_router(loadcell.router, prefix="/v1")
+api_router.include_router(mq5.router, prefix="/v1")
+api_router.include_router(mq7.router, prefix="/v1")
+api_router.include_router(rfid.router, prefix="/v1")
+api_router.include_router(sound.router, prefix="/v1")
+api_router.include_router(tcrt5000.router, prefix="/v1")
+api_router.include_router(ultrasonic.router, prefix="/v1")
+
+# Edge 센서 API 라우터 등록
+api_router.include_router(edge_flame.router, prefix="/v1")
+api_router.include_router(edge_pir.router, prefix="/v1")
+api_router.include_router(edge_reed.router, prefix="/v1")
+api_router.include_router(edge_tilt.router, prefix="/v1")
+
+# Actuator 로그 API 라우터 등록
+api_router.include_router(actuator_buzzer.router, prefix="/v1")
+api_router.include_router(actuator_irtx.router, prefix="/v1")
+api_router.include_router(actuator_relay.router, prefix="/v1")
+api_router.include_router(actuator_servo.router, prefix="/v1")
 
 __all__ = ["api_router"]
 
