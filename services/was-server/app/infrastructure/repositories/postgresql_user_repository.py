@@ -19,82 +19,95 @@ from app.infrastructure.database import get_session
 class PostgreSQLUserRepository(IUserRepository):
     """PostgreSQL 기반 User 리포지토리"""
     
-    def __init__(self):
-        pass
+    def __init__(self, db_session: AsyncSession):
+        self.db_session = db_session
     
     async def _get_session(self) -> AsyncSession:
-        """세션 가져오기 - 각 메서드 호출마다 새로운 세션 생성"""
-        return await get_session()
+        """세션 가져오기 - 주입된 세션 사용"""
+        return self.db_session
     
     async def create(self, user: User) -> User:
         """사용자 생성"""
         session = await self._get_session()
         
-        try:
-            # 도메인 엔티티를 ORM 모델로 변환
-            user_model = UserModel(
-                user_id=user.user_id,
-                user_role=user.user_role,
-                user_name=user.user_name,
-                email=user.email,
-                phone_number=user.phone_number,
-                created_at=user.created_at
-            )
-            
-            session.add(user_model)
-            await session.commit()
-            await session.refresh(user_model)
-            
-            # ORM 모델을 도메인 엔티티로 변환하여 반환
-            return User(
-                user_id=user_model.user_id,
-                user_role=user_model.user_role,
-                user_name=user_model.user_name,
-                email=user_model.email,
-                phone_number=user_model.phone_number,
-                created_at=user_model.created_at
-            )
-        finally:
-            await session.close()
+        # 도메인 엔티티를 ORM 모델로 변환
+        user_model = UserModel(
+            user_id=user.user_id,
+            user_role=user.user_role,
+            user_name=user.user_name,
+            email=user.email,
+            phone_number=user.phone_number,
+            created_at=user.created_at
+        )
+        
+        session.add(user_model)
+        await session.commit()
+        await session.refresh(user_model)
+        
+        # ORM 모델을 도메인 엔티티로 변환하여 반환
+        return User(
+            user_id=user_model.user_id,
+            user_role=user_model.user_role,
+            user_name=user_model.user_name,
+            email=user_model.email,
+            phone_number=user_model.phone_number,
+            created_at=user_model.created_at
+        )
     
     async def get_by_id(self, user_id: str) -> Optional[User]:
         """ID로 사용자 조회"""
         session = await self._get_session()
         
-        try:
-            stmt = select(UserModel).where(UserModel.user_id == user_id)
-            result = await session.execute(stmt)
-            user_model = result.scalar_one_or_none()
-            
-            if user_model is None:
-                return None
-            
-            # ORM 모델을 도메인 엔티티로 변환
-            return User(
-                user_id=user_model.user_id,
-                user_role=user_model.user_role,
-                user_name=user_model.user_name,
-                email=user_model.email,
-                phone_number=user_model.phone_number,
-                created_at=user_model.created_at
-            )
-        finally:
-            await session.close()
+        stmt = select(UserModel).where(UserModel.user_id == user_id)
+        result = await session.execute(stmt)
+        user_model = result.scalar_one_or_none()
+        
+        if user_model is None:
+            return None
+        
+        # ORM 모델을 도메인 엔티티로 변환
+        return User(
+            user_id=user_model.user_id,
+            user_role=user_model.user_role,
+            user_name=user_model.user_name,
+            email=user_model.email,
+            phone_number=user_model.phone_number,
+            created_at=user_model.created_at
+        )
     
     async def get_by_email(self, email: str) -> Optional[User]:
         """이메일로 사용자 조회"""
         session = await self._get_session()
         
-        try:
-            stmt = select(UserModel).where(UserModel.email == email)
-            result = await session.execute(stmt)
-            user_model = result.scalar_one_or_none()
-            
-            if user_model is None:
-                return None
-            
-            # ORM 모델을 도메인 엔티티로 변환
-            return User(
+        stmt = select(UserModel).where(UserModel.email == email)
+        result = await session.execute(stmt)
+        user_model = result.scalar_one_or_none()
+        
+        if user_model is None:
+            return None
+        
+        # ORM 모델을 도메인 엔티티로 변환
+        return User(
+            user_id=user_model.user_id,
+            user_role=user_model.user_role,
+            user_name=user_model.user_name,
+            email=user_model.email,
+            phone_number=user_model.phone_number,
+            created_at=user_model.created_at
+        )
+    
+    async def get_all(self) -> List[User]:
+        """모든 사용자 조회"""
+        session = await self._get_session()
+        
+        stmt = select(UserModel)
+        result = await session.execute(stmt)
+        user_models = result.scalars().all()
+        
+        # ORM 모델들을 도메인 엔티티로 변환
+        users = []
+        for user_model in user_models:
+            user = User(
                 user_id=user_model.user_id,
                 user_role=user_model.user_role,
                 user_name=user_model.user_name,
@@ -102,105 +115,68 @@ class PostgreSQLUserRepository(IUserRepository):
                 phone_number=user_model.phone_number,
                 created_at=user_model.created_at
             )
-        finally:
-            await session.close()
-    
-    async def get_all(self) -> List[User]:
-        """모든 사용자 조회"""
-        session = await self._get_session()
+            users.append(user)
         
-        try:
-            stmt = select(UserModel)
-            result = await session.execute(stmt)
-            user_models = result.scalars().all()
-            
-            # ORM 모델들을 도메인 엔티티로 변환
-            users = []
-            for user_model in user_models:
-                user = User(
-                    user_id=user_model.user_id,
-                    user_role=user_model.user_role,
-                    user_name=user_model.user_name,
-                    email=user_model.email,
-                    phone_number=user_model.phone_number,
-                    created_at=user_model.created_at
-                )
-                users.append(user)
-            
-            return users
-        finally:
-            await session.close()
+        return users
     
     async def get_by_role(self, role: str) -> List[User]:
         """역할별 사용자 조회"""
         session = await self._get_session()
         
-        try:
-            stmt = select(UserModel).where(UserModel.user_role == role)
-            result = await session.execute(stmt)
-            user_models = result.scalars().all()
-            
-            # ORM 모델들을 도메인 엔티티로 변환
-            users = []
-            for user_model in user_models:
-                user = User(
-                    user_id=user_model.user_id,
-                    user_role=user_model.user_role,
-                    user_name=user_model.user_name,
-                    email=user_model.email,
-                    phone_number=user_model.phone_number,
-                    created_at=user_model.created_at
-                )
-                users.append(user)
-            
-            return users
-        finally:
-            await session.close()
+        stmt = select(UserModel).where(UserModel.user_role == role)
+        result = await session.execute(stmt)
+        user_models = result.scalars().all()
+        
+        # ORM 모델들을 도메인 엔티티로 변환
+        users = []
+        for user_model in user_models:
+            user = User(
+                user_id=user_model.user_id,
+                user_role=user_model.user_role,
+                user_name=user_model.user_name,
+                email=user_model.email,
+                phone_number=user_model.phone_number,
+                created_at=user_model.created_at
+            )
+            users.append(user)
+        
+        return users
     
     async def update(self, user_id: str, update_data: dict) -> User:
         """사용자 정보 업데이트"""
         session = await self._get_session()
         
-        try:
-            stmt = (
-                update(UserModel)
-                .where(UserModel.user_id == user_id)
-                .values(**update_data)
-            )
-            
-            await session.execute(stmt)
-            await session.commit()
-            
-            # 업데이트된 사용자 정보 반환
-            return await self.get_by_id(user_id)
-        finally:
-            await session.close()
+        stmt = (
+            update(UserModel)
+            .where(UserModel.user_id == user_id)
+            .values(**update_data)
+        )
+        
+        await session.execute(stmt)
+        await session.commit()
+        
+        # 업데이트된 사용자 정보 반환
+        return await self.get_by_id(user_id)
     
     async def delete(self, user_id: str) -> bool:
         """사용자 삭제"""
         session = await self._get_session()
         
-        try:
-            stmt = delete(UserModel).where(UserModel.user_id == user_id)
-            result = await session.execute(stmt)
-            await session.commit()
-            
-            return result.rowcount > 0
-        finally:
-            await session.close()
+        stmt = delete(UserModel).where(UserModel.user_id == user_id)
+        result = await session.execute(stmt)
+        await session.commit()
+        
+        return result.rowcount > 0
     
     async def exists(self, user_id: str) -> bool:
         """사용자 존재 여부 확인"""
         session = await self._get_session()
         
-        try:
-            stmt = select(UserModel).where(UserModel.user_id == user_id)
-            result = await session.execute(stmt)
-            user_model = result.scalar_one_or_none()
-            
-            return user_model is not None
-        finally:
-            await session.close()
+        stmt = select(UserModel).where(UserModel.user_id == user_id)
+        result = await session.execute(stmt)
+        user_model = result.scalar_one_or_none()
+        
+        return user_model is not None
     
     async def close(self):
         """세션 종료 - 더 이상 필요하지 않음"""

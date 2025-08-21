@@ -229,3 +229,58 @@ class IUltrasonicRepository(ISensorRepository):
     ) -> dict:
         """거리 트렌드 분석"""
         pass
+
+
+class IEdgeFlameRepository(ISensorRepository):
+    """Edge 화재 감지 센서 데이터 리포지토리 인터페이스"""
+    
+    @abstractmethod
+    async def get_flame_detection_alerts(
+        self,
+        device_id: str,
+        start_time: Optional[datetime] = None,
+        end_time: Optional[datetime] = None
+    ) -> dict:
+        """화재 감지 알림 조회"""
+        pass
+
+
+class IEdgePIRRepository(ISensorRepository):
+    """Edge PIR 모션 감지 센서 데이터 리포지토리 인터페이스"""
+    
+    @abstractmethod
+    async def analyze_motion_patterns(
+        self,
+        device_id: str,
+        analysis_window: int = 3600
+    ) -> dict:
+        """모션 패턴 분석"""
+        pass
+
+
+class IEdgeReedRepository(ISensorRepository):
+    """Edge Reed 스위치 센서 데이터 리포지토리 인터페이스"""
+    
+    @abstractmethod
+    async def get_switch_activation_history(
+        self,
+        device_id: str,
+        start_time: Optional[datetime] = None,
+        end_time: Optional[datetime] = None
+    ) -> dict:
+        """스위치 활성화 이력 조회"""
+        pass
+
+
+class IEdgeTiltRepository(ISensorRepository):
+    """Edge Tilt 기울기 센서 데이터 리포지토리 인터페이스"""
+    
+    @abstractmethod
+    async def analyze_tilt_trends(
+        self,
+        device_id: str,
+        start_time: Optional[datetime] = None,
+        end_time: Optional[datetime] = None
+    ) -> dict:
+        """기울기 트렌드 분석"""
+        pass

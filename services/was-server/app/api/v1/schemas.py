@@ -193,15 +193,17 @@ class DHTDataCreate(BaseModel):
     """DHT 센서 데이터 생성 스키마"""
     time: datetime
     device_id: str
-    temperature_c: Optional[float] = None
-    humidity_percent: Optional[float] = None
+    temperature: Optional[float] = None
+    humidity: Optional[float] = None
+    heat_index: Optional[float] = None
     raw_payload: Optional[dict] = None
 
 
 class DHTDataUpdate(BaseModel):
     """DHT 센서 데이터 수정 스키마"""
-    temperature_c: Optional[float] = None
-    humidity_percent: Optional[float] = None
+    temperature: Optional[float] = None
+    humidity: Optional[float] = None
+    heat_index: Optional[float] = None
     raw_payload: Optional[dict] = None
 
 
@@ -209,8 +211,9 @@ class DHTDataResponse(BaseModel):
     """DHT 센서 데이터 응답 스키마"""
     time: datetime
     device_id: str
-    temperature_c: Optional[float] = None
-    humidity_percent: Optional[float] = None
+    temperature: Optional[float] = None
+    humidity: Optional[float] = None
+    heat_index: Optional[float] = None
     raw_payload: Optional[dict] = None
 
     class Config:
@@ -274,6 +277,10 @@ class IMUDataCreate(BaseModel):
     gyro_x: Optional[float] = None
     gyro_y: Optional[float] = None
     gyro_z: Optional[float] = None
+    mag_x: Optional[float] = None
+    mag_y: Optional[float] = None
+    mag_z: Optional[float] = None
+    temperature: Optional[float] = None
     raw_payload: Optional[dict] = None
 
 
@@ -285,6 +292,10 @@ class IMUDataUpdate(BaseModel):
     gyro_x: Optional[float] = None
     gyro_y: Optional[float] = None
     gyro_z: Optional[float] = None
+    mag_x: Optional[float] = None
+    mag_y: Optional[float] = None
+    mag_z: Optional[float] = None
+    temperature: Optional[float] = None
     raw_payload: Optional[dict] = None
 
 
@@ -298,6 +309,10 @@ class IMUDataResponse(BaseModel):
     gyro_x: Optional[float] = None
     gyro_y: Optional[float] = None
     gyro_z: Optional[float] = None
+    mag_x: Optional[float] = None
+    mag_y: Optional[float] = None
+    mag_z: Optional[float] = None
+    temperature: Optional[float] = None
     raw_payload: Optional[dict] = None
 
     class Config:
@@ -536,6 +551,7 @@ class EdgeFlameDataCreate(BaseModel):
     flame_detected: bool
     confidence: Optional[float] = None
     alert_level: Optional[str] = None
+    processing_time: Optional[float] = None
     raw_payload: Optional[dict] = None
 
 
@@ -544,6 +560,7 @@ class EdgeFlameDataUpdate(BaseModel):
     flame_detected: Optional[bool] = None
     confidence: Optional[float] = None
     alert_level: Optional[str] = None
+    processing_time: Optional[float] = None
     raw_payload: Optional[dict] = None
 
 
@@ -554,6 +571,7 @@ class EdgeFlameDataResponse(BaseModel):
     flame_detected: bool
     confidence: Optional[float] = None
     alert_level: Optional[str] = None
+    processing_time: Optional[float] = None
     raw_payload: Optional[dict] = None
 
     class Config:
@@ -567,6 +585,8 @@ class EdgePIRDataCreate(BaseModel):
     motion_detected: bool
     confidence: Optional[float] = None
     motion_direction: Optional[str] = None
+    motion_speed: Optional[float] = None
+    processing_time: Optional[float] = None
     raw_payload: Optional[dict] = None
 
 
@@ -575,6 +595,8 @@ class EdgePIRDataUpdate(BaseModel):
     motion_detected: Optional[bool] = None
     confidence: Optional[float] = None
     motion_direction: Optional[str] = None
+    motion_speed: Optional[float] = None
+    processing_time: Optional[float] = None
     raw_payload: Optional[dict] = None
 
 
@@ -585,6 +607,8 @@ class EdgePIRDataResponse(BaseModel):
     motion_detected: bool
     confidence: Optional[float] = None
     motion_direction: Optional[str] = None
+    motion_speed: Optional[float] = None
+    processing_time: Optional[float] = None
     raw_payload: Optional[dict] = None
 
     class Config:
@@ -596,14 +620,20 @@ class EdgeReedDataCreate(BaseModel):
     time: datetime
     device_id: str
     switch_state: bool
+    confidence: Optional[float] = None
     magnetic_field_detected: Optional[bool] = None
+    magnetic_strength: Optional[float] = None
+    processing_time: Optional[float] = None
     raw_payload: Optional[dict] = None
 
 
 class EdgeReedDataUpdate(BaseModel):
     """Edge Reed 스위치 센서 데이터 수정 스키마"""
     switch_state: Optional[bool] = None
+    confidence: Optional[float] = None
     magnetic_field_detected: Optional[bool] = None
+    magnetic_strength: Optional[float] = None
+    processing_time: Optional[float] = None
     raw_payload: Optional[dict] = None
 
 
@@ -612,7 +642,10 @@ class EdgeReedDataResponse(BaseModel):
     time: datetime
     device_id: str
     switch_state: bool
+    confidence: Optional[float] = None
     magnetic_field_detected: Optional[bool] = None
+    magnetic_strength: Optional[float] = None
+    processing_time: Optional[float] = None
     raw_payload: Optional[dict] = None
 
     class Config:
@@ -624,16 +657,20 @@ class EdgeTiltDataCreate(BaseModel):
     time: datetime
     device_id: str
     tilt_detected: bool
+    confidence: Optional[float] = None
     tilt_angle: Optional[float] = None
     tilt_direction: Optional[str] = None
+    processing_time: Optional[float] = None
     raw_payload: Optional[dict] = None
 
 
 class EdgeTiltDataUpdate(BaseModel):
     """Edge Tilt 센서 데이터 수정 스키마"""
     tilt_detected: Optional[bool] = None
+    confidence: Optional[float] = None
     tilt_angle: Optional[float] = None
     tilt_direction: Optional[str] = None
+    processing_time: Optional[float] = None
     raw_payload: Optional[dict] = None
 
 
@@ -642,8 +679,10 @@ class EdgeTiltDataResponse(BaseModel):
     time: datetime
     device_id: str
     tilt_detected: bool
+    confidence: Optional[float] = None
     tilt_angle: Optional[float] = None
     tilt_direction: Optional[str] = None
+    processing_time: Optional[float] = None
     raw_payload: Optional[dict] = None
 
     class Config:

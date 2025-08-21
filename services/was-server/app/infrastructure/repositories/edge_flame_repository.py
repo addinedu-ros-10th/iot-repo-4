@@ -29,9 +29,7 @@ class EdgeFlameRepository(IEdgeFlameRepository):
             flame_detected=data.flame_detected,
             confidence=data.confidence,
             alert_level=data.alert_level,
-            location_x=data.location_x,
-            location_y=data.location_y,
-            processing_time=data.processing_time
+            raw_payload=data.raw_payload
         )
         
         self.db_session.add(db_data)
@@ -44,9 +42,7 @@ class EdgeFlameRepository(IEdgeFlameRepository):
             flame_detected=db_data.flame_detected,
             confidence=db_data.confidence,
             alert_level=db_data.alert_level,
-            location_x=db_data.location_x,
-            location_y=db_data.location_y,
-            processing_time=db_data.processing_time
+            raw_payload=db_data.raw_payload
         )
 
     async def get_by_id(self, device_id: str, timestamp: datetime) -> Optional[EdgeFlameDataResponse]:
@@ -70,9 +66,7 @@ class EdgeFlameRepository(IEdgeFlameRepository):
             flame_detected=db_data.flame_detected,
             confidence=db_data.confidence,
             alert_level=db_data.alert_level,
-            location_x=db_data.location_x,
-            location_y=db_data.location_y,
-            processing_time=db_data.processing_time
+            raw_payload=db_data.raw_payload
         )
 
     async def get_latest(self, device_id: str) -> Optional[EdgeFlameDataResponse]:
@@ -93,9 +87,7 @@ class EdgeFlameRepository(IEdgeFlameRepository):
             flame_detected=db_data.flame_detected,
             confidence=db_data.confidence,
             alert_level=db_data.alert_level,
-            location_x=db_data.location_x,
-            location_y=db_data.location_y,
-            processing_time=db_data.processing_time
+            raw_payload=db_data.raw_payload
         )
 
     async def get_list(
@@ -129,9 +121,7 @@ class EdgeFlameRepository(IEdgeFlameRepository):
                 flame_detected=db_data.flame_detected,
                 confidence=db_data.confidence,
                 alert_level=db_data.alert_level,
-                location_x=db_data.location_x,
-                location_y=db_data.location_y,
-                processing_time=db_data.processing_time
+                raw_payload=db_data.raw_payload
             )
             for db_data in db_data_list
         ]
@@ -163,12 +153,8 @@ class EdgeFlameRepository(IEdgeFlameRepository):
             db_data.confidence = data.confidence
         if data.alert_level is not None:
             db_data.alert_level = data.alert_level
-        if data.location_x is not None:
-            db_data.location_x = data.location_x
-        if data.location_y is not None:
-            db_data.location_y = data.location_y
-        if data.processing_time is not None:
-            db_data.processing_time = data.processing_time
+        if data.raw_payload is not None:
+            db_data.raw_payload = data.raw_payload
         
         await self.db_session.commit()
         await self.db_session.refresh(db_data)
@@ -179,9 +165,7 @@ class EdgeFlameRepository(IEdgeFlameRepository):
             flame_detected=db_data.flame_detected,
             confidence=db_data.confidence,
             alert_level=db_data.alert_level,
-            location_x=db_data.location_x,
-            location_y=db_data.location_y,
-            processing_time=db_data.processing_time
+            raw_payload=db_data.raw_payload
         )
 
     async def delete(self, device_id: str, timestamp: datetime) -> bool:
@@ -240,14 +224,8 @@ class EdgeFlameRepository(IEdgeFlameRepository):
         
         high_alert_count = sum(1 for data in data_list if data.alert_level == "high")
         
-        processing_times = [data.processing_time for data in data_list if data.processing_time is not None]
+        # processing_time은 Edge Flame 센서에서 사용하지 않음
         processing_time_stats = {}
-        if processing_times:
-            processing_time_stats = {
-                "min": min(processing_times),
-                "max": max(processing_times),
-                "avg": sum(processing_times) / len(processing_times)
-            }
         
         return {
             "total_records": total_records,
@@ -288,11 +266,7 @@ class EdgeFlameRepository(IEdgeFlameRepository):
                 "timestamp": data.time,
                 "confidence": data.confidence,
                 "alert_level": data.alert_level,
-                "location": {
-                    "x": data.location_x,
-                    "y": data.location_y
-                },
-                "processing_time": data.processing_time
+                "raw_payload": data.raw_payload
             })
         
         return {

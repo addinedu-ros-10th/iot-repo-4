@@ -8,27 +8,29 @@ from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import JSONResponse
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.v1.schemas import (
     UserCreate, UserUpdate, UserResponse, UserListResponse,
     SuccessResponse, ErrorResponse, PaginationParams
 )
 from app.core.container import container
+from app.infrastructure.database import get_db_session
 from app.interfaces.repositories.user_repository import IUserRepository
 from app.interfaces.services.user_service_interface import IUserService
 from app.domain.entities.user import User
 
-router = APIRouter()
+router = APIRouter(tags=["users"])
 
 
-def get_user_repository() -> IUserRepository:
+def get_user_repository(db_session: AsyncSession = Depends(get_db_session)) -> IUserRepository:
     """사용자 리포지토리 의존성 주입"""
-    return container.get_user_repository()
+    return container.get_user_repository(db_session)
 
 
-def get_user_service() -> IUserService:
+def get_user_service(db_session: AsyncSession = Depends(get_db_session)) -> IUserService:
     """사용자 서비스 의존성 주입"""
-    return container.get_user_service()
+    return container.get_user_service(db_session)
 
 
 @router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
@@ -45,16 +47,13 @@ async def create_user(
     - **user_role**: 사용자 역할 (admin, caregiver, family, user)
     """
     try:
-        # 도메인 엔티티 생성
-        user = User(
-            user_name=user_data.user_name,
-            email=user_data.email,
-            phone_number=user_data.phone_number,
-            user_role=user_data.user_role
-        )
-        
         # 서비스를 통한 사용자 생성
-        created_user = await user_service.create_user(user)
+        created_user = await user_service.create_user(
+            name=user_data.user_name,
+            role=user_data.user_role,
+            email=user_data.email,
+            phone=user_data.phone_number
+        )
         
         return UserResponse(
             user_id=created_user.user_id,
@@ -74,6 +73,73 @@ async def create_user(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"사용자 생성 중 오류가 발생했습니다: {str(e)}"
+        )
+
+
+@router.get("/list", response_model=UserListResponse)
+async def get_users(
+    page: int = Query(1, ge=1, description="페이지 번호"),
+    size: int = Query(10, ge=1, le=100, description="페이지 크기"),
+    role: Optional[str] = Query(None, description="역할별 필터링"),
+    user_repository: IUserRepository = Depends(get_user_repository)
+):
+    """
+    사용자 목록 조회 (페이지네이션 지원)
+    
+    - **page**: 페이지 번호 (기본값: 1)
+    - **size**: 페이지 크기 (기본값: 10, 최대: 100)
+    - **role**: 역할별 필터링 (선택)
+    """
+    try:
+        # 페이지네이션 계산
+        offset = (page - 1) * size
+        
+        if role:
+            users = await user_repository.get_by_role(role)
+        else:
+            users = await user_repository.get_all()
+        
+        # 페이지네이션 적용
+        total = len(users)
+        paginated_users = users[offset:offset + size]
+        
+        # 응답 데이터 구성
+        user_responses = []
+        for user in paginated_users:
+            try:
+                user_response = UserResponse(
+                    user_id=user.user_id,
+                    user_name=user.user_name,
+                    email=user.email,
+                    phone_number=user.phone_number,
+                    user_role=user.user_role,
+                    created_at=user.created_at
+                )
+                user_responses.append(user_response)
+            except Exception as e:
+                print(f"사용자 응답 생성 오류: {e}, 사용자: {user.user_id}")
+                # 기본값으로 응답 생성
+                user_response = UserResponse(
+                    user_id=user.user_id,
+                    user_name=user.user_name or "",
+                    email=user.email,
+                    phone_number=user.phone_number,
+                    user_role=user.user_role or "user",
+                    created_at=None
+                )
+                user_responses.append(user_response)
+        
+        return UserListResponse(
+            users=user_responses,
+            total=total,
+            page=page,
+            size=size
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"사용자 목록 조회 중 오류가 발생했습니다: {str(e)}"
         )
 
 
@@ -110,60 +176,6 @@ async def get_user(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"사용자 조회 중 오류가 발생했습니다: {str(e)}"
-        )
-
-
-@router.get("/", response_model=UserListResponse)
-async def get_users(
-    page: int = Query(1, ge=1, description="페이지 번호"),
-    size: int = Query(10, ge=1, le=100, description="페이지 크기"),
-    role: Optional[str] = Query(None, description="역할별 필터링"),
-    user_repository: IUserRepository = Depends(get_user_repository)
-):
-    """
-    사용자 목록 조회 (페이지네이션 지원)
-    
-    - **page**: 페이지 번호 (기본값: 1)
-    - **size**: 페이지 크기 (기본값: 10, 최대: 100)
-    - **role**: 역할별 필터링 (선택)
-    """
-    try:
-        # 페이지네이션 계산
-        offset = (page - 1) * size
-        
-        if role:
-            users = await user_repository.get_by_role(role)
-        else:
-            users = await user_repository.get_all()
-        
-        # 페이지네이션 적용
-        total = len(users)
-        paginated_users = users[offset:offset + size]
-        
-        # 응답 데이터 구성
-        user_responses = [
-            UserResponse(
-                user_id=user.user_id,
-                user_name=user.user_name,
-                email=user.email,
-                phone_number=user.phone_number,
-                user_role=user.user_role,
-                created_at=user.created_at
-            )
-            for user in paginated_users
-        ]
-        
-        return UserListResponse(
-            users=user_responses,
-            total=total,
-            page=page,
-            size=size
-        )
-        
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"사용자 목록 조회 중 오류가 발생했습니다: {str(e)}"
         )
 
 

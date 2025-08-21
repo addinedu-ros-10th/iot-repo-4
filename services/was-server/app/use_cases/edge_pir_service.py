@@ -199,7 +199,7 @@ class EdgePIRService(IEdgePIRService):
             )
         
         try:
-            return await self.edge_pir_repository.get_motion_patterns(
+            return await self.edge_pir_repository.analyze_motion_patterns(
                 device_id=device_id,
                 analysis_window=analysis_window
             )

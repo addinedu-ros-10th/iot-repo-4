@@ -73,8 +73,9 @@ class SensorRawDHT(Base):
     
     time: Mapped[datetime] = Column(DateTime(timezone=True), primary_key=True)
     device_id: Mapped[str] = Column(String(64), ForeignKey("devices.device_id"), primary_key=True)
-    temperature_c: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
-    humidity_percent: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
+    temperature: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
+    humidity: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
+    heat_index: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
     raw_payload: Mapped[Optional[dict]] = Column(JSONB, nullable=True)
 
 
@@ -101,6 +102,10 @@ class SensorRawIMU(Base):
     gyro_x: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
     gyro_y: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
     gyro_z: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
+    mag_x: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
+    mag_y: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
+    mag_z: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
+    temperature: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
     raw_payload: Mapped[Optional[dict]] = Column(JSONB, nullable=True)
 
 
@@ -198,6 +203,7 @@ class SensorEdgeFlame(Base):
     flame_detected: Mapped[bool] = Column(Boolean, nullable=False)
     confidence: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
     alert_level: Mapped[Optional[str]] = Column(Text, nullable=True)
+    processing_time: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
     raw_payload: Mapped[Optional[dict]] = Column(JSONB, nullable=True)
 
 
@@ -210,6 +216,8 @@ class SensorEdgePIR(Base):
     motion_detected: Mapped[bool] = Column(Boolean, nullable=False)
     confidence: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
     motion_direction: Mapped[Optional[str]] = Column(Text, nullable=True)
+    motion_speed: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
+    processing_time: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
     raw_payload: Mapped[Optional[dict]] = Column(JSONB, nullable=True)
 
 
@@ -220,7 +228,10 @@ class SensorEdgeReed(Base):
     time: Mapped[datetime] = Column(DateTime(timezone=True), primary_key=True)
     device_id: Mapped[str] = Column(String(64), ForeignKey("devices.device_id"), primary_key=True)
     switch_state: Mapped[bool] = Column(Boolean, nullable=False)
+    confidence: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
     magnetic_field_detected: Mapped[Optional[bool]] = Column(Boolean, nullable=True)
+    magnetic_strength: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
+    processing_time: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
     raw_payload: Mapped[Optional[dict]] = Column(JSONB, nullable=True)
 
 
@@ -231,8 +242,10 @@ class SensorEdgeTilt(Base):
     time: Mapped[datetime] = Column(DateTime(timezone=True), primary_key=True)
     device_id: Mapped[str] = Column(String(64), ForeignKey("devices.device_id"), primary_key=True)
     tilt_detected: Mapped[bool] = Column(Boolean, nullable=False)
+    confidence: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
     tilt_angle: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
     tilt_direction: Mapped[Optional[str]] = Column(Text, nullable=True)
+    processing_time: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
     raw_payload: Mapped[Optional[dict]] = Column(JSONB, nullable=True)
 
 

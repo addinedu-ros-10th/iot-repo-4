@@ -30,7 +30,8 @@ from app.interfaces.repositories.actuator_repository import (
     IActuatorRelayRepository,
     IActuatorServoRepository
 )
-from app.interfaces.services.user_service import IUserService
+from app.interfaces.repositories.device_rtc_repository import IDeviceRTCStatusRepository
+from app.interfaces.services.user_service_interface import IUserService
 from app.interfaces.services.sensor_service_interface import (
     ILoadCellService,
     IMQ5Service,
@@ -50,6 +51,7 @@ from app.interfaces.services.actuator_service_interface import (
     IActuatorRelayService,
     IActuatorServoService
 )
+from app.interfaces.services.device_rtc_service_interface import IDeviceRTCStatusService
 from app.infrastructure.repositories.postgresql_user_repository import PostgreSQLUserRepository
 from app.infrastructure.repositories.postgresql_device_repository import PostgreSQLDeviceRepository
 from app.infrastructure.repositories.loadcell_repository import LoadCellRepository
@@ -67,6 +69,7 @@ from app.infrastructure.repositories.actuator_buzzer_repository import ActuatorB
 from app.infrastructure.repositories.actuator_irtx_repository import ActuatorIRTXRepository
 from app.infrastructure.repositories.actuator_relay_repository import ActuatorRelayRepository
 from app.infrastructure.repositories.actuator_servo_repository import ActuatorServoRepository
+from app.infrastructure.repositories.device_rtc_repository import DeviceRTCStatusRepository
 from app.use_cases.user_service import UserService
 from app.use_cases.loadcell_service import LoadCellService
 from app.use_cases.mq5_service import MQ5Service
@@ -83,6 +86,7 @@ from app.use_cases.actuator_buzzer_service import ActuatorBuzzerService
 from app.use_cases.actuator_irtx_service import ActuatorIRTXService
 from app.use_cases.actuator_relay_service import ActuatorRelayService
 from app.use_cases.actuator_servo_service import ActuatorServoService
+from app.use_cases.device_rtc_service import DeviceRTCStatusService
 
 
 class DependencyContainer:
@@ -228,6 +232,10 @@ class DependencyContainer:
         """Servo 액추에이터 리포지토리 제공"""
         return ActuatorServoRepository(db_session)
     
+    def get_device_rtc_repository(self, db_session: AsyncSession) -> IDeviceRTCStatusRepository:
+        """DeviceRTCStatus 리포지토리 제공"""
+        return DeviceRTCStatusRepository(db_session)
+    
     def get_actuator_buzzer_service(self, db_session: AsyncSession) -> IActuatorBuzzerService:
         """Buzzer 액추에이터 서비스 제공"""
         actuator_buzzer_repository = self.get_actuator_buzzer_repository(db_session)
@@ -247,6 +255,11 @@ class DependencyContainer:
         """Servo 액추에이터 서비스 제공"""
         actuator_servo_repository = self.get_actuator_servo_repository(db_session)
         return ActuatorServoService(actuator_servo_repository)
+    
+    def get_device_rtc_service(self, db_session: AsyncSession) -> IDeviceRTCStatusService:
+        """DeviceRTCStatus 서비스 제공"""
+        device_rtc_repository = self.get_device_rtc_repository(db_session)
+        return DeviceRTCStatusService(device_rtc_repository)
 
 
 # 전역 컨테이너 인스턴스
@@ -320,6 +333,14 @@ def get_actuator_relay_repository(db_session: AsyncSession = Depends(get_db_sess
 def get_actuator_servo_repository(db_session: AsyncSession = Depends(get_db_session)) -> IActuatorServoRepository:
     """Servo 액추에이터 리포지토리 의존성 주입"""
     return container.get_actuator_servo_repository(db_session)
+
+def get_device_rtc_repository(db_session: AsyncSession = Depends(get_db_session)) -> IDeviceRTCStatusRepository:
+    """DeviceRTCStatus 리포지토리 의존성 주입"""
+    return container.get_device_rtc_repository(db_session)
+
+def get_device_rtc_service(db_session: AsyncSession = Depends(get_db_session)) -> IDeviceRTCStatusService:
+    """DeviceRTCStatus 서비스 의존성 주입"""
+    return container.get_device_rtc_service(db_session)
 
 def get_user_service(db_session: AsyncSession = Depends(get_db_session)) -> IUserService:
     """사용자 서비스 의존성 주입"""

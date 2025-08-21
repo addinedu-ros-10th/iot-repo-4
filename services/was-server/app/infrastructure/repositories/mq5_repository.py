@@ -7,7 +7,7 @@ Clean Architecture 원칙에 따라 MQ5 가스 센서 데이터에 대한 데이
 from datetime import datetime
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_, order_by, limit
+from sqlalchemy import select, and_
 from sqlalchemy.orm import selectinload
 
 from app.interfaces.repositories.sensor_repository import IMQ5Repository
@@ -59,11 +59,10 @@ class MQ5Repository(IMQ5Repository):
             select(SensorRawMQ5)
             .where(SensorRawMQ5.device_id == device_id)
             .order_by(SensorRawMQ5.time.desc())
-            .limit(1)
         )
         
         result = await self.db.execute(query)
-        data = result.scalar_one_or_none()
+        data = result.scalars().first()
         
         if data:
             return MQ5DataResponse.from_orm(data)
@@ -88,12 +87,13 @@ class MQ5Repository(IMQ5Repository):
             query = query.where(SensorRawMQ5.time <= end_time)
         
         # 시간 역순으로 정렬하고 제한
-        query = query.order_by(SensorRawMQ5.time.desc()).limit(limit_count)
+        query = query.order_by(SensorRawMQ5.time.desc())
         
         result = await self.db.execute(query)
         data_list = result.scalars().all()
         
-        return [MQ5DataResponse.from_orm(data) for data in data_list]
+        # limit_count만큼만 반환
+        return [MQ5DataResponse.from_orm(data) for data in data_list[:limit_count]]
     
     async def update(
         self,
