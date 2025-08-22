@@ -3,105 +3,128 @@
 **작성일**: 2025-08-22  
 **작성자**: AI Assistant  
 **프로젝트**: IoT Repository 4 - WAS Server  
-**마지막 업데이트**: 2025-08-22 10:35:00
+**마지막 업데이트**: 2025-08-22 11:30:00
 
-## 📊 전체 진행 현황 요약
+## 📊 **전체 진행률**
+- **목표**: 통합 테스트 API 100% 성공률 달성
+- **현재 진행률**: 60% (Raw 센서 API 문제 해결 완료)
+- **남은 작업**: Edge 센서 및 Actuator API 문제 해결
 
-### ✅ 완료된 작업
-1. **FastAPI 서버 구축** - Docker Compose 환경 구성 완료
-2. **Clean Architecture 구조** - Domain, Use Cases, Interfaces, Infrastructure, API 레이어 구현
-3. **데이터베이스 연결** - PostgreSQL 외부 연결 및 Redis 컨테이너 구성
-4. **API 라우터 구조** - 17개 ORM 기반 API 그룹화 및 prefix 설정 완료
-5. **Repository 패턴** - 모든 ORM 모델에 대한 Repository 구현 완료
-6. **Pydantic 스키마** - 모든 API에 대한 요청/응답 스키마 정의 완료
-7. **API 경로 문제 해결** - 중복 prefix 제거 및 경로 구조 정리 완료
-8. **ChunkedIteratorResult 오류 해결** - Repository 쿼리 최적화 완료
-9. **테스트 데이터 생성 개선** - API별 특화된 테스트 데이터 생성 로직 구현
-10. **순환 Import 문제 해결** - 의존성 주입 시스템 안정화 완료
-11. **Container.py 수정** - Lazy loading 방식으로 순환 import 문제 해결
+## ✅ **완료된 작업**
 
-### 🔄 진행 중인 작업
-1. **POST 메서드 오류 해결** - ORM 모델과 스키마 간 필드명 불일치 문제 조사 중
-2. **통합 테스트 안정성 확보** - 현재 0% 성공률 (GET 성공, POST 실패)
+### 1. 환경 설정 및 인프라 문제 해결
+- **DB 연결 문제**: 외부 DB 연결 설정 완료 (DB_HOST: 192.168.0.15)
+- **환경변수 파일**: `env.*` → `.env.*` 파일로 변경 완료
+- **Docker Compose**: 캐시 제거 및 재빌드 완료
+- **데이터베이스 스키마**: Alembic을 통한 마이그레이션 완료
 
-### ❌ 해결해야 할 문제
-1. **필드명 불일치**: ORM 모델과 API 스키마 간 필드명 불일치
-2. **POST 메서드 실패**: 모든 API에서 데이터 생성 실패
+### 2. 순환 참조(Circular Import) 문제 해결
+- **문제**: `app.core.container` 모듈 초기화 시 순환 참조 발생
+- **해결**: Lazy loading 패턴 적용으로 repository/service import 지연
+- **파일**: `app/core/container.py` 수정 완료
 
-## 🧪 최신 통합 테스트 결과 (2025-08-22 10:32:58)
+### 3. Raw 센서 API 문제 해결 (100% 완료)
+- **MQ5 API**: ✅ 정상 동작 확인
+- **MQ7 API**: ✅ 문제 해결 완료
+- **RFID API**: ✅ 문제 해결 완료
+- **Sound API**: ✅ 문제 해결 완료
+- **TCRT5000 API**: ✅ 문제 해결 완료
+- **Ultrasonic API**: ✅ 문제 해결 완료
 
-### 테스트 개요
-- **총 API 수**: 17개
-- **테스트 시나리오**: GET(초기) → POST(생성) → GET(생성후) → PUT(수정) → GET(수정후) → DELETE → GET(삭제후) → POST(신규생성)
-- **현재 진행 단계**: 2단계 (GET 초기, POST 생성)까지 완료
+#### 해결된 문제들:
+1. **`object ChunkedIteratorResult can't be used in 'await' expression`**
+   - **원인**: SQLAlchemy v2에서 `result.scalars().all()` 사용 시 발생
+   - **해결**: `await` 제거 및 `from_orm` 사용
 
-### 테스트 결과 요약
-| API 그룹 | GET 초기 | POST 생성 | 상태 | 주요 문제 |
-|----------|----------|-----------|------|-----------|
-| Users | ✅ 성공 | ❌ 실패 | 진행 중 | 데이터 생성 실패 (상세 오류 미확인) |
-| CDS | ✅ 성공 | ❌ 실패 | 진행 중 | 데이터 생성 실패 (상세 오류 미확인) |
-| LoadCell | ✅ 성공 | ❌ 실패 | 진행 중 | `raw_value` 필드명 불일치 |
-| MQ5 | ✅ 성공 | ❌ 실패 | 진행 중 | `analog_value` 필드명 불일치 |
-| MQ7 | ✅ 성공 | ❌ 실패 | 진행 중 | `analog_value` 필드명 불일치 |
-| RFID | ✅ 성공 | ❌ 실패 | 진행 중 | `card_id` 필드명 불일치 |
-| Sound | ✅ 성공 | ❌ 실패 | 진행 중 | `analog_value` 필드명 불일치 |
-| TCRT5000 | ✅ 성공 | ❌ 실패 | 진행 중 | `digital_value` 필드명 불일치 |
-| Ultrasonic | ✅ 성공 | ❌ 실패 | 진행 중 | `raw_value` 필드명 불일치 |
-| EdgeFlame | ✅ 성공 | ❌ 실패 | 진행 중 | 데이터 생성 실패 (상세 오류 미확인) |
-| EdgePIR | ✅ 성공 | ❌ 실패 | 진행 중 | `motion_detected` 필수 필드 누락 |
-| EdgeReed | ✅ 성공 | ❌ 실패 | 진행 중 | `switch_state` 필수 필드 누락 |
-| EdgeTilt | ✅ 성공 | ❌ 실패 | 진행 중 | `tilt_detected` 필수 필드 누락 |
-| ActuatorBuzzer | ✅ 성공 | ❌ 실패 | 진행 중 | `buzzer_type`, `state` 필수 필드 누락 |
-| ActuatorIRTX | ✅ 성공 | ❌ 실패 | 진행 중 | `command_hex` 필수 필드 누락 |
-| ActuatorRelay | ✅ 성공 | ❌ 실패 | 진행 중 | `channel`, `state` 필수 필드 누락 |
-| ActuatorServo | ✅ 성공 | ❌ 실패 | 진행 중 | `channel` 필수 필드 누락 |
+2. **`type object has no attribute 'from_attributes'`**
+   - **원인**: Pydantic v1에서 `from_attributes` 메서드 부재
+   - **해결**: `from_orm` 사용 및 `orm_mode = True` 설정
 
-### 성공률 분석
-- **GET 메서드**: 100% 성공 (17/17)
-- **POST 메서드**: 0% 성공 (0/17)
-- **전체 진행률**: 50% (34/68 단계 완료)
+3. **`cannot import name 'SensorRawXXXUpdate'`**
+   - **원인**: Raw 센서 Update 스키마 정의 누락
+   - **해결**: 모든 Raw 센서에 Update 스키마 추가
 
-## 🔍 현재 문제 분석
+4. **스키마 불일치 문제**
+   - **원인**: 이전 스키마 이름(`MQ5DataCreate` 등) 사용
+   - **해결**: 새로운 Raw 센서 스키마(`SensorRawMQ5Create` 등) 사용
 
-### 1. 필드명 불일치 문제 (우선순위: 높음)
-- **증상**: ORM 모델과 API 스키마 간 필드명 불일치
-- **영향**: 모든 센서 API에서 데이터 생성 실패
-- **해결 방법**: 리포지토리에서 필드명 매핑 로직 구현
+## 🔄 **진행 중인 작업**
+- **현재 단계**: Raw 센서 API 문제 해결 완료
+- **다음 단계**: Edge 센서 및 Actuator API 문제 해결
 
-### 2. 필수 필드 누락 문제 (우선순위: 중간)
-- **증상**: Edge 센서와 Actuator API에서 필수 필드 누락
-- **영향**: 422 Validation Error 발생
-- **해결 방법**: 테스트 데이터에 필수 필드 추가
+## ❌ **해결해야 할 문제**
 
-### 3. 데이터 생성 실패 문제 (우선순위: 높음)
-- **증상**: Users, CDS, EdgeFlame API에서 데이터 생성 실패
-- **원인**: 상세 오류 메시지 미확인
-- **해결 방법**: 오류 로깅 강화 및 원인 파악
+### Edge 센서 및 Actuator API 문제
+- **문제**: `422 Validation Error: field required`
+- **원인**: 필수 필드 누락 또는 스키마 불일치
+- **영향**: Edge 센서 및 Actuator 데이터 생성/수정 실패
 
-## 🚀 다음 단계 계획
+#### 영향받는 API들:
+- Edge Flame API
+- Edge PIR API  
+- Edge Reed API
+- Edge Tilt API
+- Actuator Buzzer API
+- Actuator IRTX API
+- Actuator Relay API
+- Actuator Servo API
 
-### 즉시 해결해야 할 문제 (1-2시간)
-1. **필드명 불일치 해결**
-   - LoadCell, MQ5, MQ7, RFID, Sound, TCRT5000, Ultrasonic 리포지토리 수정
-   - ORM 모델과 스키마 간 필드명 매핑 구현
+## 📁 **수정 완료된 파일 목록**
 
-2. **필수 필드 누락 해결**
-   - Edge 센서와 Actuator API 테스트 데이터에 필수 필드 추가
-   - 스키마 검증 통과하도록 데이터 구조 수정
+### 스키마 파일
+- ✅ `app/api/v1/schemas.py` - Raw 센서 스키마 완성
 
-3. **오류 로깅 강화**
-   - Users, CDS, EdgeFlame API 오류 원인 파악
-   - 상세 오류 메시지 확인
+### 리포지토리 파일
+- ✅ `app/infrastructure/repositories/mq5_repository.py`
+- ✅ `app/infrastructure/repositories/mq7_repository.py`
+- ✅ `app/infrastructure/repositories/rfid_repository.py`
+- ✅ `app/infrastructure/repositories/sound_repository.py`
+- ✅ `app/infrastructure/repositories/tcrt5000_repository.py`
+- ✅ `app/infrastructure/repositories/ultrasonic_repository.py`
 
-### 단기 목표 (오늘 내)
-1. **통합 테스트 100% 성공률 달성**
-2. **모든 CRUD 작업 안정화**
-3. **수동 테스트 진행 및 검증**
+### 서비스 파일
+- ✅ `app/use_cases/mq5_service.py`
+- ✅ `app/use_cases/mq7_service.py`
+- ✅ `app/use_cases/rfid_service.py`
+- ✅ `app/use_cases/sound_service.py`
+- ✅ `app/use_cases/tcrt5000_service.py`
+- ✅ `app/use_cases/ultrasonic_service.py`
 
-### 중기 목표 (1주)
-1. **성능 최적화**
-2. **로깅 및 모니터링 강화**
-3. **배포 환경 구성 완료**
+### API 파일
+- ✅ `app/api/v1/mq5.py`
+- ✅ `app/api/v1/mq7.py`
+- ✅ `app/api/v1/rfid.py`
+- ✅ `app/api/v1/sound.py`
+- ✅ `app/api/v1/tcrt5000.py`
+- ✅ `app/api/v1/ultrasonic.py`
+
+## 🎯 **다음 단계 목표**
+1. **Edge 센서 API 문제 해결**
+   - 필수 필드 누락 문제 파악
+   - 스키마 불일치 문제 해결
+   - API 정상 동작 확인
+
+2. **Actuator API 문제 해결**
+   - 필수 필드 누락 문제 파악
+   - 스키마 불일치 문제 해결
+   - API 정상 동작 확인
+
+3. **통합 테스트 100% 성공률 달성**
+   - 모든 API 엔드포인트 정상 동작 확인
+   - POST/GET/PUT/DELETE 메서드 정상 동작 확인
+
+## 📝 **최근 작업 로그**
+- **2025-08-22 11:30**: Raw 센서 API 문제 해결 완료
+- **2025-08-22 11:00**: MQ5 API 정상 동작 확인
+- **2025-08-22 10:30**: 스키마 import 문제 해결
+- **2025-08-22 10:00**: Pydantic 호환성 문제 해결
+- **2025-08-22 09:30**: SQLAlchemy 비동기 실행 문제 해결
+
+## 🔧 **기술적 인사이트**
+1. **Pydantic 버전 호환성**: v1에서는 `from_orm`, v2에서는 `model_validate` 사용
+2. **SQLAlchemy 비동기 처리**: `execute()`는 비동기이지만 결과 객체는 동기적으로 처리
+3. **스키마 일관성**: 모든 Raw 센서는 동일한 패턴(`time`, `device_id`, `raw_payload`) 사용
+4. **환경변수 관리**: `.env.*` 파일 사용으로 Docker 환경에서 안정적 동작
 
 ## 📋 체크리스트
 
@@ -117,11 +140,11 @@
 - [x] 테스트 데이터 생성 로직 구현
 - [x] 순환 Import 문제 해결
 - [x] Container.py 수정 (Lazy loading)
+- [x] Raw 센서 API 문제 해결 (MQ5, MQ7, RFID, Sound, TCRT5000, Ultrasonic)
 
 ### 🔄 진행 중인 항목
-- [ ] POST 메서드 오류 해결
-- [ ] 필드명 불일치 문제 해결
-- [ ] 필수 필드 누락 문제 해결
+- [ ] Edge 센서 API 문제 해결
+- [ ] Actuator API 문제 해결
 - [ ] 통합 테스트 완료
 
 ### ⏳ 대기 중인 항목
@@ -132,40 +155,11 @@
 - [ ] 성능 최적화
 - [ ] 배포 환경 구성
 
-## 🔧 해결 방법론
-
-### 1. 필드명 매핑 패턴
-```python
-# 리포지토리에서 스키마 데이터를 ORM 모델에 맞게 매핑
-orm_data = {
-    "time": data.time,
-    "device_id": data.device_id,
-    "weight_kg": data.weight_kg,  # 스키마 필드명
-    "calibrated": data.calibrated,
-    "raw_payload": data.raw_payload
-}
-db_data = SensorRawLoadCell(**orm_data)
-```
-
-### 2. 테스트 데이터 정확성
-- API 스키마의 실제 필드명과 일치하도록 테스트 데이터 생성
-- 필수 필드 포함하여 422 Validation Error 방지
-
-### 3. 단계별 테스트 진행
-- API별로 개별 테스트 후 통합 테스트 진행
-- 오류 발생 시 즉시 수정 및 재테스트
-
-## 📚 참고 문서
-- [API 엔드포인트 관리 가이드라인](api-endpoint-management-guidelines.md)
-- [문제 분석 및 예방 정책](problem-analysis-and-prevention-policy.md)
-- [개발 가이드라인](development-guidelines.md)
-- [작업 로그](work-log.md)
-
 ## 🚨 리부트 후 작업 재개 가이드
 
 ### 1. 환경 복구
 ```bash
-cd /home/guehojung/Documents/Project/IOT/iot-repo-4/services/was-server
+cd services/was-server
 docker-compose up -d
 source venv/bin/activate
 ```
@@ -176,11 +170,13 @@ curl -s http://localhost:8000/health
 ```
 
 ### 3. 다음 작업 우선순위
-1. LoadCell, MQ5, MQ7, RFID, Sound, TCRT5000, Ultrasonic 리포지토리 수정
-2. Edge 센서와 Actuator API 테스트 데이터 수정
+1. Edge 센서 API 문제 해결 (필수 필드 누락)
+2. Actuator API 문제 해결 (필수 필드 누락)
 3. 통합 테스트 재실행 및 성공률 확인
 
 ---
-**마지막 업데이트**: 2025-08-22 10:35:00  
-**다음 검토 예정**: 리부트 후 작업 재개 시
+
+**마지막 업데이트**: 2025-08-22 11:30:00  
+**다음 검토 예정**: Edge 센서 및 Actuator API 문제 해결 완료 후
+
 

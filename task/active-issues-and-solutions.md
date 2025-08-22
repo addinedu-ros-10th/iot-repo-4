@@ -298,3 +298,4 @@ python integration_test.py
 **담당자**: AI Assistant  
 **상태**: 활성 관리 중
 
+
