@@ -19,7 +19,7 @@ from app.api.v1.schemas import (
     EdgeFlameDataResponse
 )
 
-router = APIRouter(prefix="/edge-flame", tags=["Edge Flame 센서"])
+router = APIRouter(tags=["Edge Flame 센서"])
 
 
 def get_edge_flame_service(db_session: AsyncSession = Depends(get_db_session)) -> IEdgeFlameService:
@@ -27,7 +27,7 @@ def get_edge_flame_service(db_session: AsyncSession = Depends(get_db_session)) -
     return container.get_edge_flame_service(db_session)
 
 
-@router.post("/", response_model=EdgeFlameDataResponse, status_code=201)
+@router.post("/create", response_model=EdgeFlameDataResponse, status_code=201)
 async def create_edge_flame_data(
     data: EdgeFlameDataCreate,
     edge_flame_service: IEdgeFlameService = Depends(get_edge_flame_service)
@@ -41,7 +41,7 @@ async def create_edge_flame_data(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/", response_model=List[EdgeFlameDataResponse])
+@router.get("/list", response_model=List[EdgeFlameDataResponse])
 async def get_edge_flame_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),

@@ -9,7 +9,7 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.infrastructure.database import get_db
+from app.infrastructure.database import get_db_session
 from app.core.container import container
 from app.interfaces.services.sensor_service_interface import ILoadCellService
 from app.api.v1.schemas import (
@@ -21,12 +21,12 @@ from app.api.v1.schemas import (
 router = APIRouter()
 
 
-def get_loadcell_service(db: AsyncSession = Depends(get_db)) -> ILoadCellService:
+def get_loadcell_service(db: AsyncSession = Depends(get_db_session)) -> ILoadCellService:
     """LoadCell 센서 서비스 의존성 주입"""
     return container.get_loadcell_service(db)
 
 
-@router.post("/", response_model=LoadCellDataResponse, status_code=201)
+@router.post("/create", response_model=LoadCellDataResponse, status_code=201)
 async def create_loadcell_data(
     data: LoadCellDataCreate,
     loadcell_service: ILoadCellService = Depends(get_loadcell_service)
@@ -35,7 +35,7 @@ async def create_loadcell_data(
     return await loadcell_service.create_sensor_data(data)
 
 
-@router.get("/", response_model=List[LoadCellDataResponse])
+@router.get("/list", response_model=List[LoadCellDataResponse])
 async def get_loadcell_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),

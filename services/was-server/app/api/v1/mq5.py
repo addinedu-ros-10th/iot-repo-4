@@ -26,7 +26,7 @@ def get_mq5_service(db: AsyncSession = Depends(get_db)) -> IMQ5Service:
     return container.get_mq5_service(db)
 
 
-@router.post("/", response_model=MQ5DataResponse, status_code=201)
+@router.post("/create", response_model=MQ5DataResponse, status_code=201)
 async def create_mq5_data(
     data: MQ5DataCreate,
     mq5_service: IMQ5Service = Depends(get_mq5_service)
@@ -35,7 +35,7 @@ async def create_mq5_data(
     return await mq5_service.create_sensor_data(data)
 
 
-@router.get("/", response_model=List[MQ5DataResponse])
+@router.get("/list", response_model=List[MQ5DataResponse])
 async def get_mq5_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),

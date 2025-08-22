@@ -34,6 +34,9 @@ engine = create_engine(
     echo=settings.DEBUG,  # 개발 환경에서만 SQL 로그 출력
 )
 
+# 비동기 엔진 생성
+async_engine = None
+
 # 세션 팩토리 생성
 SessionLocal = sessionmaker(
     autocommit=False,
@@ -73,22 +76,21 @@ async def get_session() -> AsyncSession:
     
     PostgreSQL 리포지토리에서 사용됩니다.
     """
-    # 동기 엔진을 사용하여 비동기 세션 생성
-    # 실제 프로덕션에서는 asyncpg를 사용한 비동기 엔진을 권장
-    from sqlalchemy.ext.asyncio import create_async_engine
+    global async_engine
     
-    # 동기 URL을 비동기 URL로 변환
-    async_database_url = DATABASE_URL.replace('postgresql://', 'postgresql+asyncpg://')
-    
-    async_engine = create_async_engine(
-        async_database_url,
-        poolclass=QueuePool,
-        pool_size=5,
-        max_overflow=10,
-        pool_pre_ping=True,
-        pool_recycle=3600,
-        echo=settings.DEBUG,
-    )
+    if async_engine is None:
+        # 동기 URL을 비동기 URL로 변환
+        async_database_url = DATABASE_URL.replace('postgresql://', 'postgresql+asyncpg://')
+        
+        async_engine = create_async_engine(
+            async_database_url,
+            poolclass=QueuePool,
+            pool_size=5,
+            max_overflow=10,
+            pool_pre_ping=True,
+            pool_recycle=3600,
+            echo=settings.DEBUG,
+        )
     
     async_session = async_sessionmaker(
         async_engine,
@@ -97,6 +99,46 @@ async def get_session() -> AsyncSession:
     )
     
     return async_session()
+
+
+async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
+    """
+    비동기 데이터베이스 세션을 생성하는 의존성 함수
+    
+    FastAPI의 Depends에서 사용됩니다.
+    """
+    global async_engine
+    
+    if async_engine is None:
+        # 동기 URL을 비동기 URL로 변환
+        async_database_url = DATABASE_URL.replace('postgresql://', 'postgresql+asyncpg://')
+        
+        async_engine = create_async_engine(
+            async_database_url,
+            poolclass=QueuePool,
+            pool_size=5,
+            max_overflow=10,
+            pool_pre_ping=True,
+            pool_recycle=3600,
+            echo=settings.DEBUG,
+        )
+    
+    async_session = async_sessionmaker(
+        async_engine,
+        class_=AsyncSession,
+        expire_on_commit=False
+    )
+    
+    async with async_session() as session:
+        try:
+            logger.debug("비동기 데이터베이스 세션 생성")
+            yield session
+        except Exception as e:
+            logger.error(f"비동기 데이터베이스 세션 오류: {e}")
+            await session.rollback()
+            raise
+        finally:
+            logger.debug("비동기 데이터베이스 세션 종료")
 
 
 async def get_db_session() -> AsyncGenerator[AsyncSession, None]:

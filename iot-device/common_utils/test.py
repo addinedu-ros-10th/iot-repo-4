@@ -15,14 +15,23 @@ class TestRestTransport:
             # },
             # "ts": 1724212345
             
-            "user_name": "테스트1 사용자",
-            "email": "test1@example.com",
-            "phone_number": "01012345678",
-            "user_role": "user"
+            "time": "2025-08-21T17:48:16.777Z",
+            "device_id": "string2",
+            "accel_x": 0,
+            "accel_y": 0,
+            "accel_z": 0,
+            "gyro_x": 0,
+            "gyro_y": 0,
+            "gyro_z": 0,
+            "mag_x": 0,
+            "mag_y": 0,
+            "mag_z": 0,
+            "temperature": 0,
+            "raw_payload": {}
 
         }
         # res = await rt.get("/api/v1/list")
-        res = await rt.post_json("/api/v1/", payload)
+        res = await rt.post_json("/api/imu/create", payload)
         print(f"Response: {res.text}")
         assert res.status_code == 200
     

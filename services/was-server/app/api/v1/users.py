@@ -33,7 +33,7 @@ def get_user_service(db_session: AsyncSession = Depends(get_db_session)) -> IUse
     return container.get_user_service(db_session)
 
 
-@router.post("/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/create", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def create_user(
     user_data: UserCreate,
     user_service: IUserService = Depends(get_user_service)

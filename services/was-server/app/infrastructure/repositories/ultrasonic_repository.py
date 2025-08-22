@@ -86,13 +86,13 @@ class UltrasonicRepository(IUltrasonicRepository):
             query = query.where(SensorRawUltrasonic.time <= end_time)
         
         # 시간 역순으로 정렬하고 제한
-        query = query.order_by(SensorRawUltrasonic.time.desc())
+        query = query.order_by(SensorRawUltrasonic.time.desc()).limit(limit_count)
         
         result = await self.db.execute(query)
         data_list = result.scalars().all()
         
-        # limit_count만큼만 반환
-        return [UltrasonicDataResponse.from_orm(data) for data in data_list[:limit_count]]
+        # 결과를 리스트로 변환하여 반환
+        return [UltrasonicDataResponse.from_orm(data) for data in data_list]
     
     async def update(
         self,

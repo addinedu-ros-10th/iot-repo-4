@@ -1,315 +1,176 @@
-# 개발 지침 (Development Guidelines)
+# IoT Care Backend System 개발 지침
 
-## 🎯 **개발 원칙**
+## 🚨 **중요: 디렉토리 및 파일 생성 시 주의사항**
 
-### **Clean Architecture 원칙 (절대 준수 필수)**
-- 도메인 중심의 계층화된 아키텍처 유지
-- 의존성 역전 원칙 준수
-- 인터페이스와 구현체 분리
-- **🚨 절대 위배 금지: API 레이어에서 직접 Infrastructure 레이어 접근 금지**
+### **디렉토리 생성 전 확인 절차**
+1. **현재 위치 확인**: `pwd` 명령으로 현재 작업 디렉토리 확인
+2. **대상 경로 확인**: `ls -la` 명령으로 대상 디렉토리 존재 여부 확인
+3. **중복 방지**: 동일한 이름의 디렉토리/파일이 이미 존재하는지 확인
+4. **경로 검증**: 생성할 디렉토리/파일의 경로가 올바른지 검증
 
-### **TDD (Test-Driven Development)**
-- 테스트 코드를 먼저 작성
-- 리팩토링을 통한 코드 품질 향상
-- 지속적인 테스트 실행
+### **파일 관리 원칙**
+- **절대 경로 사용 금지**: 하드코딩된 절대 경로 사용 금지
+- **상대 경로 우선**: 현재 작업 디렉토리 기준 상대 경로 사용
+- **경로 검증 의무**: 파일 생성/수정 전 경로 유효성 검증 필수
+- **중복 확인**: 동일한 이름의 파일/디렉토리 생성 전 존재 여부 확인
 
-## 🚨 **중요: Clean Architecture 준수 지침**
+### **Task 폴더 관리 규칙**
+- **프로젝트 루트**: `iot-repo-4/task/` - 전체 프로젝트 공통 문서
+- **서비스별**: `iot-repo-4/services/was-server/task/` - WAS 서버 전용 문서
+- **통합 관리**: 서비스별 문서는 프로젝트 루트로 통합하여 중앙 집중식 관리
 
-### **절대 위배 금지 사항**
-1. **API 레이어에서 직접 ORM 모델 사용 금지**
-   ```python
-   # ❌ 잘못된 방식 (절대 금지)
-   from app.infrastructure.models import SensorRawLoadCell
-   
-   @router.post("/")
-   async def create_data(data: DataCreate, db: AsyncSession = Depends(get_db)):
-       db_data = SensorRawLoadCell(**data.dict())  # 직접 ORM 모델 사용
-       db.add(db_data)
-       await db.commit()
-   
-   # ✅ 올바른 방식 (반드시 준수)
-   from app.interfaces.services.sensor_service_interface import ISensorService
-   
-   @router.post("/")
-   async def create_data(data: DataCreate, sensor_service: ISensorService = Depends(get_sensor_service)):
-       created_data = await sensor_service.create_sensor_data(data)  # 서비스 레이어 사용
-       return created_data
-   ```
+---
 
-2. **API 레이어에서 직접 데이터베이스 세션 사용 금지**
-   ```python
-   # ❌ 잘못된 방식 (절대 금지)
-   async def get_data(db: AsyncSession = Depends(get_db)):
-       query = select(SensorRawLoadCell)
-       result = await db.execute(query)
-   
-   # ✅ 올바른 방식 (반드시 준수)
-   async def get_data(sensor_service: ISensorService = Depends(get_sensor_service)):
-       data = await sensor_service.get_sensor_data()
-       return data
-   ```
+## 🏗️ **Clean Architecture 구현 지침**
 
-3. **비즈니스 로직을 API 레이어에 구현 금지**
-   ```python
-   # ❌ 잘못된 방식 (절대 금지)
-   @router.get("/stats")
-   async def get_stats(device_id: str, db: AsyncSession = Depends(get_db)):
-       # API 레이어에서 직접 통계 계산
-       query = select(SensorRawLoadCell).where(SensorRawLoadCell.device_id == device_id)
-       result = await db.execute(query)
-       data_list = result.scalars().all()
-       
-       # 통계 계산 로직이 API에 존재
-       weight_data = [d.weight_kg for d in data_list if d.weight_kg is not None]
-       avg = sum(weight_data) / len(weight_data) if weight_data else 0
-   
-   # ✅ 올바른 방식 (반드시 준수)
-   @router.get("/stats")
-   async def get_stats(device_id: str, sensor_service: ISensorService = Depends(get_sensor_service)):
-       # 서비스 레이어에서 통계 계산
-       stats = await sensor_service.get_sensor_statistics(device_id)
-       return stats
-   ```
+### **1. 레이어 분리 원칙**
+- **Domain Layer**: 순수한 비즈니스 로직만 포함
+- **Use Case Layer**: 애플리케이션 비즈니스 규칙 구현
+- **Interface Layer**: 추상화된 Repository/Service 인터페이스
+- **Infrastructure Layer**: 구체적인 구현체 (데이터베이스, 외부 API 등)
+- **API Layer**: HTTP 엔드포인트 및 요청/응답 처리
 
-### **Clean Architecture 레이어 구조 (반드시 준수)**
+### **2. 의존성 방향**
 ```
-API Layer (app/api/)
-├── 라우터 정의
-├── 요청/응답 스키마 검증
-└── 서비스 레이어 호출만 수행
-
-Use Cases Layer (app/use_cases/)
-├── 비즈니스 로직 구현
-├── 도메인 서비스 조합
-└── 트랜잭션 관리
-
-Domain Layer (app/domain/)
-├── 엔티티 정의
-├── 도메인 서비스
-└── 비즈니스 규칙
-
-Interfaces Layer (app/interfaces/)
-├── 리포지토리 인터페이스
-├── 서비스 인터페이스
-└── 외부 서비스 인터페이스
-
-Infrastructure Layer (app/infrastructure/)
-├── ORM 모델
-├── 데이터베이스 연결
-└── 외부 서비스 구현체
+API Layer → Use Case Layer → Domain Layer
+     ↓              ↓              ↓
+Interface Layer ← Interface Layer ← Interface Layer
+     ↓              ↓              ↓
+Infrastructure Layer → Infrastructure Layer → Infrastructure Layer
 ```
 
-### **의존성 주입 패턴 (반드시 준수)**
-```python
-# 1. 인터페이스 정의
-class ISensorService(ABC):
-    @abstractmethod
-    async def create_sensor_data(self, data: SensorDataCreate) -> SensorDataResponse:
-        pass
+**중요**: 의존성은 항상 안쪽(Domain)을 향해야 하며, 바깥쪽(Infrastructure)에서 안쪽으로 의존할 수 없음
 
-# 2. 구현체 생성
-class SensorService(ISensorService):
-    def __init__(self, sensor_repository: ISensorRepository):
-        self.sensor_repository = sensor_repository
-    
-    async def create_sensor_data(self, data: SensorDataCreate) -> SensorDataResponse:
-        # 비즈니스 로직 구현
-        pass
+### **3. 인터페이스 분리 원칙**
+- 각 Repository/Service는 단일 책임을 가져야 함
+- 인터페이스는 구체적인 구현에 의존하지 않아야 함
+- 의존성 주입을 통해 구체적인 구현체를 주입받아야 함
 
-# 3. 컨테이너에 등록
-def get_sensor_service() -> ISensorService:
-    return container.get_sensor_service()
-
-# 4. API에서 사용
-@router.post("/")
-async def create_data(
-    data: SensorDataCreate,
-    sensor_service: ISensorService = Depends(get_sensor_service)
-):
-    return await sensor_service.create_sensor_data(data)
-```
-
-## 🚨 **현재 발생한 문제점과 해결 방안**
-
-### **문제점**
-1. **센서 API들이 Clean Architecture 원칙 위배**
-   - LoadCell, MQ5, MQ7, RFID, Sound, TCRT5000, Ultrasonic API
-   - API 레이어에서 직접 ORM 모델 사용
-   - 비즈니스 로직이 API 레이어에 구현됨
-
-2. **의존성 역전 원칙 위배**
-   - API가 Infrastructure 레이어에 직접 의존
-   - 테스트 어려움 및 코드 재사용성 저하
-
-### **해결 방안**
-1. **즉시 리팩토링 진행**
-   - 센서별 리포지토리 인터페이스 생성
-   - 센서별 서비스 인터페이스 생성
-   - API 레이어에서 서비스 레이어 호출로 변경
-
-2. **새로운 API 구현 시 Clean Architecture 준수**
-   - Edge 센서 API (4개)
-   - Actuator 로그 API (4개)
-
-3. **기존 API 점진적 리팩토링**
-   - Users, Devices, Sensors API는 이미 준수
-   - 나머지 센서 API들 단계적 리팩토링
-
-## 🚨 **중요: 파일 경로 관리 지침**
-
-### **절대 경로 사용 원칙**
-- **모든 파일 생성 시 절대 경로 사용 필수**
-- **상대 경로 사용 금지** (경로 오류 발생 원인)
-- **올바른 경로 형식**: `services/was-server/app/...`
-
-### **작업 디렉토리 확인 절차**
-파일/디렉토리 생성 명령어 실행 전 **반드시** 다음 절차 수행:
-
-1. **현재 위치 확인**
-   ```bash
-   pwd
-   ```
-
-2. **작업 디렉토리 확인**
-   ```bash
-   ls -la
-   ```
-
-3. **필요시 올바른 디렉토리로 이동**
-   ```bash
-   cd services/was-server
-   ```
-
-4. **경로 확인 후 명령어 실행**
-   ```bash
-   mkdir -p app/api/v1
-   ```
-
-### **파일 생성 시 경로 검증**
-- `edit_file` 도구 사용 시 **절대 경로** 명시
-- 파일 생성 후 `find` 명력으로 실제 위치 확인
-- 잘못된 위치 발견 시 즉시 정리
-
-### **잘못된 경로 문제 해결 방안**
-1. **즉시 정리**: 잘못 생성된 파일들 삭제
-2. **절대 경로 재생성**: 올바른 위치에 파일 재생성
-3. **경로 검증**: 생성된 파일 위치 재확인
-
-## 🔧 **개발 환경 설정**
-
-### **Docker 환경**
-- Docker Compose를 통한 일관된 개발 환경
-- 볼륨 마운트를 통한 파일 동기화
-- 컨테이너 재시작 시 파일 변경사항 반영
-
-### **데이터베이스 연결**
-- PostgreSQL 연결 시 비밀번호 특수문자 처리
-- SSH 터널을 통한 안전한 데이터베이스 접근
-- 환경 변수를 통한 설정 관리
+---
 
 ## 📁 **프로젝트 구조 관리**
 
 ### **디렉토리 구조**
 ```
-services/was-server/
-├── app/                    # 메인 애플리케이션
-│   ├── api/               # API 레이어 (라우터만)
-│   ├── core/              # 핵심 설정
-│   ├── domain/            # 도메인 레이어 (엔티티, 서비스)
-│   ├── use_cases/         # 유스케이스 레이어 (비즈니스 로직)
-│   ├── infrastructure/    # 인프라스트럭처 레이어 (ORM, DB)
-│   └── interfaces/        # 인터페이스 레이어 (추상화)
-├── tests/                 # 테스트 코드
-└── alembic/               # 데이터베이스 마이그레이션
+iot-repo-4/
+├── task/                           # 전체 프로젝트 공통 문서
+│   ├── checklist.md               # 개발 체크리스트
+│   ├── work-log.md                # 개발 작업 로그
+│   ├── development-guidelines.md  # 개발 지침
+│   └── ...
+├── services/
+│   └── was-server/                # WAS 서버 전용
+│       ├── app/                   # 애플리케이션 코드
+│       ├── task/                  # WAS 서버 전용 문서 (통합 예정)
+│       └── ...
+└── ...
 ```
 
-### **파일 명명 규칙**
-- Python 파일: `snake_case.py`
-- 클래스: `PascalCase`
-- 함수/변수: `snake_case`
-- 상수: `UPPER_SNAKE_CASE`
+### **파일 관리 규칙**
+- **공통 문서**: 프로젝트 루트 `task/` 폴더에 배치
+- **서비스별 문서**: 해당 서비스 디렉토리 내 `task/` 폴더에 배치
+- **문서 통합**: 서비스별 문서는 주기적으로 프로젝트 루트로 통합
+
+---
+
+## 🔧 **코딩 표준**
+
+### **1. Python 코딩 스타일**
+- **PEP 8 준수**: Python 공식 스타일 가이드 준수
+- **타입 힌트 사용**: 모든 함수와 변수에 타입 힌트 명시
+- **문서화**: 모든 클래스와 함수에 docstring 작성
+- **에러 처리**: 적절한 예외 처리 및 로깅 구현
+
+### **2. FastAPI 사용 규칙**
+- **의존성 주입**: `Depends()`를 사용한 의존성 주입 구현
+- **Pydantic 모델**: 요청/응답 데이터 검증을 위한 Pydantic 스키마 사용
+- **HTTP 상태 코드**: 적절한 HTTP 상태 코드 반환
+- **에러 응답**: 일관된 에러 응답 형식 사용
+
+### **3. 데이터베이스 접근**
+- **Repository 패턴**: 데이터 접근 로직을 Repository 클래스로 캡슐화
+- **트랜잭션 관리**: 적절한 트랜잭션 경계 설정
+- **연결 풀링**: 데이터베이스 연결 풀 관리
+- **비동기 처리**: SQLAlchemy async 기능 활용
+
+---
 
 ## 🧪 **테스트 지침**
 
-### **테스트 작성 원칙**
-- 각 도메인 엔티티별 단위 테스트
-- 리포지토리 패턴 테스트
-- 의존성 주입 시스템 테스트
-- 통합 테스트를 통한 전체 시스템 검증
+### **1. TDD 원칙**
+- **테스트 우선**: 기능 구현 전 테스트 코드 작성
+- **리팩토링**: 테스트 통과 후 코드 개선
+- **커버리지**: 최소 80% 이상의 테스트 커버리지 유지
 
-### **테스트 실행**
-```bash
-# 전체 테스트 실행
-pytest
+### **2. 테스트 구조**
+- **Unit Test**: 개별 함수/클래스 단위 테스트
+- **Integration Test**: 여러 컴포넌트 간 통합 테스트
+- **End-to-End Test**: 전체 시스템 동작 테스트
 
-# 특정 테스트 파일 실행
-pytest tests/core/test_container.py
+### **3. 테스트 데이터**
+- **테스트 DB**: 테스트 전용 데이터베이스 사용
+- **Fixture**: 테스트 데이터를 위한 fixture 파일 사용
+- **Cleanup**: 테스트 후 데이터 정리
 
-# 상세 출력과 함께 실행
-pytest -v
-```
+---
 
-## 📝 **코드 품질**
+## 📚 **문서화 지침**
 
-### **코드 스타일**
-- Black을 통한 코드 포맷팅
-- Flake8을 통한 린팅
-- MyPy를 통한 타입 체크
+### **1. 필수 문서**
+- **README.md**: 프로젝트 개요 및 시작 가이드
+- **API 문서**: Swagger UI를 통한 자동 API 문서 생성
+- **개발 가이드**: 개발자 온보딩 및 참고 자료
+- **배포 가이드**: 운영 환경 배포 및 관리 방법
 
-### **문서화**
-- 모든 함수와 클래스에 docstring 작성
-- 복잡한 로직에 주석 추가
-- README 파일 최신 상태 유지
+### **2. 문서 관리**
+- **버전 관리**: 문서 변경 이력 관리
+- **검토 프로세스**: 문서 작성 후 검토 및 승인 절차
+- **정기 업데이트**: 프로젝트 진행에 따른 문서 정기 업데이트
+
+---
 
 ## 🚀 **배포 및 운영**
 
-### **환경별 설정**
-- `env.local`: 로컬 개발 환경
-- `env.dev`: 개발 서버 환경
-- `env.prod`: 운영 서버 환경
+### **1. 환경별 설정**
+- **Local**: 개발자 로컬 환경
+- **Development**: 개발 서버 환경
+- **Production**: 운영 서버 환경
 
-### **Docker 배포**
-- 개발용: `docker-compose.dev.yml`
-- 운영용: `docker-compose.prod.yml`
-- 환경별 설정 파일 분리
+### **2. 컨테이너 관리**
+- **Docker**: 애플리케이션 컨테이너화
+- **Docker Compose**: 다중 컨테이너 오케스트레이션
+- **볼륨 관리**: 데이터 영속성을 위한 볼륨 마운트
 
-## 🔍 **문제 해결 가이드**
+### **3. 모니터링**
+- **로깅**: 구조화된 로그 수집 및 관리
+- **메트릭**: 성능 및 상태 메트릭 수집
+- **알림**: 이상 상황 발생 시 알림 시스템
 
-### **자주 발생하는 문제**
-1. **파일 경로 오류**: 절대 경로 사용으로 해결
-2. **Docker 파일 동기화**: 볼륨 마운트 설정 확인
-3. **데이터베이스 연결**: SSH 터널 및 환경 변수 확인
-4. **모듈 임포트 오류**: Python 경로 및 패키지 구조 확인
-5. **Clean Architecture 위배**: 인터페이스와 서비스 레이어 사용 필수
+---
 
-### **Clean Architecture 위배 시 해결 절차**
-1. **문제 상황 파악**: API 레이어에서 직접 DB 접근 코드 식별
-2. **인터페이스 생성**: 해당 도메인의 리포지토리/서비스 인터페이스 생성
-3. **서비스 구현**: 비즈니스 로직을 서비스 레이어로 이동
-4. **API 수정**: API 레이어에서 서비스 레이어 호출로 변경
-5. **테스트 작성**: 새로운 구조에 대한 테스트 코드 작성
-6. **검증**: Clean Architecture 원칙 준수 확인
+## 📋 **체크리스트**
 
-## 📚 **참고 자료**
+### **개발 시작 전**
+- [ ] 현재 작업 디렉토리 확인 (`pwd`)
+- [ ] 대상 경로 존재 여부 확인 (`ls -la`)
+- [ ] 개발 지침 문서 검토
+- [ ] 기존 코드 구조 파악
 
-### **기술 문서**
-- FastAPI 공식 문서
-- SQLAlchemy 공식 문서
-- Clean Architecture 원칙
-- TDD 방법론
+### **코드 작성 중**
+- [ ] Clean Architecture 원칙 준수
+- [ ] 의존성 주입 패턴 적용
+- [ ] 적절한 에러 처리 구현
+- [ ] 타입 힌트 및 문서화
 
-### **프로젝트 문서**
-- `task/work-log.md`: 작업 진행 상황
-- `task/checklist.md`: 요구사항 체크리스트
-- `doc/project-structure.md`: 프로젝트 구조 설명
+### **테스트 및 검증**
+- [ ] TDD 원칙에 따른 테스트 코드 작성
+- [ ] 모든 테스트 케이스 통과 확인
+- [ ] 코드 리뷰 및 개선
+- [ ] 문서 업데이트
 
-## ⚠️ **중요 경고**
+---
 
-**Clean Architecture 원칙을 위배하는 코드는 절대 작성하지 마세요!**
-
-- API 레이어에서 직접 ORM 모델 사용 금지
-- 비즈니스 로직을 API 레이어에 구현 금지
-- 의존성 주입을 통한 인터페이스 사용 필수
-- 모든 새로운 API는 이 지침을 준수하여 구현
-
-**위배 시 즉시 리팩토링 진행 필수!**
+**마지막 업데이트**: 2024-12-19  
+**작성자**: AI Assistant  
+**검토자**: 사용자  
+**상태**: 활성 ✅

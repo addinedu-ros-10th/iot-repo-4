@@ -14,10 +14,10 @@ from app.infrastructure.database import get_db_session
 from app.infrastructure.models import SensorRawDHT
 from app.api.v1.schemas import DHTDataCreate, DHTDataResponse, DHTDataUpdate
 
-router = APIRouter(prefix="/dht", tags=["DHT Sensor"])
+router = APIRouter(tags=["DHT Sensor"])
 
 
-@router.post("/", response_model=DHTDataResponse, status_code=201)
+@router.post("/create", response_model=DHTDataResponse, status_code=201)
 async def create_dht_data(
     dht_data: DHTDataCreate,
     db: AsyncSession = Depends(get_db_session)

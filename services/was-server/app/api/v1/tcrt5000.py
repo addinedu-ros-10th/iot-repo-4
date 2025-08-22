@@ -26,7 +26,7 @@ def get_tcrt5000_service(db: AsyncSession = Depends(get_db)) -> ITCRT5000Service
     return container.get_tcrt5000_service(db)
 
 
-@router.post("/", response_model=TCRT5000DataResponse, status_code=201)
+@router.post("/create", response_model=TCRT5000DataResponse, status_code=201)
 async def create_tcrt5000_data(
     data: TCRT5000DataCreate,
     tcrt5000_service: ITCRT5000Service = Depends(get_tcrt5000_service)
@@ -35,7 +35,7 @@ async def create_tcrt5000_data(
     return await tcrt5000_service.create_sensor_data(data)
 
 
-@router.get("/", response_model=List[TCRT5000DataResponse])
+@router.get("/list", response_model=List[TCRT5000DataResponse])
 async def get_tcrt5000_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),

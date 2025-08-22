@@ -13,10 +13,10 @@ from app.api.v1.schemas import (
     ActuatorServoDataCreate, ActuatorServoDataUpdate, ActuatorServoDataResponse
 )
 
-router = APIRouter(prefix="/actuator-servo", tags=["actuator-servo"])
+router = APIRouter(tags=["actuator-servo"])
 
 
-@router.post("/", response_model=ActuatorServoDataResponse, status_code=201)
+@router.post("/create", response_model=ActuatorServoDataResponse, status_code=201)
 async def create_actuator_servo_data(
     data: ActuatorServoDataCreate,
     container: DependencyContainer = Depends()
@@ -26,7 +26,7 @@ async def create_actuator_servo_data(
     return await service.create_actuator_data(data)
 
 
-@router.get("/", response_model=List[ActuatorServoDataResponse])
+@router.get("/list", response_model=List[ActuatorServoDataResponse])
 async def get_actuator_servo_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),

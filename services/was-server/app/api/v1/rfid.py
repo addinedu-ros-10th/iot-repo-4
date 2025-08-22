@@ -26,7 +26,7 @@ def get_rfid_service(db: AsyncSession = Depends(get_db)) -> IRFIDService:
     return container.get_rfid_service(db)
 
 
-@router.post("/", response_model=RFIDDataResponse, status_code=201)
+@router.post("/create", response_model=RFIDDataResponse, status_code=201)
 async def create_rfid_data(
     data: RFIDDataCreate,
     rfid_service: IRFIDService = Depends(get_rfid_service)
@@ -35,7 +35,7 @@ async def create_rfid_data(
     return await rfid_service.create_sensor_data(data)
 
 
-@router.get("/", response_model=List[RFIDDataResponse])
+@router.get("/list", response_model=List[RFIDDataResponse])
 async def get_rfid_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),

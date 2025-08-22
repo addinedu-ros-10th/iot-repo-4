@@ -14,10 +14,10 @@ from app.infrastructure.database import get_db_session
 from app.infrastructure.models import SensorRawCDS
 from app.api.v1.schemas import CDSDataCreate, CDSDataResponse, CDSDataUpdate
 
-router = APIRouter(prefix="/cds", tags=["CDS Sensor"])
+router = APIRouter(tags=["CDS Sensor"])
 
 
-@router.post("/", response_model=CDSDataResponse, status_code=201)
+@router.post("/create", response_model=CDSDataResponse, status_code=201)
 async def create_cds_data(
     cds_data: CDSDataCreate,
     db: AsyncSession = Depends(get_db_session)
@@ -47,7 +47,7 @@ async def create_cds_data(
         raise HTTPException(status_code=500, detail=f"CDS 데이터 생성 실패: {str(e)}")
 
 
-@router.get("/", response_model=List[CDSDataResponse])
+@router.get("/list", response_model=List[CDSDataResponse])
 async def get_cds_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),
@@ -75,6 +75,7 @@ async def get_cds_data_list(
         result = await db.execute(query)
         cds_list = result.scalars().all()
         
+        # 결과를 리스트로 변환하여 반환
         return [
             CDSDataResponse(
                 time=cds.time,

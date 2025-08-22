@@ -13,10 +13,10 @@ from app.api.v1.schemas import (
     ActuatorIRTXDataCreate, ActuatorIRTXDataUpdate, ActuatorIRTXDataResponse
 )
 
-router = APIRouter(prefix="/actuator-irtx", tags=["actuator-irtx"])
+router = APIRouter(tags=["actuator-irtx"])
 
 
-@router.post("/", response_model=ActuatorIRTXDataResponse, status_code=201)
+@router.post("/create", response_model=ActuatorIRTXDataResponse, status_code=201)
 async def create_actuator_irtx_data(
     data: ActuatorIRTXDataCreate,
     container: DependencyContainer = Depends()
@@ -26,7 +26,7 @@ async def create_actuator_irtx_data(
     return await service.create_actuator_data(data)
 
 
-@router.get("/", response_model=List[ActuatorIRTXDataResponse])
+@router.get("/list", response_model=List[ActuatorIRTXDataResponse])
 async def get_actuator_irtx_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),

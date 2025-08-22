@@ -19,12 +19,12 @@ from app.infrastructure.database import get_session
 class PostgreSQLDeviceRepository(IDeviceRepository):
     """PostgreSQL 기반 Device 리포지토리"""
     
-    def __init__(self):
-        pass
+    def __init__(self, db_session: AsyncSession):
+        self.db_session = db_session
     
     async def _get_session(self) -> AsyncSession:
-        """세션 가져오기 - 각 메서드 호출마다 새로운 세션 생성"""
-        return await get_session()
+        """세션 가져오기 - 생성자에서 받은 세션 사용"""
+        return self.db_session
     
     async def create(self, device: Device) -> Device:
         """디바이스 생성"""

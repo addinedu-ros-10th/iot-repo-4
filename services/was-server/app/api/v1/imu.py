@@ -14,10 +14,10 @@ from app.infrastructure.database import get_db_session
 from app.infrastructure.models import SensorRawIMU
 from app.api.v1.schemas import IMUDataCreate, IMUDataResponse, IMUDataUpdate
 
-router = APIRouter(prefix="/imu", tags=["IMU Sensor"])
+router = APIRouter(tags=["IMU Sensor"])
 
 
-@router.post("/", response_model=IMUDataResponse, status_code=201)
+@router.post("/create", response_model=IMUDataResponse, status_code=201)
 async def create_imu_data(
     imu_data: IMUDataCreate,
     db: AsyncSession = Depends(get_db_session)
@@ -63,7 +63,7 @@ async def create_imu_data(
         raise HTTPException(status_code=500, detail=f"IMU 데이터 생성 실패: {str(e)}")
 
 
-@router.get("/", response_model=List[IMUDataResponse])
+@router.get("/list", response_model=List[IMUDataResponse])
 async def get_imu_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),

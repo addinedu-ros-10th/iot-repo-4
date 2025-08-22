@@ -19,7 +19,7 @@ from app.api.v1.schemas import (
     EdgePIRDataResponse
 )
 
-router = APIRouter(prefix="/edge-pir", tags=["Edge PIR 센서"])
+router = APIRouter(tags=["Edge PIR 센서"])
 
 
 def get_edge_pir_service(db_session: AsyncSession = Depends(get_db_session)) -> IEdgePIRService:
@@ -27,7 +27,7 @@ def get_edge_pir_service(db_session: AsyncSession = Depends(get_db_session)) -> 
     return container.get_edge_pir_service(db_session)
 
 
-@router.post("/", response_model=EdgePIRDataResponse, status_code=201)
+@router.post("/create", response_model=EdgePIRDataResponse, status_code=201)
 async def create_edge_pir_data(
     data: EdgePIRDataCreate,
     edge_pir_service: IEdgePIRService = Depends(get_edge_pir_service)
@@ -41,7 +41,7 @@ async def create_edge_pir_data(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/", response_model=List[EdgePIRDataResponse])
+@router.get("/list", response_model=List[EdgePIRDataResponse])
 async def get_edge_pir_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),

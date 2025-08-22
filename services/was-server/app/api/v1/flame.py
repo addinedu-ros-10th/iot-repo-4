@@ -14,7 +14,7 @@ from app.infrastructure.database import get_db_session
 from app.infrastructure.models import SensorRawFlame
 from app.api.v1.schemas import FlameDataCreate, FlameDataResponse, FlameDataUpdate
 
-router = APIRouter(prefix="/flame", tags=["Flame Sensor"])
+router = APIRouter(tags=["Flame Sensor"])
 
 
 @router.post("/", response_model=FlameDataResponse, status_code=201)

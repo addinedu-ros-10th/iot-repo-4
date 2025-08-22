@@ -13,10 +13,10 @@ from app.api.v1.schemas import (
     ActuatorRelayDataCreate, ActuatorRelayDataUpdate, ActuatorRelayDataResponse
 )
 
-router = APIRouter(prefix="/actuator-relay", tags=["actuator-relay"])
+router = APIRouter(tags=["actuator-relay"])
 
 
-@router.post("/", response_model=ActuatorRelayDataResponse, status_code=201)
+@router.post("/create", response_model=ActuatorRelayDataResponse, status_code=201)
 async def create_actuator_relay_data(
     data: ActuatorRelayDataCreate,
     container: DependencyContainer = Depends()
@@ -26,7 +26,7 @@ async def create_actuator_relay_data(
     return await service.create_actuator_data(data)
 
 
-@router.get("/", response_model=List[ActuatorRelayDataResponse])
+@router.get("/list", response_model=List[ActuatorRelayDataResponse])
 async def get_actuator_relay_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),

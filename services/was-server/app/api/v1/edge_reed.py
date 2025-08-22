@@ -19,7 +19,7 @@ from app.api.v1.schemas import (
     EdgeReedDataResponse
 )
 
-router = APIRouter(prefix="/edge-reed", tags=["Edge Reed 센서"])
+router = APIRouter(tags=["Edge Reed 센서"])
 
 
 def get_edge_reed_service(db_session: AsyncSession = Depends(get_db_session)) -> IEdgeReedService:
@@ -27,7 +27,7 @@ def get_edge_reed_service(db_session: AsyncSession = Depends(get_db_session)) ->
     return container.get_edge_reed_service(db_session)
 
 
-@router.post("/", response_model=EdgeReedDataResponse, status_code=201)
+@router.post("/create", response_model=EdgeReedDataResponse, status_code=201)
 async def create_edge_reed_data(
     data: EdgeReedDataCreate,
     edge_reed_service: IEdgeReedService = Depends(get_edge_reed_service)
@@ -41,7 +41,7 @@ async def create_edge_reed_data(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/", response_model=List[EdgeReedDataResponse])
+@router.get("/list", response_model=List[EdgeReedDataResponse])
 async def get_edge_reed_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),

@@ -19,7 +19,7 @@ from app.api.v1.schemas import (
     EdgeTiltDataResponse
 )
 
-router = APIRouter(prefix="/edge-tilt", tags=["Edge Tilt 센서"])
+router = APIRouter(tags=["Edge Tilt 센서"])
 
 
 def get_edge_tilt_service(db_session: AsyncSession = Depends(get_db_session)) -> IEdgeTiltService:
@@ -27,7 +27,7 @@ def get_edge_tilt_service(db_session: AsyncSession = Depends(get_db_session)) ->
     return container.get_edge_tilt_service(db_session)
 
 
-@router.post("/", response_model=EdgeTiltDataResponse, status_code=201)
+@router.post("/create", response_model=EdgeTiltDataResponse, status_code=201)
 async def create_edge_tilt_data(
     data: EdgeTiltDataCreate,
     edge_tilt_service: IEdgeTiltService = Depends(get_edge_tilt_service)
@@ -41,7 +41,7 @@ async def create_edge_tilt_data(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/", response_model=List[EdgeTiltDataResponse])
+@router.get("/list", response_model=List[EdgeTiltDataResponse])
 async def get_edge_tilt_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),

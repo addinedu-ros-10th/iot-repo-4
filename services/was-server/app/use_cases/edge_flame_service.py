@@ -35,7 +35,7 @@ class EdgeFlameService(IEdgeFlameService):
         #         detail="처리 시간은 0 이상이어야 합니다."
         #     )
         
-        if data.alert_level not in ["low", "medium", "high"]:
+        if data.alert_level is not None and data.alert_level not in ["low", "medium", "high"]:
             raise HTTPException(
                 status_code=400,
                 detail="알림 레벨은 'low', 'medium', 'high' 중 하나여야 합니다."

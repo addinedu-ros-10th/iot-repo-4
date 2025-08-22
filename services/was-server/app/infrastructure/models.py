@@ -115,7 +115,6 @@ class SensorRawLoadCell(Base):
     
     time: Mapped[datetime] = Column(DateTime(timezone=True), primary_key=True)
     device_id: Mapped[str] = Column(String(64), ForeignKey("devices.device_id"), primary_key=True)
-    raw_value: Mapped[Optional[int]] = Column(Integer, nullable=True)
     weight_kg: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
     calibrated: Mapped[Optional[bool]] = Column(Boolean, nullable=True)
     raw_payload: Mapped[Optional[dict]] = Column(JSONB, nullable=True)
@@ -127,7 +126,6 @@ class SensorRawMQ5(Base):
     
     time: Mapped[datetime] = Column(DateTime(timezone=True), primary_key=True)
     device_id: Mapped[str] = Column(String(64), ForeignKey("devices.device_id"), primary_key=True)
-    analog_value: Mapped[Optional[int]] = Column(Integer, nullable=True)
     ppm_value: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
     gas_type: Mapped[Optional[str]] = Column(Text, nullable=True)
     raw_payload: Mapped[Optional[dict]] = Column(JSONB, nullable=True)
@@ -139,7 +137,6 @@ class SensorRawMQ7(Base):
     
     time: Mapped[datetime] = Column(DateTime(timezone=True), primary_key=True)
     device_id: Mapped[str] = Column(String(64), ForeignKey("devices.device_id"), primary_key=True)
-    analog_value: Mapped[Optional[int]] = Column(Integer, nullable=True)
     ppm_value: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
     gas_type: Mapped[Optional[str]] = Column(Text, nullable=True)
     raw_payload: Mapped[Optional[dict]] = Column(JSONB, nullable=True)
@@ -151,7 +148,6 @@ class SensorRawRFID(Base):
     
     time: Mapped[datetime] = Column(DateTime(timezone=True), primary_key=True)
     device_id: Mapped[str] = Column(String(64), ForeignKey("devices.device_id"), primary_key=True)
-    card_id: Mapped[Optional[str]] = Column(Text, nullable=True)
     card_type: Mapped[Optional[str]] = Column(Text, nullable=True)
     read_success: Mapped[Optional[bool]] = Column(Boolean, nullable=True)
     raw_payload: Mapped[Optional[dict]] = Column(JSONB, nullable=True)
@@ -163,7 +159,6 @@ class SensorRawSound(Base):
     
     time: Mapped[datetime] = Column(DateTime(timezone=True), primary_key=True)
     device_id: Mapped[str] = Column(String(64), ForeignKey("devices.device_id"), primary_key=True)
-    analog_value: Mapped[Optional[int]] = Column(Integer, nullable=True)
     db_value: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
     threshold_exceeded: Mapped[Optional[bool]] = Column(Boolean, nullable=True)
     raw_payload: Mapped[Optional[dict]] = Column(JSONB, nullable=True)
@@ -175,8 +170,6 @@ class SensorRawTCRT5000(Base):
     
     time: Mapped[datetime] = Column(DateTime(timezone=True), primary_key=True)
     device_id: Mapped[str] = Column(String(64), ForeignKey("devices.device_id"), primary_key=True)
-    digital_value: Mapped[Optional[bool]] = Column(Boolean, nullable=True)
-    analog_value: Mapped[Optional[int]] = Column(Integer, nullable=True)
     object_detected: Mapped[Optional[bool]] = Column(Boolean, nullable=True)
     raw_payload: Mapped[Optional[dict]] = Column(JSONB, nullable=True)
 
@@ -188,7 +181,6 @@ class SensorRawUltrasonic(Base):
     time: Mapped[datetime] = Column(DateTime(timezone=True), primary_key=True)
     device_id: Mapped[str] = Column(String(64), ForeignKey("devices.device_id"), primary_key=True)
     distance_cm: Mapped[Optional[Numeric]] = Column(Numeric, nullable=True)
-    raw_value: Mapped[Optional[int]] = Column(Integer, nullable=True)
     measurement_valid: Mapped[Optional[bool]] = Column(Boolean, nullable=True)
     raw_payload: Mapped[Optional[dict]] = Column(JSONB, nullable=True)
 

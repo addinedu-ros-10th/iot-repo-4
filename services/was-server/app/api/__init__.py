@@ -14,37 +14,38 @@ from app.api.v1 import device_rtc
 # 메인 API 라우터
 api_router = APIRouter()
 
-# v1 API 라우터 등록
-api_router.include_router(users.router, prefix="/v1", tags=["users"])
-api_router.include_router(devices.router, prefix="/v1", tags=["devices"])
+# ORM 기준 API 그룹화 등록 (prefix 설정)
+# Users & Devices 그룹
+api_router.include_router(users.router, prefix="/users", tags=["users"])
+api_router.include_router(devices.router, prefix="/devices", tags=["devices"])
 
-# Raw 센서 데이터 API 라우터 등록
-api_router.include_router(cds.router, prefix="/v1")
-api_router.include_router(dht.router, prefix="/v1")
-api_router.include_router(flame.router, prefix="/v1")
-api_router.include_router(imu.router, prefix="/v1")
-api_router.include_router(loadcell.router, prefix="/v1")
-api_router.include_router(mq5.router, prefix="/v1")
-api_router.include_router(mq7.router, prefix="/v1")
-api_router.include_router(rfid.router, prefix="/v1")
-api_router.include_router(sound.router, prefix="/v1")
-api_router.include_router(tcrt5000.router, prefix="/v1")
-api_router.include_router(ultrasonic.router, prefix="/v1")
+# Raw 센서 데이터 그룹
+api_router.include_router(cds.router, prefix="/cds", tags=["sensors"])
+api_router.include_router(dht.router, prefix="/dht", tags=["sensors"])
+api_router.include_router(flame.router, prefix="/flame", tags=["sensors"])
+api_router.include_router(imu.router, prefix="/imu", tags=["sensors"])
+api_router.include_router(loadcell.router, prefix="/loadcell", tags=["sensors"])
+api_router.include_router(mq5.router, prefix="/mq5", tags=["sensors"])
+api_router.include_router(mq7.router, prefix="/mq7", tags=["sensors"])
+api_router.include_router(rfid.router, prefix="/rfid", tags=["sensors"])
+api_router.include_router(sound.router, prefix="/sound", tags=["sensors"])
+api_router.include_router(tcrt5000.router, prefix="/tcrt5000", tags=["sensors"])
+api_router.include_router(ultrasonic.router, prefix="/ultrasonic", tags=["sensors"])
 
-# Edge 센서 API 라우터 등록
-api_router.include_router(edge_flame.router, prefix="/v1")
-api_router.include_router(edge_pir.router, prefix="/v1")
-api_router.include_router(edge_reed.router, prefix="/v1")
-api_router.include_router(edge_tilt.router, prefix="/v1")
+# Edge 센서 그룹
+api_router.include_router(edge_flame.router, prefix="/edge-flame", tags=["edge-sensors"])
+api_router.include_router(edge_pir.router, prefix="/edge-pir", tags=["edge-sensors"])
+api_router.include_router(edge_reed.router, prefix="/edge-reed", tags=["edge-sensors"])
+api_router.include_router(edge_tilt.router, prefix="/edge-tilt", tags=["edge-sensors"])
 
-# Actuator 로그 API 라우터 등록
-api_router.include_router(actuator_buzzer.router, prefix="/v1")
-api_router.include_router(actuator_irtx.router, prefix="/v1")
-api_router.include_router(actuator_relay.router, prefix="/v1")
-api_router.include_router(actuator_servo.router, prefix="/v1")
+# Actuator 로그 그룹
+api_router.include_router(actuator_buzzer.router, prefix="/actuator-buzzer", tags=["actuators"])
+api_router.include_router(actuator_irtx.router, prefix="/actuator-irtx", tags=["actuators"])
+api_router.include_router(actuator_relay.router, prefix="/actuator-relay", tags=["actuators"])
+api_router.include_router(actuator_servo.router, prefix="/actuator-servo", tags=["actuators"])
 
-# DeviceRTCStatus API 라우터 등록
-api_router.include_router(device_rtc.router, prefix="/v1")
+# DeviceRTCStatus 그룹
+api_router.include_router(device_rtc.router, prefix="/device-rtc", tags=["device-status"])
 
 __all__ = ["api_router"]
 

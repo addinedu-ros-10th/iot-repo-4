@@ -13,10 +13,10 @@ from app.api.v1.schemas import (
     ActuatorBuzzerDataCreate, ActuatorBuzzerDataUpdate, ActuatorBuzzerDataResponse
 )
 
-router = APIRouter(prefix="/actuator-buzzer", tags=["actuator-buzzer"])
+router = APIRouter(tags=["actuator-buzzer"])
 
 
-@router.post("/", response_model=ActuatorBuzzerDataResponse, status_code=201)
+@router.post("/create", response_model=ActuatorBuzzerDataResponse, status_code=201)
 async def create_actuator_buzzer_data(
     data: ActuatorBuzzerDataCreate,
     container: DependencyContainer = Depends()
@@ -26,7 +26,7 @@ async def create_actuator_buzzer_data(
     return await service.create_actuator_data(data)
 
 
-@router.get("/", response_model=List[ActuatorBuzzerDataResponse])
+@router.get("/list", response_model=List[ActuatorBuzzerDataResponse])
 async def get_actuator_buzzer_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),
