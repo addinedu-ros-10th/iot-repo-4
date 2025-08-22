@@ -1,4 +1,80 @@
-# IoT Care Backend System 개발 지침
+# IoT Care Backend System 개발 가이드라인
+
+**작성일**: 2025-08-22  
+**마지막 업데이트**: 2025-08-22 13:30:00  
+**프로젝트**: IoT Repository 4 - WAS Server
+
+## 🚀 개발 환경 설정
+
+### 1. 개발 머신 IP 주소 확인 및 환경변수 업데이트
+
+#### 환경변수 파일 관리 체계
+프로젝트는 운영/개발 환경별로 환경변수를 분리하여 관리합니다:
+
+- **`.env.local`**: 로컬 개발 환경 (현재 사용 중)
+- **`.env.dev`**: 개발 서버 환경
+- **`.env.prod`**: 운영 서버 환경
+
+#### Windows 환경에서 IP 주소 확인
+```bash
+# Git Bash에서 PowerShell 명령어 실행
+powershell -Command "ipconfig"
+
+# 또는 직접 실행
+ipconfig
+```
+
+#### 환경변수 파일 업데이트
+- **파일 위치**: `services/was-server/.env.local`
+- **업데이트 대상**:
+  - `DB_HOST`: 현재 개발 머신의 실제 IP 주소
+  - `CADDY_DOMAIN`: 현재 개발 머신의 실제 IP 주소
+
+#### 업데이트 명령어
+```bash
+# DB_HOST 업데이트
+sed -i 's/DB_HOST=이전IP/DB_HOST=현재IP/g' .env.local
+
+# CADDY_DOMAIN 업데이트  
+sed -i 's/CADDY_DOMAIN=이전IP/CADDY_DOMAIN=현재IP/g' .env.local
+```
+
+#### 환경변수 업데이트 후 Docker 재시작
+```bash
+# 컨테이너 및 볼륨 완전 제거
+docker-compose down --volumes --remove-orphans
+
+# Docker 시스템 정리
+docker system prune -f
+
+# 프로젝트 재시작
+docker-compose up -d
+
+# 상태 확인
+docker-compose ps
+curl -s http://localhost:8000/health
+```
+
+### 2. 가상환경 활성화
+```bash
+# 가상환경 활성화
+source .venv/Scripts/activate
+
+# 패키지 설치 확인
+pip list | grep fastapi
+```
+
+### 3. 환경별 설정 전환
+```bash
+# 로컬 개발 환경
+cp .env.local .env
+
+# 개발 서버 환경
+cp .env.dev .env
+
+# 운영 서버 환경
+cp .env.prod .env
+```
 
 ## 🚨 **중요: 디렉토리 및 파일 생성 시 주의사항**
 

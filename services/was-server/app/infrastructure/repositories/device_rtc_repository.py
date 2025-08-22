@@ -45,7 +45,7 @@ class DeviceRTCStatusRepository(IDeviceRTCStatusRepository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data = result.scalar_one_or_none()
         
         if data:
@@ -60,7 +60,7 @@ class DeviceRTCStatusRepository(IDeviceRTCStatusRepository):
             .order_by(DeviceRTCStatus.time.desc())
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data = result.scalars().first()
         
         if data:
@@ -88,7 +88,7 @@ class DeviceRTCStatusRepository(IDeviceRTCStatusRepository):
         # 시간 역순으로 정렬하고 제한
         query = query.order_by(DeviceRTCStatus.time.desc()).limit(limit_count)
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data_list = result.scalars().all()
         
         # 결과를 리스트로 변환하여 반환
@@ -108,7 +108,7 @@ class DeviceRTCStatusRepository(IDeviceRTCStatusRepository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         db_data = result.scalar_one_or_none()
         
         if not db_data:
@@ -132,7 +132,7 @@ class DeviceRTCStatusRepository(IDeviceRTCStatusRepository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         db_data = result.scalar_one_or_none()
         
         if not db_data:
@@ -156,7 +156,7 @@ class DeviceRTCStatusRepository(IDeviceRTCStatusRepository):
         if end_time:
             query = query.where(DeviceRTCStatus.time <= end_time)
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data_list = result.scalars().all()
         
         if not data_list:

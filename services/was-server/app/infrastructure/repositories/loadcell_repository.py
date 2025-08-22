@@ -53,7 +53,7 @@ class LoadCellRepository(ILoadCellRepository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data = result.scalar_one_or_none()
         
         if data:
@@ -68,7 +68,7 @@ class LoadCellRepository(ILoadCellRepository):
             .order_by(SensorRawLoadCell.time.desc())
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data = result.scalars().first()
         
         if data:
@@ -96,7 +96,7 @@ class LoadCellRepository(ILoadCellRepository):
         # 시간 역순으로 정렬하고 제한
         query = query.order_by(SensorRawLoadCell.time.desc()).limit(limit_count)
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data_list = result.scalars().all()
         
         # 결과를 리스트로 변환하여 반환
@@ -116,7 +116,7 @@ class LoadCellRepository(ILoadCellRepository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         db_data = result.scalar_one_or_none()
         
         if not db_data:
@@ -140,7 +140,7 @@ class LoadCellRepository(ILoadCellRepository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         db_data = result.scalar_one_or_none()
         
         if not db_data:
