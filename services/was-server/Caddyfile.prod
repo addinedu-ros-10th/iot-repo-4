@@ -41,7 +41,7 @@
 }
 
 # Alternative: Specific IP binding (if needed)
-# ec2-3-34-98-7.ap-northeast-2.compute.amazonaws.com:80 {
+# ec2-43-201-96-23.ap-northeast-2.compute.amazonaws.com:80 {
 #     reverse_proxy app:8000
 # }
 

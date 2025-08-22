@@ -58,6 +58,11 @@ hostname -I
 - **`CADDY_DOMAIN`**: 현재 개발 머신의 실제 IP 주소
 - **`REDIS_HOST`**: Redis 컨테이너 IP (일반적으로 Docker 내부 IP)
 
+#### **AWS EC2 운영 환경 IP 주소**
+- **현재 운영 환경 IP**: `ec2-43-201-96-23.ap-northeast-2.compute.amazonaws.com`
+- **이전 운영 환경 IP**: `ec2-3-34-98-7.ap-northeast-2.compute.amazonaws.com`
+- **업데이트 날짜**: 2025-08-23
+
 #### **환경변수 자동 업데이트 스크립트**
 
 ##### **Windows 환경용 업데이트 스크립트**

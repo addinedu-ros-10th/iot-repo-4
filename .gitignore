@@ -144,6 +144,42 @@ ENV/
 env.bak/
 venv.bak/
 
+# IoT Care Backend Environment Variables
+.env.local
+.env.dev
+.env.prod
+.env.*
+*.env
+.env.local.backup
+
+# Security and Configuration Files
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+secrets.json
+secrets.yaml
+secrets.yml
+config/secrets.*
+config/*.key
+config/*.pem
+config/*.crt
+
+# Docker and Container Files
+.dockerignore
+docker-compose.override.yml
+docker-compose.*.local.yml
+
+# Logs and Temporary Files
+logs/
+*.log
+*.log.*
+temp/
+tmp/
+cache/
+
 # Spyder project settings
 .spyderproject
 .spyproject

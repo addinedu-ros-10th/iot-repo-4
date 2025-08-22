@@ -55,8 +55,11 @@ class PostThread(QThread):
         self.payload = payload
 
     def run(self):
+        import asyncio
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         rt = RestTransport()
-        res = rt.post_json("/api/users/create", self.payload)
+        res = loop.run_until_complete(rt.post_json("/api/users/create", self.payload))
         self.finished.emit(res)
 
 class WindowClass(QMainWindow, from_class):
@@ -65,10 +68,19 @@ class WindowClass(QMainWindow, from_class):
         self.setupUi(self)
 
         self.uid = bytes(4)
-        self.conn = serial.Serial(port = '/dev/ttyACM0', baudrate=9600, timeout=1)
-        self.recv = Receiver(self.conn)
-        self.recv.start()
-        self.recv.sig_bytes.connect(self.print)
+        try:
+            import serial
+            self.conn = serial.Serial(port = '/dev/ttyACM0', baudrate=9600, timeout=1)
+        except Exception as e:
+            print(f"Serial not available: {e}")
+            self.conn = None
+
+        if self.conn:
+            self.recv = Receiver(self.conn)
+            self.recv.start()
+            self.recv.sig_bytes.connect(self.print)
+        else:
+            self.recv = None
         self.server = 7
 
         self.pushButton.clicked.connect(self.high)
@@ -76,14 +88,16 @@ class WindowClass(QMainWindow, from_class):
 
     def high(self):
         print("HIGH")
-        self.conn.write(b'H')
+        if self.conn:
+            self.conn.write(b'H')
         self.server += 1
         self.test_post_json()
         return
 
     def low(self):
         print("LOW")
-        self.conn.write(b'L')
+        if self.conn:
+            self.conn.write(b'L')
         self.server += 1
         self.test_post_json()
         return
