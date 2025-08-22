@@ -11,9 +11,9 @@ from fastapi import HTTPException
 from app.interfaces.services.sensor_service_interface import ITCRT5000Service
 from app.interfaces.repositories.sensor_repository import ITCRT5000Repository
 from app.api.v1.schemas import (
-    TCRT5000DataCreate,
-    TCRT5000DataUpdate,
-    TCRT5000DataResponse
+    SensorRawTCRT5000Create,
+    SensorRawTCRT5000Update,
+    SensorRawTCRT5000Response
 )
 
 

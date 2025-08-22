@@ -12,9 +12,9 @@ from sqlalchemy import select, and_
 from app.interfaces.repositories.sensor_repository import IUltrasonicRepository
 from app.infrastructure.models import SensorRawUltrasonic
 from app.api.v1.schemas import (
-    UltrasonicDataCreate,
-    UltrasonicDataUpdate,
-    UltrasonicDataResponse
+    SensorRawUltrasonicCreate,
+    SensorRawUltrasonicUpdate,
+    SensorRawUltrasonicResponse
 )
 
 
@@ -26,7 +26,14 @@ class UltrasonicRepository(IUltrasonicRepository):
     
     async def create(self, data: UltrasonicDataCreate) -> UltrasonicDataResponse:
         """Ultrasonic 센서 데이터 생성"""
-        db_data = SensorRawUltrasonic(**data.dict())
+        # 실제 DB 테이블 구조에 맞게 매핑 (time, device_id, raw_payload만 사용)
+        orm_data = {
+            "time": data.time,
+            "device_id": data.device_id,
+            "raw_payload": data.raw_payload
+        }
+        
+        db_data = SensorRawUltrasonic(**orm_data)
         self.db.add(db_data)
         await self.db.commit()
         await self.db.refresh(db_data)

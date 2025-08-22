@@ -13,9 +13,9 @@ from app.infrastructure.database import get_db
 from app.core.container import container
 from app.interfaces.services.sensor_service_interface import IMQ5Service
 from app.api.v1.schemas import (
-    MQ5DataCreate,
-    MQ5DataUpdate,
-    MQ5DataResponse
+    SensorRawMQ5Create,
+    SensorRawMQ5Update,
+    SensorRawMQ5Response
 )
 
 router = APIRouter()
@@ -26,16 +26,16 @@ def get_mq5_service(db: AsyncSession = Depends(get_db)) -> IMQ5Service:
     return container.get_mq5_service(db)
 
 
-@router.post("/create", response_model=MQ5DataResponse, status_code=201)
+@router.post("/create", response_model=SensorRawMQ5Response, status_code=201)
 async def create_mq5_data(
-    data: MQ5DataCreate,
+    data: SensorRawMQ5Create,
     mq5_service: IMQ5Service = Depends(get_mq5_service)
 ):
     """MQ5 가스 센서 데이터 생성"""
     return await mq5_service.create_sensor_data(data)
 
 
-@router.get("/list", response_model=List[MQ5DataResponse])
+@router.get("/list", response_model=List[SensorRawMQ5Response])
 async def get_mq5_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),
@@ -52,7 +52,7 @@ async def get_mq5_data_list(
     )
 
 
-@router.get("/latest", response_model=Optional[MQ5DataResponse])
+@router.get("/latest", response_model=Optional[SensorRawMQ5Response])
 async def get_latest_mq5_data(
     device_id: str = Query(..., description="디바이스 ID"),
     mq5_service: IMQ5Service = Depends(get_mq5_service)
@@ -61,7 +61,7 @@ async def get_latest_mq5_data(
     return await mq5_service.get_latest_sensor_data(device_id)
 
 
-@router.get("/{device_id}/{timestamp}", response_model=MQ5DataResponse)
+@router.get("/{device_id}/{timestamp}", response_model=SensorRawMQ5Response)
 async def get_mq5_data(
     device_id: str,
     timestamp: datetime,
@@ -71,11 +71,11 @@ async def get_mq5_data(
     return await mq5_service.get_sensor_data(device_id, timestamp)
 
 
-@router.put("/{device_id}/{timestamp}", response_model=MQ5DataResponse)
+@router.put("/{device_id}/{timestamp}", response_model=SensorRawMQ5Response)
 async def update_mq5_data(
     device_id: str,
     timestamp: datetime,
-    data: MQ5DataUpdate,
+    data: SensorRawMQ5Update,
     mq5_service: IMQ5Service = Depends(get_mq5_service)
 ):
     """MQ5 가스 센서 데이터 수정"""

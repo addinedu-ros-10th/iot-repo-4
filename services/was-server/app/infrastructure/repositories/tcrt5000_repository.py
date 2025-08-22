@@ -12,9 +12,9 @@ from sqlalchemy import select, and_
 from app.interfaces.repositories.sensor_repository import ITCRT5000Repository
 from app.infrastructure.models import SensorRawTCRT5000
 from app.api.v1.schemas import (
-    TCRT5000DataCreate,
-    TCRT5000DataUpdate,
-    TCRT5000DataResponse
+    SensorRawTCRT5000Create,
+    SensorRawTCRT5000Update,
+    SensorRawTCRT5000Response
 )
 
 
@@ -25,8 +25,15 @@ class TCRT5000Repository(ITCRT5000Repository):
         self.db = db
     
     async def create(self, data: TCRT5000DataCreate) -> TCRT5000DataResponse:
-        """TCRT5000 센서 데이터 생성"""
-        db_data = SensorRawTCRT5000(**data.dict())
+        """TCRT5000 근접 센서 데이터 생성"""
+        # 실제 DB 테이블 구조에 맞게 매핑 (time, device_id, raw_payload만 사용)
+        orm_data = {
+            "time": data.time,
+            "device_id": data.device_id,
+            "raw_payload": data.raw_payload
+        }
+        
+        db_data = SensorRawTCRT5000(**orm_data)
         self.db.add(db_data)
         await self.db.commit()
         await self.db.refresh(db_data)

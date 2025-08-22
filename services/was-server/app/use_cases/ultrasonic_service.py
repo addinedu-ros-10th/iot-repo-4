@@ -11,9 +11,9 @@ from fastapi import HTTPException
 from app.interfaces.services.sensor_service_interface import IUltrasonicService
 from app.interfaces.repositories.sensor_repository import IUltrasonicRepository
 from app.api.v1.schemas import (
-    UltrasonicDataCreate,
-    UltrasonicDataUpdate,
-    UltrasonicDataResponse
+    SensorRawUltrasonicCreate,
+    SensorRawUltrasonicUpdate,
+    SensorRawUltrasonicResponse
 )
 
 

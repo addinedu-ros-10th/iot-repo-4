@@ -12,7 +12,7 @@ services:
       - ./logs:/app/logs
       - ./config:/app/config
     env_file:
-      - env.local
+      - .env.local
     depends_on:
       - redis
     extra_hosts:

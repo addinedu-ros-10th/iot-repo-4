@@ -1,232 +1,132 @@
-# 개발 작업 로그
+# IoT Care Backend System 작업 로그
 
-## 2024-12-19
+## 2025-08-22 작업 현황
 
-### Phase 4: Clean Architecture 리팩토링 및 Actuator API 구현 완료 ✅
+### 🕐 10:35:00 - 작업 현황 정리 및 문서 업데이트 완료
 
-#### 14:00 - 16:00: Actuator API 구현 완료
-- **ActuatorBuzzer API** 구현 완료
-  - Repository, Service, API 레이어 모두 Clean Architecture 준수
-  - Pydantic 스키마: Create, Update, Response 모델
-  - 비즈니스 로직: 주파수(20Hz-20kHz), 지속시간(0-60초) 검증
-  - 통계 기능: 상태, 타입, 주파수, 지속시간별 통계
+#### 완료된 작업
+1. **순환 Import 문제 해결** ✅
+   - `container.py`에서 lazy loading 방식으로 변경
+   - `actuator_service_interface.py`에서 스키마 import 제거
+   - 의존성 주입 시스템 안정화
 
-- **ActuatorIRTX API** 구현 완료
-  - Repository, Service, API 레이어 모두 Clean Architecture 준수
-  - Pydantic 스키마: Create, Update, Response 모델
-  - 비즈니스 로직: 반복횟수(1-100), 16진수 형식 검증
-  - 통계 기능: 프로토콜, 명령어, 반복횟수별 통계
+2. **LoadCell 리포지토리 수정** ✅
+   - ORM 모델과 스키마 간 필드명 매핑 구현
+   - `raw_value` → `weight_kg` 필드명 매핑
 
-- **ActuatorRelay API** 구현 완료
-  - Repository, Service, API 레이어 모두 Clean Architecture 준수
-  - Pydantic 스키마: Create, Update, Response 모델
-  - 비즈니스 로직: 채널(1-16), 상태(on/off/toggle/pulse) 검증
-  - 통계 기능: 상태, 채널별 통계
+3. **MQ5 리포지토리 수정** ✅
+   - ORM 모델과 스키마 간 필드명 매핑 구현
+   - `analog_value` → `ppm_value` 필드명 매핑
 
-- **ActuatorServo API** 구현 완료
-  - Repository, Service, API 레이어 모두 Clean Architecture 준수
-  - Pydantic 스키마: Create, Update, Response 모델
-  - 비즈니스 로직: 채널(1-16), 각도(0-180도), PWM(500-2500μs) 검증
-  - 통계 기능: 채널, 각도, PWM별 통계
+4. **개발 관리 문서 업데이트** ✅
+   - `current-development-status.md` 업데이트
+   - `issues-and-solutions.md` 업데이트
+   - `work-log.md` 업데이트
 
-#### 16:00 - 17:00: 의존성 주입 컨테이너 업데이트
-- `container.py`에 모든 Actuator Repository/Service 등록
-- API 라우터에 Actuator 엔드포인트 등록
-- 전체 25개 테이블 API 구현 완료
+#### 현재 상태
+- **통합 테스트 성공률**: 0% (GET 성공, POST 실패)
+- **주요 문제**: 필드명 불일치 및 필수 필드 누락
+- **해결 진행률**: 2/17 API 리포지토리 수정 완료
 
-### 전체 진행률: 100% ✅
-- **25/25 테이블 API 구현 완료**
-- **Clean Architecture 준수 100%**
-- **의존성 주입 및 역전 원칙 적용 완료**
+#### 다음 작업 우선순위
+1. **나머지 센서 리포지토리 수정** (1시간)
+   - MQ7, RFID, Sound, TCRT5000, Ultrasonic
+   - ORM 모델과 스키마 간 필드명 매핑 구현
 
----
+2. **Edge 센서 및 Actuator API 테스트 데이터 수정** (30분)
+   - 필수 필드 추가하여 422 Validation Error 방지
 
-## 2024-12-19
+3. **통합 테스트 재실행** (1시간)
+   - 수정된 코드로 성공률 확인
+   - 추가 문제 해결
 
-### Phase 4.5: 시스템 통합 테스트 및 트러블슈팅 🔄 진행 중
+### 🕐 10:30:00 - 통합 테스트 실행 및 문제 분석
 
-#### 17:00 - 18:00: 시스템 시작 시도 및 오류 발생
-- Docker Compose로 시스템 시작 시도
-- **ImportError 발생**: `IEdgeFlameRepository`를 `sensor_repository`에서 찾을 수 없음
-- **문제 원인 파악**: 
-  - `container.py`에서 존재하지 않는 인터페이스들을 import하려고 시도
-  - 각 센서별 개별 인터페이스 파일과 통합된 `sensor_repository` 간의 불일치
-  - 의존성 주입 시스템의 import 경로 오류
+#### 테스트 결과
+- **Health Check**: ✅ 성공
+- **GET 메서드**: 100% 성공 (17/17)
+- **POST 메서드**: 0% 성공 (0/17)
 
-#### 18:00 - 19:00: 문제 해결 계획 수립
-- **Phase 1**: 인터페이스 파일 구조 정리 및 누락된 인터페이스 정의 추가
-- **Phase 2**: `container.py`의 import 문 수정 및 의존성 주입 시스템 수정
-- **Phase 3**: 시스템 재시작 및 API 서버 정상 동작 검증
+#### 발견된 문제
+1. **필드명 불일치**:
+   - LoadCell: `raw_value` vs `weight_kg`
+   - MQ5/MQ7: `analog_value` vs `ppm_value`
+   - RFID: `card_id` vs `card_type`
+   - Sound: `analog_value` vs `db_value`
+   - TCRT5000: `digital_value` vs `object_detected`
+   - Ultrasonic: `raw_value` vs `distance_cm`
 
-### 현재 상태: 🔴 **시스템 시작 실패 - Import 오류**
-- **API 구현**: 25/25 완료 (100%)
-- **시스템 통합**: 0% (Import 오류로 인한 시작 실패)
-- **다음 단계**: Import 오류 해결 후 시스템 통합 테스트 진행
+2. **필수 필드 누락**:
+   - Edge 센서: `motion_detected`, `switch_state`, `tilt_detected`
+   - Actuator: `buzzer_type`, `state`, `command_hex`, `channel`
 
----
+### 🕐 10:20:00 - 순환 Import 문제 해결
 
-## 2024-12-19
+#### 문제 상황
+```
+ImportError: cannot import name 'container' from partially initialized module 'app.core.container'
+```
 
-### Phase 4: Clean Architecture 리팩토링 진행 중
+#### 해결 과정
+1. **Container.py 수정**: 모든 import를 lazy loading 방식으로 변경
+2. **인터페이스 수정**: `actuator_service_interface.py`에서 스키마 import 제거
+3. **의존성 주입 시스템 안정화**: 순환 참조 문제 완전 해결
 
-#### 10:00 - 12:00: 센서 API 리팩토링 완료
-- **LoadCell API** 리팩토링 완료 ✅
-- **MQ5 API** 리팩토링 완료 ✅
-- **MQ7 API** 리팩토링 완료 ✅
-- **RFID API** 리팩토링 완료 ✅
-- **Sound API** 리팩토링 완료 ✅
-- **TCRT5000 API** 리팩토링 완료 ✅
-- **Ultrasonic API** 리팩토링 완료 ✅
-- **EdgeFlame API** 리팩토링 완료 ✅
-- **EdgePIR API** 리팩토링 완료 ✅
-- **EdgeReed API** 리팩토링 완료 ✅
-- **EdgeTilt API** 리팩토링 완료 ✅
+#### 결과
+- API 서버 정상 시작
+- 의존성 주입 시스템 안정화
+- 통합 테스트 실행 가능 상태
 
-#### 12:00 - 14:00: Actuator API 구현 시작
-- **ActuatorBuzzer API** 구현 시작
-- **ActuatorIRTX API** 구현 시작
-- **ActuatorRelay API** 구현 시작
-- **ActuatorServo API** 구현 시작
+### 🕐 10:00:00 - 작업 시작
 
-### 전체 진행률: 88% (22/25)
-- **센서 API**: 17/17 완료 (100%)
-- **Actuator API**: 4/4 진행 중 (0%)
-- **User API**: 1/1 완료 (100%)
+#### 목표
+- 통합 테스트 API 100% 성공률 달성
+- POST 메서드 오류 해결
+- 모든 CRUD 작업 안정화
+
+#### 초기 상태
+- FastAPI 서버 구축 완료
+- Clean Architecture 구조 구현 완료
+- 17개 API 라우터 구현 완료
+- Repository 패턴 구현 완료
 
 ---
 
-## 2024-12-19
+## 🚨 리부트 후 작업 재개 가이드
 
-### Phase 4: Clean Architecture 리팩토링 시작
+### 1. 환경 복구
+```bash
+cd /home/guehojung/Documents/Project/IOT/iot-repo-4/services/was-server
+docker-compose up -d
+source venv/bin/activate
+```
 
-#### 09:00 - 10:00: 개발 지침 업데이트
-- Clean Architecture 준수 강화 지침 추가
-- 의존성 주입 및 역전 원칙 준수 강조
-- 기존 센서 API 리팩토링 계획 수립
+### 2. 서버 상태 확인
+```bash
+curl -s http://localhost:8000/health
+```
 
-#### 10:00 - 12:00: 센서 API 리팩토링 진행
-- **LoadCell API** 리팩토링 완료 ✅
-- **MQ5 API** 리팩토링 완료 ✅
-- **MQ7 API** 리팩토링 완료 ✅
-- **RFID API** 리팩토링 완료 ✅
-- **Sound API** 리팩토링 완료 ✅
+### 3. 현재 작업 상태
+- **완료**: LoadCell, MQ5 리포지토리 수정
+- **진행 중**: POST 메서드 오류 해결
+- **다음**: 나머지 센서 리포지토리 수정
 
-### 전체 진행률: 72% (18/25)
-- **센서 API**: 12/17 완료 (71%)
-- **Actuator API**: 0/4 완료 (0%)
-- **User API**: 1/1 완료 (100%)
-
----
-
-## 2024-12-19
-
-### Phase 3: 센서 API 구현 완료
-
-#### 14:00 - 16:00: 나머지 센서 API 구현
-- **TCRT5000 API** 구현 완료 ✅
-- **Ultrasonic API** 구현 완료 ✅
-- **EdgeFlame API** 구현 완료 ✅
-- **EdgePIR API** 구현 완료 ✅
-- **EdgeReed API** 구현 완료 ✅
-- **EdgeTilt API** 구현 완료 ✅
-
-#### 16:00 - 17:00: 통합 테스트 및 검증
-- 모든 센서 API 엔드포인트 테스트
-- Swagger UI에서 API 문서 확인
-- 데이터베이스 연결 및 CRUD 작업 검증
-
-### 전체 진행률: 72% (18/25)
-- **센서 API**: 17/17 완료 (100%)
-- **Actuator API**: 0/4 완료 (0%)
-- **User API**: 1/1 완료 (100%)
+### 4. 작업 우선순위
+1. MQ7, RFID, Sound, TCRT5000, Ultrasonic 리포지토리 수정
+2. Edge 센서 및 Actuator API 테스트 데이터 수정
+3. 통합 테스트 재실행 및 성공률 확인
 
 ---
 
-## 2024-12-19
+## 📊 전체 진행률
 
-### Phase 3: 센서 API 구현 계속
-
-#### 10:00 - 12:00: 센서 API 구현
-- **LoadCell API** 구현 완료 ✅
-- **MQ5 API** 구현 완료 ✅
-- **MQ7 API** 구현 완료 ✅
-- **RFID API** 구현 완료 ✅
-- **Sound API** 구현 완료 ✅
-
-#### 12:00 - 14:00: 추가 센서 API 구현
-- **TCRT5000 API** 구현 시작
-- **Ultrasonic API** 구현 시작
-- **EdgeFlame API** 구현 시작
-
-### 전체 진행률: 48% (12/25)
-- **센서 API**: 12/17 완료 (71%)
-- **Actuator API**: 0/4 완료 (0%)
-- **User API**: 1/1 완료 (100%)
+- **API 구현**: 100% 완료 (17/17)
+- **Repository 패턴**: 100% 완료 (17/17)
+- **의존성 주입**: 100% 완료
+- **통합 테스트**: 0% 성공률 (목표: 100%)
+- **POST 메서드**: 0% 성공률 (목표: 100%)
 
 ---
 
-## 2024-12-19
-
-### Phase 3: 센서 API 구현 시작
-
-#### 09:00 - 10:00: 개발 환경 점검
-- Docker Compose 환경 정상 작동 확인
-- 데이터베이스 연결 상태 확인
-- 기존 User API 동작 확인
-
-#### 10:00 - 12:00: 센서 API 구현
-- **LoadCell API** 구현 완료 ✅
-- **MQ5 API** 구현 완료 ✅
-- **MQ7 API** 구현 완료 ✅
-
-### 전체 진행률: 16% (4/25)
-- **센서 API**: 3/17 완료 (18%)
-- **Actuator API**: 0/4 완료 (0%)
-- **User API**: 1/1 완료 (100%)
-
----
-
-## 2024-12-19
-
-### Phase 2: 개발 환경 구축 완료
-
-#### 14:00 - 16:00: Docker Compose 환경 구축
-- `docker-compose.yml` 생성 완료 ✅
-- `docker-compose.dev.yml` 생성 완료 ✅
-- `docker-compose.prod.yml` 생성 완료 ✅
-- 환경별 `.env` 파일 생성 완료 ✅
-
-#### 16:00 - 17:00: FastAPI 애플리케이션 구조 구축
-- Clean Architecture 레이어 구조 생성 완료 ✅
-- 의존성 주입 컨테이너 구현 완료 ✅
-- 데이터베이스 연결 및 ORM 설정 완료 ✅
-
-#### 17:00 - 18:00: 첫 번째 API 구현
-- **User API** 구현 완료 ✅
-- Swagger UI 및 ReDoc 활성화 완료 ✅
-
-### 전체 진행률: 4% (1/25)
-- **센서 API**: 0/17 완료 (0%)
-- **Actuator API**: 0/4 완료 (0%)
-- **User API**: 1/1 완료 (100%)
-
----
-
-## 2024-12-19
-
-### Phase 1: 프로젝트 초기 설정
-
-#### 09:00 - 12:00: 프로젝트 구조 분석
-- 기존 코드베이스 분석 완료 ✅
-- 25개 테이블 ORM 모델 확인 완료 ✅
-- API 구현 현황 파악 완료 ✅
-
-#### 12:00 - 14:00: 개발 계획 수립
-- Clean Architecture 적용 계획 수립 완료 ✅
-- API 구현 우선순위 결정 완료 ✅
-- 개발 단계별 계획 수립 완료 ✅
-
-### 전체 진행률: 0% (0/25)
-- **센서 API**: 0/17 완료 (0%)
-- **Actuator API**: 0/4 완료 (0%)
-- **User API**: 0/1 완료 (0%)
+**마지막 업데이트**: 2025-08-22 10:35:00  
+**다음 업데이트**: 리부트 후 작업 재개 시

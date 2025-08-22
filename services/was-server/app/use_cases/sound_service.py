@@ -11,9 +11,9 @@ from fastapi import HTTPException
 from app.interfaces.services.sensor_service_interface import ISoundService
 from app.interfaces.repositories.sensor_repository import ISoundRepository
 from app.api.v1.schemas import (
-    SoundDataCreate,
-    SoundDataUpdate,
-    SoundDataResponse
+    SensorRawSoundCreate,
+    SensorRawSoundUpdate,
+    SensorRawSoundResponse
 )
 
 
@@ -23,7 +23,7 @@ class SoundService(ISoundService):
     def __init__(self, sound_repository: ISoundRepository):
         self.sound_repository = sound_repository
     
-    async def create_sensor_data(self, data: SoundDataCreate) -> SoundDataResponse:
+    async def create_sensor_data(self, data: SensorRawSoundCreate) -> SensorRawSoundResponse:
         """Sound 센서 데이터 생성"""
         try:
             # 비즈니스 로직 검증
@@ -46,7 +46,7 @@ class SoundService(ISoundService):
         self,
         device_id: str,
         timestamp: datetime
-    ) -> Optional[SoundDataResponse]:
+    ) -> Optional[SensorRawSoundResponse]:
         """특정 시간의 Sound 센서 데이터 조회"""
         try:
             data = await self.sound_repository.get_by_id(device_id, timestamp)
@@ -59,7 +59,7 @@ class SoundService(ISoundService):
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Sound 센서 데이터 조회 실패: {str(e)}")
     
-    async def get_latest_sensor_data(self, device_id: str) -> Optional[SoundDataResponse]:
+    async def get_latest_sensor_data(self, device_id: str) -> Optional[SensorRawSoundResponse]:
         """최신 Sound 센서 데이터 조회"""
         try:
             data = await self.sound_repository.get_latest(device_id)
@@ -78,7 +78,7 @@ class SoundService(ISoundService):
         start_time: Optional[datetime] = None,
         end_time: Optional[datetime] = None,
         limit: int = 100
-    ) -> List[SoundDataResponse]:
+    ) -> List[SensorRawSoundResponse]:
         """Sound 센서 데이터 목록 조회"""
         try:
             # 비즈니스 로직 검증
@@ -105,8 +105,8 @@ class SoundService(ISoundService):
         self,
         device_id: str,
         timestamp: datetime,
-        data: SoundDataUpdate
-    ) -> Optional[SoundDataResponse]:
+        data: SensorRawSoundUpdate
+    ) -> Optional[SensorRawSoundResponse]:
         """Sound 센서 데이터 수정"""
         try:
             # 비즈니스 로직 검증

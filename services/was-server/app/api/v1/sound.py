@@ -13,9 +13,9 @@ from app.infrastructure.database import get_db
 from app.core.container import container
 from app.interfaces.services.sensor_service_interface import ISoundService
 from app.api.v1.schemas import (
-    SoundDataCreate,
-    SoundDataUpdate,
-    SoundDataResponse
+    SensorRawSoundCreate,
+    SensorRawSoundUpdate,
+    SensorRawSoundResponse
 )
 
 router = APIRouter()
@@ -26,16 +26,16 @@ def get_sound_service(db: AsyncSession = Depends(get_db)) -> ISoundService:
     return container.get_sound_service(db)
 
 
-@router.post("/create", response_model=SoundDataResponse, status_code=201)
+@router.post("/create", response_model=SensorRawSoundResponse, status_code=201)
 async def create_sound_data(
-    data: SoundDataCreate,
+    data: SensorRawSoundCreate,
     sound_service: ISoundService = Depends(get_sound_service)
 ):
     """Sound 센서 데이터 생성"""
     return await sound_service.create_sensor_data(data)
 
 
-@router.get("/list", response_model=List[SoundDataResponse])
+@router.get("/list", response_model=List[SensorRawSoundResponse])
 async def get_sound_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),
@@ -52,7 +52,7 @@ async def get_sound_data_list(
     )
 
 
-@router.get("/latest", response_model=Optional[SoundDataResponse])
+@router.get("/latest", response_model=Optional[SensorRawSoundResponse])
 async def get_latest_sound_data(
     device_id: str = Query(..., description="디바이스 ID"),
     sound_service: ISoundService = Depends(get_sound_service)
@@ -61,7 +61,7 @@ async def get_latest_sound_data(
     return await sound_service.get_latest_sensor_data(device_id)
 
 
-@router.get("/{device_id}/{timestamp}", response_model=SoundDataResponse)
+@router.get("/{device_id}/{timestamp}", response_model=SensorRawSoundResponse)
 async def get_sound_data(
     device_id: str,
     timestamp: datetime,
@@ -71,11 +71,11 @@ async def get_sound_data(
     return await sound_service.get_sensor_data(device_id, timestamp)
 
 
-@router.put("/{device_id}/{timestamp}", response_model=SoundDataResponse)
+@router.put("/{device_id}/{timestamp}", response_model=SensorRawSoundResponse)
 async def update_sound_data(
     device_id: str,
     timestamp: datetime,
-    data: SoundDataUpdate,
+    data: SensorRawSoundUpdate,
     sound_service: ISoundService = Depends(get_sound_service)
 ):
     """Sound 센서 데이터 수정"""

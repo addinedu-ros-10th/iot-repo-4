@@ -13,9 +13,9 @@ from sqlalchemy.orm import selectinload
 from app.interfaces.repositories.sensor_repository import IRFIDRepository
 from app.infrastructure.models import SensorRawRFID
 from app.api.v1.schemas import (
-    RFIDDataCreate,
-    RFIDDataUpdate,
-    RFIDDataResponse
+    SensorRawRFIDCreate,
+    SensorRawRFIDUpdate,
+    SensorRawRFIDResponse
 )
 
 
@@ -25,19 +25,26 @@ class RFIDRepository(IRFIDRepository):
     def __init__(self, db: AsyncSession):
         self.db = db
     
-    async def create(self, data: RFIDDataCreate) -> RFIDDataResponse:
+    async def create(self, data: SensorRawRFIDCreate) -> SensorRawRFIDResponse:
         """RFID 센서 데이터 생성"""
-        db_data = SensorRawRFID(**data.dict())
+        # 실제 DB 테이블 구조에 맞게 매핑 (time, device_id, raw_payload만 사용)
+        orm_data = {
+            "time": data.time,
+            "device_id": data.device_id,
+            "raw_payload": data.raw_payload
+        }
+        
+        db_data = SensorRawRFID(**orm_data)
         self.db.add(db_data)
         await self.db.commit()
         await self.db.refresh(db_data)
-        return RFIDDataResponse.from_orm(db_data)
+        return SensorRawRFIDResponse.from_orm(db_data)
     
     async def get_by_id(
         self,
         device_id: str,
         timestamp: datetime
-    ) -> Optional[RFIDDataResponse]:
+    ) -> Optional[SensorRawRFIDResponse]:
         """특정 시간의 RFID 센서 데이터 조회"""
         query = select(SensorRawRFID).where(
             and_(
@@ -46,14 +53,14 @@ class RFIDRepository(IRFIDRepository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data = result.scalar_one_or_none()
         
         if data:
-            return RFIDDataResponse.from_orm(data)
+            return SensorRawRFIDResponse.from_orm(data)
         return None
     
-    async def get_latest(self, device_id: str) -> Optional[RFIDDataResponse]:
+    async def get_latest(self, device_id: str) -> Optional[SensorRawRFIDResponse]:
         """최신 RFID 센서 데이터 조회"""
         query = (
             select(SensorRawRFID)
@@ -61,11 +68,11 @@ class RFIDRepository(IRFIDRepository):
             .order_by(SensorRawRFID.time.desc())
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data = result.scalars().first()
         
         if data:
-            return RFIDDataResponse.from_orm(data)
+            return SensorRawRFIDResponse.from_orm(data)
         return None
     
     async def get_list(
@@ -74,7 +81,7 @@ class RFIDRepository(IRFIDRepository):
         start_time: Optional[datetime] = None,
         end_time: Optional[datetime] = None,
         limit_count: int = 100
-    ) -> List[RFIDDataResponse]:
+    ) -> List[SensorRawRFIDResponse]:
         """RFID 센서 데이터 목록 조회"""
         query = select(SensorRawRFID)
         
@@ -89,18 +96,18 @@ class RFIDRepository(IRFIDRepository):
         # 시간 역순으로 정렬하고 제한
         query = query.order_by(SensorRawRFID.time.desc()).limit(limit_count)
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data_list = result.scalars().all()
         
         # 결과를 리스트로 변환하여 반환
-        return [RFIDDataResponse.from_orm(data) for data in data_list]
+        return [SensorRawRFIDResponse.from_orm(data) for data in data_list]
     
     async def update(
         self,
         device_id: str,
         timestamp: datetime,
-        data: RFIDDataUpdate
-    ) -> Optional[RFIDDataResponse]:
+        data: SensorRawRFIDUpdate
+    ) -> Optional[SensorRawRFIDResponse]:
         """RFID 센서 데이터 수정"""
         query = select(SensorRawRFID).where(
             and_(
@@ -122,7 +129,7 @@ class RFIDRepository(IRFIDRepository):
         
         await self.db.commit()
         await self.db.refresh(db_data)
-        return RFIDDataResponse.from_orm(db_data)
+        return SensorRawRFIDResponse.from_orm(db_data)
     
     async def delete(self, device_id: str, timestamp: datetime) -> bool:
         """RFID 센서 데이터 삭제"""

@@ -11,9 +11,9 @@ from fastapi import HTTPException
 from app.interfaces.services.sensor_service_interface import IRFIDService
 from app.interfaces.repositories.sensor_repository import IRFIDRepository
 from app.api.v1.schemas import (
-    RFIDDataCreate,
-    RFIDDataUpdate,
-    RFIDDataResponse
+    SensorRawRFIDCreate,
+    SensorRawRFIDUpdate,
+    SensorRawRFIDResponse
 )
 
 
@@ -23,7 +23,7 @@ class RFIDService(IRFIDService):
     def __init__(self, rfid_repository: IRFIDRepository):
         self.rfid_repository = rfid_repository
     
-    async def create_sensor_data(self, data: RFIDDataCreate) -> RFIDDataResponse:
+    async def create_sensor_data(self, data: SensorRawRFIDCreate) -> SensorRawRFIDResponse:
         """RFID 센서 데이터 생성"""
         try:
             # 비즈니스 로직 검증
@@ -43,7 +43,7 @@ class RFIDService(IRFIDService):
         self,
         device_id: str,
         timestamp: datetime
-    ) -> Optional[RFIDDataResponse]:
+    ) -> Optional[SensorRawRFIDResponse]:
         """특정 시간의 RFID 센서 데이터 조회"""
         try:
             data = await self.rfid_repository.get_by_id(device_id, timestamp)
@@ -56,7 +56,7 @@ class RFIDService(IRFIDService):
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"데이터 조회 실패: {str(e)}")
     
-    async def get_latest_sensor_data(self, device_id: str) -> Optional[RFIDDataResponse]:
+    async def get_latest_sensor_data(self, device_id: str) -> Optional[SensorRawRFIDResponse]:
         """최신 RFID 센서 데이터 조회"""
         try:
             data = await self.rfid_repository.get_latest(device_id)
@@ -75,7 +75,7 @@ class RFIDService(IRFIDService):
         start_time: Optional[datetime] = None,
         end_time: Optional[datetime] = None,
         limit: int = 100
-    ) -> List[RFIDDataResponse]:
+    ) -> List[SensorRawRFIDResponse]:
         """RFID 센서 데이터 목록 조회"""
         try:
             # 비즈니스 로직 검증
@@ -102,8 +102,8 @@ class RFIDService(IRFIDService):
         self,
         device_id: str,
         timestamp: datetime,
-        data: RFIDDataUpdate
-    ) -> Optional[RFIDDataResponse]:
+        data: SensorRawRFIDUpdate   
+    ) -> Optional[SensorRawRFIDResponse]:
         """RFID 센서 데이터 수정"""
         try:
             # 비즈니스 로직 검증
