@@ -1,8 +1,13 @@
 # Production Environment Caddyfile for AWS EC2
-# HTTP only configuration (no SSL for IP-based access)
+# HTTPS with automatic SSL certificate (Elastic IP enabled)
 
-# AWS EC2 Public IP - HTTP only
-:80 {
+# AWS EC2 Public IP - HTTP and HTTPS
+ec2-43-201-96-23.ap-northeast-2.compute.amazonaws.com {
+    # Automatic HTTPS with Let's Encrypt
+    tls {
+        on_demand
+    }
+
     # Reverse proxy to FastAPI application
     reverse_proxy app:8000 {
         header_up Host {host}
@@ -40,8 +45,8 @@
     encode gzip
 }
 
-# Alternative: Specific IP binding (if needed)
-# ec2-43-201-96-23.ap-northeast-2.compute.amazonaws.com:80 {
-#     reverse_proxy app:8000
-# }
+# HTTP to HTTPS redirect
+:80 {
+    redir https://ec2-43-201-96-23.ap-northeast-2.compute.amazonaws.com{uri} permanent
+}
 
