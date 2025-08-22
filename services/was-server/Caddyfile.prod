@@ -1,13 +1,8 @@
 # Production Environment Caddyfile for AWS EC2
-# HTTPS with automatic SSL certificate (Elastic IP enabled)
+# HTTP only configuration (IP-based access - no SSL)
 
-# AWS EC2 Public IP - HTTP and HTTPS
-ec2-43-201-96-23.ap-northeast-2.compute.amazonaws.com {
-    # Automatic HTTPS with Let's Encrypt
-    tls {
-        on_demand
-    }
-
+# AWS EC2 Public IP - HTTP only
+:80 {
     # Reverse proxy to FastAPI application
     reverse_proxy app:8000 {
         header_up Host {host}
@@ -45,8 +40,7 @@ ec2-43-201-96-23.ap-northeast-2.compute.amazonaws.com {
     encode gzip
 }
 
-# HTTP to HTTPS redirect
-:80 {
-    redir https://ec2-43-201-96-23.ap-northeast-2.compute.amazonaws.com{uri} permanent
-}
+# Note: SSL certificates cannot be issued for IP addresses by Let's Encrypt
+# To enable HTTPS, you need a real domain name (e.g., iot-care.com)
+# and configure it in Route 53 or your DNS provider
 
