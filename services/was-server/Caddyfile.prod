@@ -1,13 +1,8 @@
-# Production Environment Caddyfile
-# Automatic SSL with Let's Encrypt
+# Production Environment Caddyfile for AWS EC2
+# HTTP only configuration (no SSL for IP-based access)
 
-# Replace with your actual domain
-iot-care.example.com {
-    # Automatic HTTPS with Let's Encrypt
-    tls {
-        on_demand
-    }
-
+# AWS EC2 Public IP - HTTP only
+:80 {
     # Reverse proxy to FastAPI application
     reverse_proxy app:8000 {
         header_up Host {host}
@@ -44,4 +39,9 @@ iot-care.example.com {
     # Gzip compression
     encode gzip
 }
+
+# Alternative: Specific IP binding (if needed)
+# ec2-3-34-98-7.ap-northeast-2.compute.amazonaws.com:80 {
+#     reverse_proxy app:8000
+# }
 
