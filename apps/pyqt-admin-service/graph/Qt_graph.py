@@ -45,7 +45,14 @@ class WindowClass(QMainWindow, from_class):
         ax = self.fig.add_subplot(111)
         
         ax.clear()  # 새로 그릴 때는 지우기
-        ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90, labeldistance=1.2, pctdistance=0.7)
+
+        def make_autopct(values):
+            def my_autopct(pct):
+                total = sum(values)
+                val = int(round(pct*total/100.0))
+                return f"{val}"  # or f"{val}개" 등으로 표시 가능
+            return my_autopct
+        ax.pie(sizes, labels=labels, autopct=make_autopct(sizes), startangle=90, labeldistance=1.2, pctdistance=0.7)
         ax.axis("equal")  # 원형 유지
         
         self.fig.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
