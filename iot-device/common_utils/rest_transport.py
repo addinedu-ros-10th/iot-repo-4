@@ -26,7 +26,7 @@ class RestSettings(BaseModel):
     """
     REST 통신에 필요한 설정 값만 가짐
     """
-    base_url: str = Field(default=os.getenv("API_BASE_URL", "http://localhost"))
+    base_url: str = Field(default=os.getenv("API_BASE_URL", "http://ec2-43-201-96-23.ap-northeast-2.compute.amazonaws.com"))
     timeout_sec: float = Field(default=float(os.getenv("HTTP_TIMEOUT_SEC", "10")))
     max_retries: int = Field(default=int(os.getenv("HTTP_MAX_RETRIES", "4")))
     backoff_factor: float = Field(default=float(os.getenv("HTTP_BACKOFF_FACTOR", "0.7")))
