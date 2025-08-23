@@ -6,11 +6,12 @@ from PyQt6 import uic
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+
 import warnings
-warnings.filterwarnings("ignore", category=UserWarning, 
+warnings.filterwarnings("ignore", category=UserWarning,
                         message=".*Ignoring fixed x limits.*")
 
-from_class = uic.loadUiType("graph.ui")[0]  # UI 파일 이름에 맞게 변경
+from_class = uic.loadUiType("graph.ui")[0]  # UI 파일 경로
 
 class PieCanvas(FigureCanvas):
     def __init__(self, parent=None):
@@ -18,43 +19,51 @@ class PieCanvas(FigureCanvas):
         self.ax = self.fig.add_subplot(111)
         super().__init__(self.fig)
         self.setParent(parent)
-        self.draw_pie(0)  # 초기 상태
+        self.draw_pie(0)
 
     def draw_pie(self, value):
         self.ax.clear()
         self.ax.set_aspect("equal", adjustable="box")
 
-        # 파이그래프 비율 계산 (0~1 값)
-        filled = value
-        remaining = 1 - filled
-        val = [remaining, filled]
+        val = [value, 1 - value]
+
         def make_autopct(values):
             def my_autopct(pct):
                 total = sum(values)
-                val = pct*total/100.0
-                return f"{val:.3f}"  # or f"{val}개" 등으로 표시 가능
+                val = pct * total / 100.0
+                return f"{val:.3f}"
             return my_autopct
 
         self.ax.pie(val,
                     colors=["skyblue", "lightgray"],
-                    startangle=90, autopct=make_autopct(val),
+                    startangle=90,
+                    autopct=make_autopct(val),
                     counterclock=False)
         self.draw()
 
 
-
 class WindowClass(QMainWindow, from_class):
-    def __init__(self):
+    def __init__(self, parent=None):
         super().__init__()
         self.setupUi(self)
-        self.setWindowTitle("Multi Pie Graphs!")
+        self.setWindowTitle("Multi Pie Graphs with Per-Sensor Normalization")
 
-        # 센서 파이그래프를 담을 딕셔너리
+        # ✅ 센서별 정규화 범위 (소프트코딩)
+        self.sensor_config = {
+            "sensor1": {"min": 0, "max": 2},
+            "sensor2": {"min": 0.5, "max": 2},
+            "sensor3": {"min": 0, "max": 2},
+            "sensor4": {"min": 0, "max": 2},
+            "sensor5": {"min": 0.2, "max": 2}
+        }
+
+        # ✅ 센서 위젯 등록
         self.sensor_widgets = {
             "sensor1": self.widgetPlot_pie_1,
             "sensor2": self.widgetPlot_pie_2,
             "sensor3": self.widgetPlot_pie_3,
-            # 필요에 따라 추가
+            "sensor4": self.widgetPlot_pie_4,
+            "sensor5": self.widgetPlot_pie_5
         }
 
         self.sensor_canvases = {}
@@ -70,20 +79,36 @@ class WindowClass(QMainWindow, from_class):
         self.phase = {
             "sensor1": 0,
             "sensor2": np.pi / 3,
-            "sensor3": np.pi / 2
+            "sensor3": np.pi / 2,
+            "sensor4": np.pi,
+            "sensor5": np.pi * 2
         }
 
-        # 타이머로 업데이트
         self.timer = QTimer()
         self.timer.setInterval(100)
         self.timer.timeout.connect(self.update_pies)
         self.timer.start()
 
+    def normalize(self, name, val):
+        """센서별 정규화 처리"""
+        config = self.sensor_config.get(name, {})
+        min_v = config.get("min", 0)
+        max_v = config.get("max", 1)
+
+        if max_v == min_v:
+            return 0.0
+        return min(max((val - min_v) / (max_v - min_v), 0.0), 1.0)
+
     def update_pies(self):
         for name, canvas in self.sensor_canvases.items():
             phase_shift = self.phase[name]
-            y = (np.sin(self.x[self.index] + phase_shift) + 1) / 2  # 정규화
-            canvas.draw_pie(y)
+            
+            if phase_shift != "sensor3":
+                y = np.sin(self.x[self.index] + phase_shift) + 1  # 0~2 사이의 값
+            else:
+                y = np.sin(self.x[self.index] + phase_shift) + 1  # 0~2 사이의 값
+            y_norm = self.normalize(name, y)
+            canvas.draw_pie(y_norm)
 
         self.index = (self.index + 1) % len(self.x)
 
