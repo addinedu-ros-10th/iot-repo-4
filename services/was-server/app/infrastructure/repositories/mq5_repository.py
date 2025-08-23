@@ -53,7 +53,7 @@ class MQ5Repository(IMQ5Repository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data = result.scalar_one_or_none()
         
         if data:
@@ -68,7 +68,7 @@ class MQ5Repository(IMQ5Repository):
             .order_by(SensorRawMQ5.time.desc())
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data = result.scalars().first()
         
         if data:
@@ -128,7 +128,7 @@ class MQ5Repository(IMQ5Repository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         db_data = result.scalar_one_or_none()
         
         if not db_data:

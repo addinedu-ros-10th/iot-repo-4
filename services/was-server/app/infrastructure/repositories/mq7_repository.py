@@ -140,7 +140,7 @@ class MQ7Repository(IMQ7Repository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         db_data = result.scalar_one_or_none()
         
         if not db_data:
@@ -173,7 +173,7 @@ class MQ7Repository(IMQ7Repository):
         if end_time:
             query = query.where(SensorRawMQ7.time <= end_time)
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data_list = result.scalars().all()
         
         if not data_list:
@@ -232,7 +232,7 @@ class MQ7Repository(IMQ7Repository):
         if end_time:
             query = query.where(SensorRawMQ7.time <= end_time)
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         alert_data = result.scalars().all()
         
         alerts = []

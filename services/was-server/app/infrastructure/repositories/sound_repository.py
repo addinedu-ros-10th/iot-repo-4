@@ -67,7 +67,7 @@ class SoundRepository(ISoundRepository):
             .order_by(SensorRawSound.time.desc())
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data = result.scalars().first()
         
         if data:
@@ -115,7 +115,7 @@ class SoundRepository(ISoundRepository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         db_data = result.scalar_one_or_none()
         
         if not db_data:
@@ -139,7 +139,7 @@ class SoundRepository(ISoundRepository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         db_data = result.scalar_one_or_none()
         
         if not db_data:

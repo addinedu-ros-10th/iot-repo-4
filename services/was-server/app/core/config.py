@@ -7,7 +7,8 @@ Core 설정 모듈
 
 import os
 from typing import Optional
-from pydantic import BaseSettings, Field
+from pydantic_settings import BaseSettings
+from pydantic import Field
 from dotenv import load_dotenv
 
 
@@ -64,7 +65,7 @@ class Settings(BaseSettings):
     LOG_BACKUP_COUNT: int = Field(default=5, env="LOG_BACKUP_COUNT")
     
     class Config:
-        env_file = ".env"
+        env_file = ".env.local"
         case_sensitive = True
 
 

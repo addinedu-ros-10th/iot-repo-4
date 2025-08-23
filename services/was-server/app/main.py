@@ -40,13 +40,20 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
+    openapi_url="/openapi.json",
+    swagger_ui_parameters={
+        "defaultModelsExpandDepth": -1,
+        "defaultModelExpandDepth": 3,
+        "docExpansion": "list",
+        "syntaxHighlight.theme": "monokai"
+    },
     lifespan=lifespan
 )
 
 # CORS 미들웨어 설정
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_HOSTS,
+    allow_origins=["*"],  # 개발/테스트 환경에서는 모든 origin 허용
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

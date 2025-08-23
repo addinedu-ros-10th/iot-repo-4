@@ -116,7 +116,7 @@ class RFIDRepository(IRFIDRepository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         db_data = result.scalar_one_or_none()
         
         if not db_data:
@@ -140,7 +140,7 @@ class RFIDRepository(IRFIDRepository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         db_data = result.scalar_one_or_none()
         
         if not db_data:
@@ -173,7 +173,7 @@ class RFIDRepository(IRFIDRepository):
         if end_time:
             query = query.where(SensorRawRFID.time <= end_time)
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data_list = result.scalars().all()
         
         if not data_list:
