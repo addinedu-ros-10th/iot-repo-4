@@ -43,10 +43,7 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./Caddyfile.local:/app/Caddyfile:ro
-      - ./Caddyfile.dev:/app/Caddyfile.dev:ro
-      - ./Caddyfile.prod:/app/Caddyfile.prod:ro
-      - ./scripts/detect_environment.sh:/app/detect_environment.sh
+      - ./Caddyfile.prod:/etc/caddy/Caddyfile:ro
       - caddy_prod_data:/data
       - caddy_prod_config:/config
     depends_on:
@@ -54,11 +51,7 @@ services:
     networks:
       - iot-care-prod-network
     # 환경별 Caddy 설정 자동 적용
-    command: >
-      sh -c "
-        chmod +x /app/detect_environment.sh &&
-        /app/detect_environment.sh
-      "
+    command: caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
 
 volumes:
   redis_prod_data:
