@@ -28,13 +28,4 @@
         path /health
     }
     respond @health 200
-
-    # Development features
-    @docs {
-        path /docs /redoc /openapi.json
-    }
-    
-    handle @docs {
-        reverse_proxy iot-care-app:8000
-    }
 }

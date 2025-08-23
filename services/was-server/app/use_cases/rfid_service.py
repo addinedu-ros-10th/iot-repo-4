@@ -26,12 +26,10 @@ class RFIDService(IRFIDService):
     async def create_sensor_data(self, data: SensorRawRFIDCreate) -> SensorRawRFIDResponse:
         """RFID 센서 데이터 생성"""
         try:
-            # 비즈니스 로직 검증
-            if data.card_id and len(data.card_id.strip()) == 0:
-                raise ValueError("카드 ID는 비어있을 수 없습니다")
             
             # 리포지토리를 통한 데이터 생성
             created_data = await self.rfid_repository.create(data)
+            print(created_data)
             return created_data
             
         except ValueError as e:

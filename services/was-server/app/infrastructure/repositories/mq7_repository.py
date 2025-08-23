@@ -36,8 +36,8 @@ class MQ7Repository(IMQ7Repository):
         
         db_data = SensorRawMQ7(**orm_data)
         self.db.add(db_data)
-        await self.db.commit()
-        await self.db.refresh(db_data)
+        self.db.commit()
+        self.db.refresh(db_data)
         return SensorRawMQ7Response.from_orm(db_data)
     
     async def get_by_id(

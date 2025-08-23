@@ -28,8 +28,8 @@ class DeviceRTCStatusRepository(IDeviceRTCStatusRepository):
         """RTC 상태 데이터 생성"""
         db_data = DeviceRTCStatus(**data.dict())
         self.db.add(db_data)
-        await self.db.commit()
-        await self.db.refresh(db_data)
+        self.db.commit()
+        self.db.refresh(db_data)
         return DeviceRTCDataResponse.from_orm(db_data)
     
     async def get_by_id(

@@ -31,7 +31,24 @@ async def create_ultrasonic_data(
     data: SensorRawUltrasonicCreate,
     ultrasonic_service: IUltrasonicService = Depends(get_ultrasonic_service)
 ):
-    """Ultrasonic 초음파 센서 데이터 생성"""
+    """
+    Ultrasonic 초음파 센서 데이터 생성
+    
+    - **time**: 거리 측정 시간 (ISO 8601 형식)
+    - **device_id**: 초음파 센서 디바이스 ID (필수)
+    - **raw_payload**: 원시 거리 데이터 (JSON 형태, 선택)
+    
+    Ultrasonic 센서는 거리 측정, 물체 감지, 자동차 주차 보조 등에 사용됩니다.
+    
+    예시:
+    ```json
+    {
+        "time": "2025-08-23T15:00:00.000Z",
+        "device_id": "ultrasonic_sensor_001",
+        "raw_payload": {"distance_cm": 25.5, "signal_strength": 0.9, "echo_time": 0.15}
+    }
+    ```
+    """
     return await ultrasonic_service.create_sensor_data(data)
 
 

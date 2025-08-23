@@ -1,5 +1,12 @@
+# docker-compose.auto.yml
+# IoT Care Backend System 환경변수 자동 업데이트 + Docker Compose 시작
+# 모든 운영체제에서 사용 가능
+# 작성일: 2025-08-23
+
+version: '3.8'
+
 services:
-  # 환경변수 자동 업데이트 서비스 (프로젝트 시작 시 실행)
+  # 환경변수 자동 업데이트 서비스
   env-updater:
     image: alpine:latest
     container_name: iot-care-env-updater
@@ -14,10 +21,11 @@ services:
         apk add --no-cache bash curl &&
         chmod +x auto_env_update.sh &&
         ./auto_env_update.sh &&
-        echo '✅ 환경변수 업데이트 완료'
+        echo '✅ 환경변수 업데이트 완료' &&
+        echo '🚀 Docker Compose 서비스 시작 중...'
       "
     profiles:
-      - setup
+      - auto-setup
     restart: "no"
 
   # FastAPI 애플리케이션
@@ -28,8 +36,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./app:/app/app:delegated  # 소스 코드 동기화를 위한 마운트 추가
-      - ./tests:/app/tests:delegated  # 테스트 코드 동기화
+      - ./app:/app/app:delegated
+      - ./tests:/app/tests:delegated
       - ./logs:/app/logs
       - ./config:/app/config
     env_file:
@@ -56,7 +64,7 @@ services:
     networks:
       - iot-care-network
 
-  # Caddy 웹서버 (환경별 설정 자동 적용)
+  # Caddy 웹서버
   caddy:
     image: caddy:2-alpine
     container_name: iot-care-caddy
@@ -65,14 +73,13 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./Caddyfile.local:/etc/caddy/Caddyfile:ro
+      - ./Caddyfile.local:/app/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
       - app
     networks:
       - iot-care-network
-    # 환경별 Caddy 설정 자동 적용
     command: caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
 
 volumes:

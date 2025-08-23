@@ -26,9 +26,6 @@ class TCRT5000Service(ITCRT5000Service):
     async def create_sensor_data(self, data: SensorRawTCRT5000Create) -> SensorRawTCRT5000Response:
         """TCRT5000 센서 데이터 생성"""
         try:
-            # 비즈니스 로직 검증
-            if data.analog_value is not None and (data.analog_value < 0 or data.analog_value > 1023):
-                raise ValueError("아날로그 값은 0에서 1023 사이여야 합니다")
             
             # 리포지토리를 통한 데이터 생성
             created_data = await self.tcrt5000_repository.create(data)

@@ -36,9 +36,9 @@ class MQ5Repository(IMQ5Repository):
         
         db_data = SensorRawMQ5(**orm_data)
         self.db.add(db_data)
-        await self.db.commit()
-        await self.db.refresh(db_data)
-        return SensorRawMQ5Response.from_attributes(db_data)
+        self.db.commit()
+        self.db.refresh(db_data)
+        return SensorRawMQ5Response.from_orm(data)
     
     async def get_by_id(
         self,
