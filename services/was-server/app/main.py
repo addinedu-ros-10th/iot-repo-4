@@ -42,7 +42,7 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_url="/openapi.json",
     swagger_ui_parameters={
-        "defaultModelsExpandDepth": -1,
+        "defaultModelsExpandDepth": 1,
         "defaultModelExpandDepth": 3,
         "docExpansion": "list",
         "syntaxHighlight.theme": "monokai"
