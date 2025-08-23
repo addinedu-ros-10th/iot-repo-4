@@ -3,6 +3,7 @@ import numpy as np
 from PyQt6.QtWidgets import *
 from PyQt6.QtCore import QTimer
 from PyQt6 import uic
+from PyQt6.QtGui import QColor
 
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -52,43 +53,65 @@ class WindowClass(QMainWindow, from_class):
         self.gas = np.linspace(0, 100, len(self.x))
         self.temperature = 20 + 10 * self.x
         self.weight_rice = 50 + 30 * np.sin(self.x / 40)
-        self.weight_bed = 100 + 20 * np.cos(self.x / 60)
+        self.weight_bed = 100 + 20 * np.cos(self.x / 10)
         self.weight_laundry = 70 + 10 * np.sin(self.x / 20)
 
-        # ✅ 센서별 정규화 범위 (소프트코딩)
-        self.sensor_config = {
-            "sensor1": {"min": 0, "max": 100},
-            "sensor2": {"min": 0.5, "max": 200},
-            "sensor3": {"min": 0, "max": 200},
-            "sensor4": {"min": 0, "max": 300},
-            "sensor5": {"min": 0.2, "max": 300}
-        }
+        self.table_log.setColumnCount(4)
+        self.table_log.setHorizontalHeaderLabels(["Index", "Sensor", "Raw", "Norm", "Level"])
+        self.table_log.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.table_log.verticalHeader().setVisible(False)
+        self.table_log.horizontalHeader().setStretchLastSection(True)
 
-        # ✅ 센서 위젯 등록
-        self.sensor_widgets = {
-            "sensor1": self.widgetPlot_pie_1,
-            "sensor2": self.widgetPlot_pie_2,
-            "sensor3": self.widgetPlot_pie_3,
-            "sensor4": self.widgetPlot_pie_4,
-            "sensor5": self.widgetPlot_pie_5
-        }
+        header = self.table_log.horizontalHeader()
+        for i in range(4):
+            header.setSectionResizeMode(i, QHeaderView.ResizeMode.Stretch)
 
-        self.sensor_values = {
-            "sensor1": self.gas,           # 가스 센서
-            "sensor2": self.temperature,   # 온도
-            "sensor3": self.weight_rice,   # 쌀 무게
-            "sensor4": self.weight_bed,    # 침대 무게
-            "sensor5": self.weight_laundry # 세탁물 무게
+        self.sensors = {
+            "sensor1": {
+                "widget": self.widgetPlot_pie_1,
+                "value": self.gas,
+                "min": 0,
+                "max": 100,
+                "threshold": 100
+            },
+            "sensor2": {
+                "widget": self.widgetPlot_pie_2,
+                "value": self.temperature,
+                "min": 0.5,
+                "max": 200,
+                "threshold": 100
+            },
+            "sensor3": {
+                "widget": self.widgetPlot_pie_3,
+                "value": self.weight_rice,
+                "min": 0,
+                "max": 200,
+                "threshold": 100
+            },
+            "sensor4": {
+                "widget": self.widgetPlot_pie_4,
+                "value": self.weight_bed,
+                "min": 0,
+                "max": 300,
+                "threshold": 100
+            },
+            "sensor5": {
+                "widget": self.widgetPlot_pie_5,
+                "value": self.weight_laundry,
+                "min": 0.2,
+                "max": 300,
+                "threshold": 100
+            }
         }
 
         self.sensor_canvases = {}
-        for name, widget in self.sensor_widgets.items():
-            canvas = PieCanvas(widget)
-            layout = QVBoxLayout(widget)
+        for name, info in self.sensors.items():
+            canvas = PieCanvas(info["widget"])
+            layout = QVBoxLayout(info["widget"])
+            layout.setContentsMargins(0, 0, 0, 0)
             layout.addWidget(canvas)
-            self.sensor_canvases[name] = canvas
+            info["canvas"] = canvas # 캔버스를 센서 정보에 저장
 
-        # 테스트용 사인 곡선 (센서별 phase 다르게)
         self.index = 0
 
         self.timer = QTimer()
@@ -96,35 +119,70 @@ class WindowClass(QMainWindow, from_class):
         self.timer.timeout.connect(self.update_pies)
         self.timer.start()
 
-        self.decide_crisis_level()
-        self.show_crisis_contents()
+
+    def append_log(self, sensor_name, index, raw, norm):
+        row = self.table_log.rowCount()
+        self.table_log.insertRow(row)
+        item_index = QTableWidgetItem(str(index))
+        item_sensor = QTableWidgetItem(sensor_name)
+        item_raw = QTableWidgetItem(f"{raw:.2f}")
+        item_norm = QTableWidgetItem(f"{norm:.3f}")
+
+        # ✅ 조건부 색상 적용: 정규화 값(norm)이 0.4 이상이면 붉은 배경
+        if norm >= 0.9:
+            highlight = QColor(255, 0, 0)  # 진한 빨강
+        elif norm >= 0.8:
+            highlight = QColor(255, 153, 153)  # 연한 빨강
+        elif norm <= 0.2:
+            highlight = QColor(173, 216, 230)  # 연한 파랑
+        else:
+            highlight = QColor(255, 255, 255)
+
+        item_index.setBackground(highlight)
+        item_sensor.setBackground(highlight)
+        item_norm.setBackground(highlight)
+        item_raw.setBackground(highlight)
+
+        # 표에 추가
+        self.table_log.setItem(row, 0, item_index)
+        self.table_log.setItem(row, 1, item_sensor)
+        self.table_log.setItem(row, 2, item_raw)
+        self.table_log.setItem(row, 3, item_norm)
+
+        self.table_log.scrollToBottom()
+
 
     def decide_crisis_level(self):
-        self.label_crlevel.setText("qqq")
-        return
+        if True:
+            self.label_crlevel.setText("응급")  
+        elif True:
+            self.label_crlevel.setText("주의")
+        elif True:
+            self.label_crlevel.setText("관심")
+        else:
+            self.label_crlevel.setText("보통")
+
+        self.show_crisis_contents()
 
     def show_crisis_contents(self):
-        self.line_crcontents.setText("qqq")
-        return
-
-    def normalize(self, name, val):
-        """센서별 정규화 처리"""
-        config = self.sensor_config.get(name, {})
-        min_v = config.get("min", 0)
-        max_v = config.get("max", 1)
-
+        self.line_crcontents.setText("qqqq")
+    
+    def normalize(self, val, min_v, max_v):
         if max_v == min_v:
             return 0.0
         return min(max((val - min_v) / (max_v - min_v), 0.0), 2.0)
 
     def update_pies(self):
-        for name, canvas in self.sensor_canvases.items():
-            data = self.sensor_values.get(name)
-            if data is not None and self.index < len(data):
-                value = data[self.index]
-                norm = self.normalize(name, value)
-                canvas.draw_pie(norm)
+        for name, info in self.sensors.items():
+            data = info["value"]
+            if self.index < len(data):
+                raw_val = data[self.index]
+                norm_val = self.normalize(raw_val, info["min"], info["max"])
+                info["canvas"].draw_pie(norm_val)
 
+                # level = self.get_crisis_level_text(raw_val)
+                self.append_log(name, self.index, raw_val, norm_val)
+                self.decide_crisis_level()
         self.index += 1
 
 
