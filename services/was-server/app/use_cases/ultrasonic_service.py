@@ -11,9 +11,9 @@ from fastapi import HTTPException
 from app.interfaces.services.sensor_service_interface import IUltrasonicService
 from app.interfaces.repositories.sensor_repository import IUltrasonicRepository
 from app.api.v1.schemas import (
-    UltrasonicDataCreate,
-    UltrasonicDataUpdate,
-    UltrasonicDataResponse
+    SensorRawUltrasonicCreate,
+    SensorRawUltrasonicUpdate,
+    SensorRawUltrasonicResponse
 )
 
 
@@ -23,7 +23,7 @@ class UltrasonicService(IUltrasonicService):
     def __init__(self, ultrasonic_repository: IUltrasonicRepository):
         self.ultrasonic_repository = ultrasonic_repository
     
-    async def create_sensor_data(self, data: UltrasonicDataCreate) -> UltrasonicDataResponse:
+    async def create_sensor_data(self, data: SensorRawUltrasonicCreate) -> SensorRawUltrasonicResponse:
         """Ultrasonic 센서 데이터 생성"""
         try:
             # 비즈니스 로직 검증
@@ -46,7 +46,7 @@ class UltrasonicService(IUltrasonicService):
         self,
         device_id: str,
         timestamp: datetime
-    ) -> Optional[UltrasonicDataResponse]:
+    ) -> Optional[SensorRawUltrasonicResponse]:
         """특정 시간의 Ultrasonic 센서 데이터 조회"""
         try:
             data = await self.ultrasonic_repository.get_by_id(device_id, timestamp)
@@ -59,7 +59,7 @@ class UltrasonicService(IUltrasonicService):
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Ultrasonic 센서 데이터 조회 실패: {str(e)}")
     
-    async def get_latest_sensor_data(self, device_id: str) -> Optional[UltrasonicDataResponse]:
+    async def get_latest_sensor_data(self, device_id: str) -> Optional[SensorRawUltrasonicResponse]:
         """최신 Ultrasonic 센서 데이터 조회"""
         try:
             data = await self.ultrasonic_repository.get_latest(device_id)
@@ -78,7 +78,7 @@ class UltrasonicService(IUltrasonicService):
         start_time: Optional[datetime] = None,
         end_time: Optional[datetime] = None,
         limit: int = 100
-    ) -> List[UltrasonicDataResponse]:
+    ) -> List[SensorRawUltrasonicResponse]:
         """Ultrasonic 센서 데이터 목록 조회"""
         try:
             # 비즈니스 로직 검증
@@ -105,8 +105,8 @@ class UltrasonicService(IUltrasonicService):
         self,
         device_id: str,
         timestamp: datetime,
-        data: UltrasonicDataUpdate
-    ) -> Optional[UltrasonicDataResponse]:
+        data: SensorRawUltrasonicUpdate
+    ) -> Optional[SensorRawUltrasonicResponse]:
         """Ultrasonic 센서 데이터 수정"""
         try:
             # 비즈니스 로직 검증

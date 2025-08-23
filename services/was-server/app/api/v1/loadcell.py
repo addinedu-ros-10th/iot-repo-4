@@ -13,9 +13,9 @@ from app.infrastructure.database import get_db_session
 from app.core.container import container
 from app.interfaces.services.sensor_service_interface import ILoadCellService
 from app.api.v1.schemas import (
-    LoadCellDataCreate,
-    LoadCellDataUpdate,
-    LoadCellDataResponse
+    SensorRawLoadCellCreate,
+    SensorRawLoadCellUpdate,
+    SensorRawLoadCellResponse
 )
 
 router = APIRouter()
@@ -26,16 +26,16 @@ def get_loadcell_service(db: AsyncSession = Depends(get_db_session)) -> ILoadCel
     return container.get_loadcell_service(db)
 
 
-@router.post("/create", response_model=LoadCellDataResponse, status_code=201)
+@router.post("/create", response_model=SensorRawLoadCellResponse, status_code=201)
 async def create_loadcell_data(
-    data: LoadCellDataCreate,
+    data: SensorRawLoadCellCreate,
     loadcell_service: ILoadCellService = Depends(get_loadcell_service)
 ):
     """로드셀 센서 데이터 생성"""
     return await loadcell_service.create_sensor_data(data)
 
 
-@router.get("/list", response_model=List[LoadCellDataResponse])
+@router.get("/list", response_model=List[SensorRawLoadCellResponse])
 async def get_loadcell_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),
@@ -52,7 +52,7 @@ async def get_loadcell_data_list(
     )
 
 
-@router.get("/latest", response_model=Optional[LoadCellDataResponse])
+@router.get("/latest", response_model=Optional[SensorRawLoadCellResponse])
 async def get_latest_loadcell_data(
     device_id: str = Query(..., description="디바이스 ID"),
     loadcell_service: ILoadCellService = Depends(get_loadcell_service)
@@ -61,7 +61,7 @@ async def get_latest_loadcell_data(
     return await loadcell_service.get_latest_sensor_data(device_id)
 
 
-@router.get("/{device_id}/{timestamp}", response_model=LoadCellDataResponse)
+@router.get("/{device_id}/{timestamp}", response_model=SensorRawLoadCellResponse)
 async def get_loadcell_data(
     device_id: str,
     timestamp: datetime,
@@ -71,11 +71,11 @@ async def get_loadcell_data(
     return await loadcell_service.get_sensor_data(device_id, timestamp)
 
 
-@router.put("/{device_id}/{timestamp}", response_model=LoadCellDataResponse)
+@router.put("/{device_id}/{timestamp}", response_model=SensorRawLoadCellResponse)
 async def update_loadcell_data(
     device_id: str,
     timestamp: datetime,
-    data: LoadCellDataUpdate,
+    data: SensorRawLoadCellUpdate,
     loadcell_service: ILoadCellService = Depends(get_loadcell_service)
 ):
     """로드셀 센서 데이터 수정"""

@@ -1,51 +1,78 @@
 #!/usr/bin/env python3
 """
-테이블 구조 확인 스크립트
+DB 테이블 구조 확인 스크립트
 """
+import asyncio
+import asyncpg
+import os
+from dotenv import load_dotenv
 
-import psycopg2
-from psycopg2.extras import RealDictCursor
-
-def check_table_structure():
-    """테이블 구조를 확인합니다."""
+async def check_table_structure():
+    """테이블 구조 확인"""
+    load_dotenv('.env.local')
     
-    # 데이터베이스 연결
-    conn = psycopg2.connect(
-        host='192.168.2.81',
-        port=15432,
-        database='iot_care',
-        user='svc_dev',
-        password='IOT_dev_123!@#'
-    )
+    # DB 연결 정보
+    db_config = {
+        'host': os.getenv('DB_HOST'),
+        'port': int(os.getenv('DB_PORT')),
+        'user': os.getenv('DB_USER'),
+        'password': os.getenv('DB_PASSWORD'),
+        'database': os.getenv('DB_NAME')
+    }
     
-    cur = conn.cursor()
+    print(f"DB 연결 정보: {db_config['host']}:{db_config['port']}")
     
     try:
-        print("🔍 테이블 구조 확인 중...")
+        # DB 연결
+        conn = await asyncpg.connect(**db_config)
+        print("✅ DB 연결 성공")
         
-        # Edge 센서 테이블들의 구조 확인
-        tables = ['sensor_edge_flame', 'sensor_edge_pir', 'sensor_edge_reed', 'sensor_edge_tilt']
+        # 테이블 목록 조회
+        tables = await conn.fetch("""
+            SELECT table_name 
+            FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name LIKE 'sensor_%'
+            ORDER BY table_name
+        """)
         
-        for table_name in tables:
-            print(f"\n📋 {table_name} 테이블 구조:")
-            cur.execute(f"""
-                SELECT column_name, data_type, is_nullable, column_default
-                FROM information_schema.columns 
-                WHERE table_name = '{table_name}' 
-                ORDER BY ordinal_position;
-            """)
-            
-            columns = cur.fetchall()
-            for col in columns:
-                nullable = "NULL" if col[2] == "YES" else "NOT NULL"
-                default = f" DEFAULT {col[3]}" if col[3] else ""
-                print(f"  - {col[0]}: {col[1]} {nullable}{default}")
-            
+        print(f"\n📋 센서 테이블 목록:")
+        for table in tables:
+            print(f"  - {table['table_name']}")
+        
+        # 주요 테이블 구조 확인
+        target_tables = [
+            'sensor_raw_loadcell',
+            'sensor_raw_mq5', 
+            'sensor_raw_mq7',
+            'sensor_raw_rfid',
+            'sensor_raw_sound',
+            'sensor_raw_tcrt5000',
+            'sensor_raw_ultrasonic'
+        ]
+        
+        for table_name in target_tables:
+            try:
+                columns = await conn.fetch(f"""
+                    SELECT column_name, data_type, is_nullable
+                    FROM information_schema.columns 
+                    WHERE table_name = '{table_name}'
+                    ORDER BY ordinal_position
+                """)
+                
+                print(f"\n🔍 {table_name} 테이블 구조:")
+                for col in columns:
+                    nullable = "NULL" if col['is_nullable'] == 'YES' else "NOT NULL"
+                    print(f"  - {col['column_name']}: {col['data_type']} ({nullable})")
+                    
+            except Exception as e:
+                print(f"❌ {table_name} 테이블 조회 실패: {e}")
+        
+        await conn.close()
+        print("\n✅ 테이블 구조 확인 완료")
+        
     except Exception as e:
-        print(f"❌ 오류 발생: {e}")
-    finally:
-        cur.close()
-        conn.close()
+        print(f"❌ DB 연결 실패: {e}")
 
 if __name__ == "__main__":
-    check_table_structure() 
+    asyncio.run(check_table_structure()) 

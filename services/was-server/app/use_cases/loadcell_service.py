@@ -11,9 +11,9 @@ from fastapi import HTTPException
 from app.interfaces.services.sensor_service_interface import ILoadCellService
 from app.interfaces.repositories.sensor_repository import ILoadCellRepository
 from app.api.v1.schemas import (
-    LoadCellDataCreate,
-    LoadCellDataUpdate,
-    LoadCellDataResponse
+    SensorRawLoadCellCreate,
+    SensorRawLoadCellUpdate,
+    SensorRawLoadCellResponse
 )
 
 
@@ -23,16 +23,9 @@ class LoadCellService(ILoadCellService):
     def __init__(self, loadcell_repository: ILoadCellRepository):
         self.loadcell_repository = loadcell_repository
     
-    async def create_sensor_data(self, data: LoadCellDataCreate) -> LoadCellDataResponse:
+    async def create_sensor_data(self, data: SensorRawLoadCellCreate) -> SensorRawLoadCellResponse:
         """로드셀 센서 데이터 생성"""
         try:
-            # 비즈니스 로직 검증
-            if data.weight_kg is not None and data.weight_kg < 0:
-                raise ValueError("무게는 0 이상이어야 합니다")
-            
-            if data.raw_value is not None and data.raw_value < 0:
-                raise ValueError("원시 값은 0 이상이어야 합니다")
-            
             # 리포지토리를 통한 데이터 생성
             created_data = await self.loadcell_repository.create(data)
             return created_data
@@ -46,7 +39,7 @@ class LoadCellService(ILoadCellService):
         self,
         device_id: str,
         timestamp: datetime
-    ) -> Optional[LoadCellDataResponse]:
+    ) -> Optional[SensorRawLoadCellResponse]:
         """특정 시간의 로드셀 센서 데이터 조회"""
         try:
             data = await self.loadcell_repository.get_by_id(device_id, timestamp)
@@ -59,7 +52,7 @@ class LoadCellService(ILoadCellService):
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"데이터 조회 실패: {str(e)}")
     
-    async def get_latest_sensor_data(self, device_id: str) -> Optional[LoadCellDataResponse]:
+    async def get_latest_sensor_data(self, device_id: str) -> Optional[SensorRawLoadCellResponse]:
         """최신 로드셀 센서 데이터 조회"""
         try:
             data = await self.loadcell_repository.get_latest(device_id)
@@ -78,7 +71,7 @@ class LoadCellService(ILoadCellService):
         start_time: Optional[datetime] = None,
         end_time: Optional[datetime] = None,
         limit: int = 100
-    ) -> List[LoadCellDataResponse]:
+    ) -> List[SensorRawLoadCellResponse]:
         """로드셀 센서 데이터 목록 조회"""
         try:
             # 비즈니스 로직 검증
@@ -105,17 +98,10 @@ class LoadCellService(ILoadCellService):
         self,
         device_id: str,
         timestamp: datetime,
-        data: LoadCellDataUpdate
-    ) -> Optional[LoadCellDataResponse]:
+        data: SensorRawLoadCellUpdate
+    ) -> Optional[SensorRawLoadCellResponse]:
         """로드셀 센서 데이터 수정"""
         try:
-            # 비즈니스 로직 검증
-            if data.weight_kg is not None and data.weight_kg < 0:
-                raise ValueError("무게는 0 이상이어야 합니다")
-            
-            if data.raw_value is not None and data.raw_value < 0:
-                raise ValueError("원시 값은 0 이상이어야 합니다")
-            
             updated_data = await self.loadcell_repository.update(device_id, timestamp, data)
             if not updated_data:
                 raise HTTPException(status_code=404, detail="수정할 데이터를 찾을 수 없습니다")

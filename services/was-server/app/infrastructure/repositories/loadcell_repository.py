@@ -13,9 +13,9 @@ from sqlalchemy.orm import selectinload
 from app.interfaces.repositories.sensor_repository import ILoadCellRepository
 from app.infrastructure.models import SensorRawLoadCell
 from app.api.v1.schemas import (
-    LoadCellDataCreate,
-    LoadCellDataUpdate,
-    LoadCellDataResponse
+    SensorRawLoadCellCreate,
+    SensorRawLoadCellUpdate,
+    SensorRawLoadCellResponse
 )
 
 
@@ -25,19 +25,26 @@ class LoadCellRepository(ILoadCellRepository):
     def __init__(self, db: AsyncSession):
         self.db = db
     
-    async def create(self, data: LoadCellDataCreate) -> LoadCellDataResponse:
+    async def create(self, data: SensorRawLoadCellCreate) -> SensorRawLoadCellResponse:
         """로드셀 센서 데이터 생성"""
-        db_data = SensorRawLoadCell(**data.dict())
+        # 실제 DB 테이블 구조에 맞게 매핑 (time, device_id, raw_payload만 사용)
+        orm_data = {
+            "time": data.time,
+            "device_id": data.device_id,
+            "raw_payload": data.raw_payload
+        }
+        
+        db_data = SensorRawLoadCell(**orm_data)
         self.db.add(db_data)
         await self.db.commit()
         await self.db.refresh(db_data)
-        return LoadCellDataResponse.from_orm(db_data)
+        return SensorRawLoadCellResponse.from_orm(db_data)
     
     async def get_by_id(
         self,
         device_id: str,
         timestamp: datetime
-    ) -> Optional[LoadCellDataResponse]:
+    ) -> Optional[SensorRawLoadCellResponse]:
         """특정 시간의 로드셀 센서 데이터 조회"""
         query = select(SensorRawLoadCell).where(
             and_(
@@ -46,14 +53,14 @@ class LoadCellRepository(ILoadCellRepository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data = result.scalar_one_or_none()
         
         if data:
-            return LoadCellDataResponse.from_orm(data)
+            return SensorRawLoadCellResponse.from_orm(data)
         return None
     
-    async def get_latest(self, device_id: str) -> Optional[LoadCellDataResponse]:
+    async def get_latest(self, device_id: str) -> Optional[SensorRawLoadCellResponse]:
         """최신 로드셀 센서 데이터 조회"""
         query = (
             select(SensorRawLoadCell)
@@ -61,11 +68,11 @@ class LoadCellRepository(ILoadCellRepository):
             .order_by(SensorRawLoadCell.time.desc())
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data = result.scalars().first()
         
         if data:
-            return LoadCellDataResponse.from_orm(data)
+            return SensorRawLoadCellResponse.from_orm(data)
         return None
     
     async def get_list(
@@ -74,7 +81,7 @@ class LoadCellRepository(ILoadCellRepository):
         start_time: Optional[datetime] = None,
         end_time: Optional[datetime] = None,
         limit_count: int = 100
-    ) -> List[LoadCellDataResponse]:
+    ) -> List[SensorRawLoadCellResponse]:
         """로드셀 센서 데이터 목록 조회"""
         query = select(SensorRawLoadCell)
         
@@ -89,18 +96,18 @@ class LoadCellRepository(ILoadCellRepository):
         # 시간 역순으로 정렬하고 제한
         query = query.order_by(SensorRawLoadCell.time.desc()).limit(limit_count)
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data_list = result.scalars().all()
         
         # 결과를 리스트로 변환하여 반환
-        return [LoadCellDataResponse.from_orm(data) for data in data_list]
+        return [SensorRawLoadCellResponse.from_orm(data) for data in data_list]
     
     async def update(
         self,
         device_id: str,
         timestamp: datetime,
-        data: LoadCellDataUpdate
-    ) -> Optional[LoadCellDataResponse]:
+        data: SensorRawLoadCellUpdate
+    ) -> Optional[SensorRawLoadCellResponse]:
         """로드셀 센서 데이터 수정"""
         query = select(SensorRawLoadCell).where(
             and_(
@@ -109,7 +116,7 @@ class LoadCellRepository(ILoadCellRepository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         db_data = result.scalar_one_or_none()
         
         if not db_data:
@@ -122,7 +129,7 @@ class LoadCellRepository(ILoadCellRepository):
         
         await self.db.commit()
         await self.db.refresh(db_data)
-        return LoadCellDataResponse.from_orm(db_data)
+        return SensorRawLoadCellResponse.from_orm(db_data)
     
     async def delete(self, device_id: str, timestamp: datetime) -> bool:
         """로드셀 센서 데이터 삭제"""
@@ -133,7 +140,7 @@ class LoadCellRepository(ILoadCellRepository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         db_data = result.scalar_one_or_none()
         
         if not db_data:

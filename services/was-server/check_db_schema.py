@@ -8,7 +8,7 @@ import os
 from dotenv import load_dotenv
 
 # 환경 변수 로드
-load_dotenv('env.local')
+load_dotenv('.env.local')
 
 async def check_table_structure():
     """데이터베이스 테이블 구조를 확인합니다."""
@@ -81,4 +81,5 @@ async def check_table_structure():
 
 if __name__ == "__main__":
     asyncio.run(check_table_structure())
+
 

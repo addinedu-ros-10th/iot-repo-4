@@ -13,9 +13,9 @@ from app.infrastructure.database import get_db
 from app.core.container import container
 from app.interfaces.services.sensor_service_interface import ITCRT5000Service
 from app.api.v1.schemas import (
-    TCRT5000DataCreate,
-    TCRT5000DataUpdate,
-    TCRT5000DataResponse
+    SensorRawTCRT5000Create,
+    SensorRawTCRT5000Update,
+    SensorRawTCRT5000Response
 )
 
 router = APIRouter()
@@ -26,16 +26,16 @@ def get_tcrt5000_service(db: AsyncSession = Depends(get_db)) -> ITCRT5000Service
     return container.get_tcrt5000_service(db)
 
 
-@router.post("/create", response_model=TCRT5000DataResponse, status_code=201)
+@router.post("/create", response_model=SensorRawTCRT5000Response, status_code=201)
 async def create_tcrt5000_data(
-    data: TCRT5000DataCreate,
+    data: SensorRawTCRT5000Create,
     tcrt5000_service: ITCRT5000Service = Depends(get_tcrt5000_service)
 ):
     """TCRT5000 근접 센서 데이터 생성"""
     return await tcrt5000_service.create_sensor_data(data)
 
 
-@router.get("/list", response_model=List[TCRT5000DataResponse])
+@router.get("/list", response_model=List[SensorRawTCRT5000Response])
 async def get_tcrt5000_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),
@@ -52,7 +52,7 @@ async def get_tcrt5000_data_list(
     )
 
 
-@router.get("/latest", response_model=Optional[TCRT5000DataResponse])
+@router.get("/latest", response_model=Optional[SensorRawTCRT5000Response])
 async def get_latest_tcrt5000_data(
     device_id: str = Query(..., description="디바이스 ID"),
     tcrt5000_service: ITCRT5000Service = Depends(get_tcrt5000_service)
@@ -61,7 +61,7 @@ async def get_latest_tcrt5000_data(
     return await tcrt5000_service.get_latest_sensor_data(device_id)
 
 
-@router.get("/{device_id}/{timestamp}", response_model=TCRT5000DataResponse)
+@router.get("/{device_id}/{timestamp}", response_model=SensorRawTCRT5000Response)
 async def get_tcrt5000_data(
     device_id: str,
     timestamp: datetime,
@@ -71,11 +71,11 @@ async def get_tcrt5000_data(
     return await tcrt5000_service.get_sensor_data(device_id, timestamp)
 
 
-@router.put("/{device_id}/{timestamp}", response_model=TCRT5000DataResponse)
+@router.put("/{device_id}/{timestamp}", response_model=SensorRawTCRT5000Response)
 async def update_tcrt5000_data(
     device_id: str,
     timestamp: datetime,
-    data: TCRT5000DataUpdate,
+    data: SensorRawTCRT5000Update,
     tcrt5000_service: ITCRT5000Service = Depends(get_tcrt5000_service)
 ):
     """TCRT5000 근접 센서 데이터 수정"""

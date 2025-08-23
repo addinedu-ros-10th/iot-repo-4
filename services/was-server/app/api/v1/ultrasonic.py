@@ -13,9 +13,9 @@ from app.infrastructure.database import get_db
 from app.core.container import container
 from app.interfaces.services.sensor_service_interface import IUltrasonicService
 from app.api.v1.schemas import (
-    UltrasonicDataCreate,
-    UltrasonicDataUpdate,
-    UltrasonicDataResponse
+    SensorRawUltrasonicCreate,
+    SensorRawUltrasonicUpdate,
+    SensorRawUltrasonicResponse
 )
 
 router = APIRouter()
@@ -26,16 +26,16 @@ def get_ultrasonic_service(db: AsyncSession = Depends(get_db)) -> IUltrasonicSer
     return container.get_ultrasonic_service(db)
 
 
-@router.post("/create", response_model=UltrasonicDataResponse, status_code=201)
+@router.post("/create", response_model=SensorRawUltrasonicResponse, status_code=201)
 async def create_ultrasonic_data(
-    data: UltrasonicDataCreate,
+    data: SensorRawUltrasonicCreate,
     ultrasonic_service: IUltrasonicService = Depends(get_ultrasonic_service)
 ):
     """Ultrasonic 초음파 센서 데이터 생성"""
     return await ultrasonic_service.create_sensor_data(data)
 
 
-@router.get("/list", response_model=List[UltrasonicDataResponse])
+@router.get("/list", response_model=List[SensorRawUltrasonicResponse])
 async def get_ultrasonic_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),
@@ -52,7 +52,7 @@ async def get_ultrasonic_data_list(
     )
 
 
-@router.get("/latest", response_model=Optional[UltrasonicDataResponse])
+@router.get("/latest", response_model=Optional[SensorRawUltrasonicResponse])
 async def get_latest_ultrasonic_data(
     device_id: str = Query(..., description="디바이스 ID"),
     ultrasonic_service: IUltrasonicService = Depends(get_ultrasonic_service)
@@ -61,7 +61,7 @@ async def get_latest_ultrasonic_data(
     return await ultrasonic_service.get_latest_sensor_data(device_id)
 
 
-@router.get("/{device_id}/{timestamp}", response_model=UltrasonicDataResponse)
+@router.get("/{device_id}/{timestamp}", response_model=SensorRawUltrasonicResponse)
 async def get_ultrasonic_data(
     device_id: str,
     timestamp: datetime,
@@ -71,11 +71,11 @@ async def get_ultrasonic_data(
     return await ultrasonic_service.get_sensor_data(device_id, timestamp)
 
 
-@router.put("/{device_id}/{timestamp}", response_model=UltrasonicDataResponse)
+@router.put("/{device_id}/{timestamp}", response_model=SensorRawUltrasonicResponse)
 async def update_ultrasonic_data(
     device_id: str,
     timestamp: datetime,
-    data: UltrasonicDataUpdate,
+    data: SensorRawUltrasonicUpdate,
     ultrasonic_service: IUltrasonicService = Depends(get_ultrasonic_service)
 ):
     """Ultrasonic 초음파 센서 데이터 수정"""

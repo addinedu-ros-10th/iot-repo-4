@@ -17,17 +17,17 @@
 - [x] 볼륨 및 네트워크 설정
 
 ## Phase 3: 센서 API 구현 ✅ 완료
-- [x] LoadCell API 구현 (Clean Architecture 준수)
-- [x] MQ5 API 구현 (Clean Architecture 준수)
-- [x] MQ7 API 구현 (Clean Architecture 준수)
-- [x] RFID API 구현 (Clean Architecture 준수)
-- [x] Sound API 구현 (Clean Architecture 준수)
-- [x] TCRT5000 API 구현 (Clean Architecture 준수)
-- [x] Ultrasonic API 구현 (Clean Architecture 준수)
-- [x] EdgeFlame API 구현 (Clean Architecture 준수)
-- [x] EdgePIR API 구현 (Clean Architecture 준수)
-- [x] EdgeReed API 구현 (Clean Architecture 준수)
-- [x] EdgeTilt API 구현 (Clean Architecture 준수)
+- [x] LoadCell API 구현 (Clean Architecture 준수) ✅
+- [x] MQ5 API 구현 (Clean Architecture 준수) ✅
+- [x] MQ7 API 구현 (Clean Architecture 준수) ✅
+- [x] RFID API 구현 (Clean Architecture 준수) ✅
+- [x] Sound API 구현 (Clean Architecture 준수) ✅
+- [x] TCRT5000 API 구현 (Clean Architecture 준수) ✅
+- [x] Ultrasonic API 구현 (Clean Architecture 준수) ✅
+- [x] EdgeFlame API 구현 (Clean Architecture 준수) 🔄
+- [x] EdgePIR API 구현 (Clean Architecture 준수) 🔄
+- [x] EdgeReed API 구현 (Clean Architecture 준수) 🔄
+- [x] EdgeTilt API 구현 (Clean Architecture 준수) 🔄
 - [x] DHT11 API 구현 (Clean Architecture 준수)
 - [x] DHT22 API 구현 (Clean Architecture 준수)
 - [x] DS18B20 API 구현 (Clean Architecture 준수)
@@ -36,10 +36,10 @@
 - [x] PIR API 구현 (Clean Architecture 준수)
 
 ## Phase 4: Actuator API 구현 ✅ 완료
-- [x] ActuatorBuzzer API 구현 (Clean Architecture 준수)
-- [x] ActuatorIRTX API 구현 (Clean Architecture 준수)
-- [x] ActuatorRelay API 구현 (Clean Architecture 준수)
-- [x] ActuatorServo API 구현 (Clean Architecture 준수)
+- [x] ActuatorBuzzer API 구현 (Clean Architecture 준수) 🔄
+- [x] ActuatorIRTX API 구현 (Clean Architecture 준수) 🔄
+- [x] ActuatorRelay API 구현 (Clean Architecture 준수) 🔄
+- [x] ActuatorServo API 구현 (Clean Architecture 준수) 🔄
 
 ## Phase 5: User API 구현 ✅ 완료
 - [x] User API 구현 (Clean Architecture 준수)
@@ -48,6 +48,9 @@
 - [x] 모든 API 엔드포인트 통합 테스트
 - [x] Swagger UI API 문서 확인
 - [x] 데이터베이스 CRUD 작업 검증
+- [x] Raw 센서 API 6개 문제 해결 완료 ✅
+- [ ] Edge 센서 및 Actuator API 문제 해결 🔄
+- [ ] 통합 테스트 100% 성공률 달성 🔄
 - [ ] 성능 최적화 및 부하 테스트
 - [ ] 에러 처리 및 로깅 검증
 
@@ -65,13 +68,21 @@
 - [ ] 보안 강화 및 감사
 - [ ] 백업 및 복구 전략
 
-## 전체 진행률: 100% ✅
-- **25/25 테이블 API 구현 완료**
-- **Clean Architecture 준수 100%**
-- **의존성 주입 및 역전 원칙 적용 완료**
+## 전체 진행률: 60% 🔄
+- **25/25 테이블 API 구현 완료** ✅
+- **Clean Architecture 준수 100%** ✅
+- **의존성 주입 및 역전 원칙 적용 완료** ✅
+- **Raw 센서 API 6개 문제 해결 완료** ✅
+- **Edge 센서 및 Actuator API 문제 해결 진행 중** 🔄
 
 ## 다음 단계
-1. **통합 테스트 완료 및 최적화**
-2. **고급 기능 구현 (인증, 실시간 알림 등)**
-3. **프로덕션 환경 준비**
-4. **문서화 및 사용자 가이드 작성**
+1. **Edge 센서 및 Actuator API 문제 해결 완료** (현재 진행 중)
+2. **통합 테스트 100% 성공률 달성**
+3. **고급 기능 구현 (인증, 실시간 알림 등)**
+4. **프로덕션 환경 준비**
+5. **문서화 및 사용자 가이드 작성**
+
+---
+
+**상태**: ✅ 완료, 🔄 진행 중, ❌ 문제 발생, 📋 대기 중  
+**마지막 업데이트**: 2025-08-22 11:30:00

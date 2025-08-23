@@ -13,9 +13,9 @@ from app.infrastructure.database import get_db
 from app.core.container import container
 from app.interfaces.services.sensor_service_interface import IRFIDService
 from app.api.v1.schemas import (
-    RFIDDataCreate,
-    RFIDDataUpdate,
-    RFIDDataResponse
+    SensorRawRFIDCreate,
+    SensorRawRFIDUpdate,
+    SensorRawRFIDResponse
 )
 
 router = APIRouter()
@@ -26,16 +26,16 @@ def get_rfid_service(db: AsyncSession = Depends(get_db)) -> IRFIDService:
     return container.get_rfid_service(db)
 
 
-@router.post("/create", response_model=RFIDDataResponse, status_code=201)
+@router.post("/create", response_model=SensorRawRFIDUpdate, status_code=201)
 async def create_rfid_data(
-    data: RFIDDataCreate,
+    data: SensorRawRFIDCreate,
     rfid_service: IRFIDService = Depends(get_rfid_service)
 ):
     """RFID 센서 데이터 생성"""
     return await rfid_service.create_sensor_data(data)
 
 
-@router.get("/list", response_model=List[RFIDDataResponse])
+@router.get("/list", response_model=List[SensorRawRFIDUpdate])
 async def get_rfid_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),
@@ -52,7 +52,7 @@ async def get_rfid_data_list(
     )
 
 
-@router.get("/latest", response_model=Optional[RFIDDataResponse])
+@router.get("/latest", response_model=Optional[SensorRawRFIDUpdate])
 async def get_latest_rfid_data(
     device_id: str = Query(..., description="디바이스 ID"),
     rfid_service: IRFIDService = Depends(get_rfid_service)
@@ -61,7 +61,7 @@ async def get_latest_rfid_data(
     return await rfid_service.get_latest_sensor_data(device_id)
 
 
-@router.get("/{device_id}/{timestamp}", response_model=RFIDDataResponse)
+@router.get("/{device_id}/{timestamp}", response_model=SensorRawRFIDResponse)
 async def get_rfid_data(
     device_id: str,
     timestamp: datetime,
@@ -71,11 +71,11 @@ async def get_rfid_data(
     return await rfid_service.get_sensor_data(device_id, timestamp)
 
 
-@router.put("/{device_id}/{timestamp}", response_model=RFIDDataResponse)
+@router.put("/{device_id}/{timestamp}", response_model=SensorRawRFIDResponse)
 async def update_rfid_data(
     device_id: str,
     timestamp: datetime,
-    data: RFIDDataUpdate,
+    data: SensorRawRFIDResponse,
     rfid_service: IRFIDService = Depends(get_rfid_service)
 ):
     """RFID 센서 데이터 수정"""

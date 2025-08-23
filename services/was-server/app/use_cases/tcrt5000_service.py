@@ -11,9 +11,9 @@ from fastapi import HTTPException
 from app.interfaces.services.sensor_service_interface import ITCRT5000Service
 from app.interfaces.repositories.sensor_repository import ITCRT5000Repository
 from app.api.v1.schemas import (
-    TCRT5000DataCreate,
-    TCRT5000DataUpdate,
-    TCRT5000DataResponse
+    SensorRawTCRT5000Create,
+    SensorRawTCRT5000Update,
+    SensorRawTCRT5000Response
 )
 
 
@@ -23,7 +23,7 @@ class TCRT5000Service(ITCRT5000Service):
     def __init__(self, tcrt5000_repository: ITCRT5000Repository):
         self.tcrt5000_repository = tcrt5000_repository
     
-    async def create_sensor_data(self, data: TCRT5000DataCreate) -> TCRT5000DataResponse:
+    async def create_sensor_data(self, data: SensorRawTCRT5000Create) -> SensorRawTCRT5000Response:
         """TCRT5000 센서 데이터 생성"""
         try:
             # 비즈니스 로직 검증
@@ -43,7 +43,7 @@ class TCRT5000Service(ITCRT5000Service):
         self,
         device_id: str,
         timestamp: datetime
-    ) -> Optional[TCRT5000DataResponse]:
+    ) -> Optional[SensorRawTCRT5000Response]:
         """특정 시간의 TCRT5000 센서 데이터 조회"""
         try:
             data = await self.tcrt5000_repository.get_by_id(device_id, timestamp)
@@ -56,7 +56,7 @@ class TCRT5000Service(ITCRT5000Service):
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"TCRT5000 센서 데이터 조회 실패: {str(e)}")
     
-    async def get_latest_sensor_data(self, device_id: str) -> Optional[TCRT5000DataResponse]:
+    async def get_latest_sensor_data(self, device_id: str) -> Optional[SensorRawTCRT5000Response]:
         """최신 TCRT5000 센서 데이터 조회"""
         try:
             data = await self.tcrt5000_repository.get_latest(device_id)
@@ -75,7 +75,7 @@ class TCRT5000Service(ITCRT5000Service):
         start_time: Optional[datetime] = None,
         end_time: Optional[datetime] = None,
         limit: int = 100
-    ) -> List[TCRT5000DataResponse]:
+    ) -> List[SensorRawTCRT5000Response]:
         """TCRT5000 센서 데이터 목록 조회"""
         try:
             # 비즈니스 로직 검증
@@ -102,8 +102,8 @@ class TCRT5000Service(ITCRT5000Service):
         self,
         device_id: str,
         timestamp: datetime,
-        data: TCRT5000DataUpdate
-    ) -> Optional[TCRT5000DataResponse]:
+        data: SensorRawTCRT5000Update
+    ) -> Optional[SensorRawTCRT5000Response]:
         """TCRT5000 센서 데이터 수정"""
         try:
             # 비즈니스 로직 검증

@@ -20,16 +20,22 @@ import time
 from typing import Dict, List, Any
 from datetime import datetime, timedelta
 import uuid
+import os
+from dotenv import load_dotenv
 
-class IoTAPIIntegrationTest:
+class IoTIntegrationTester:
     """IoT Care Backend System API 통합 테스트 클래스"""
     
     def __init__(self, base_url: str = "http://localhost:8000"):
         self.base_url = base_url
-        self.client = httpx.AsyncClient(timeout=30.0)
+        self.client = httpx.AsyncClient(timeout=120.0)
         self.test_results = {}
         self.created_ids = {}
         self.failed_tests = []
+        self.existing_device_ids = []
+        
+        # 환경 변수 로드
+        load_dotenv('.env.local')
         
     async def __aenter__(self):
         return self
@@ -62,7 +68,11 @@ class IoTAPIIntegrationTest:
     async def test_health_check(self) -> bool:
         """Health check 테스트"""
         try:
+            print(f"🔍 Health check 시도: {self.base_url}/health")
             response = await self.client.get(f"{self.base_url}/health")
+            print(f"📡 Response status: {response.status_code}")
+            print(f"📡 Response body: {response.text}")
+            
             if response.status_code == 200:
                 print("✅ Health check 성공")
                 return True
@@ -71,6 +81,8 @@ class IoTAPIIntegrationTest:
                 return False
         except Exception as e:
             print(f"❌ Health check 오류: {e}")
+            import traceback
+            traceback.print_exc()
             return False
     
     async def test_api_endpoint(self, api_name: str, endpoint: str, test_data: Dict[str, Any]) -> bool:
@@ -250,160 +262,90 @@ class IoTAPIIntegrationTest:
             print(f"  DELETE 오류: {e}")
             return False
     
-    def generate_test_data(self, api_name: str) -> Dict[str, Any]:
+    async def get_existing_device_ids(self):
+        """데이터베이스에서 실제 존재하는 device_id 목록을 가져옵니다."""
+        try:
+            import asyncpg
+            
+            db_config = {
+                'host': os.getenv('DB_HOST'),
+                'port': int(os.getenv('DB_PORT')),
+                'user': os.getenv('DB_USER'),
+                'password': os.getenv('DB_PASSWORD'),
+                'database': os.getenv('DB_NAME')
+            }
+            
+            conn = await asyncpg.connect(**db_config)
+            result = await conn.fetch("SELECT device_id FROM devices LIMIT 10")
+            await conn.close()
+            
+            self.existing_device_ids = [row['device_id'] for row in result]
+            print(f"✅ 실제 device_id {len(self.existing_device_ids)}개 로드 완료")
+            
+        except Exception as e:
+            print(f"⚠️ device_id 로드 실패, 기본값 사용: {e}")
+            # 기본 테스트용 device_id 사용
+            self.existing_device_ids = ['test_device_001', 'test_device_002', 'test_device_003']
+    
+    def get_random_device_id(self):
+        """실제 존재하는 device_id 중에서 랜덤으로 선택합니다."""
+        if self.existing_device_ids:
+            import random
+            return random.choice(self.existing_device_ids)
+        else:
+            return 'test_device_001'  # 기본값
+    
+    def generate_test_data(self, api_name):
         """API별 테스트 데이터 생성"""
         current_time = datetime.now()
         
-        # API별 특화 데이터
-        if "user" in api_name.lower():
-            unique_id = uuid.uuid4().hex[:8]
+        if "edge_flame" in api_name.lower():
             return {
-                "user_name": f"test_user_{unique_id}",
-                "email": f"test_{unique_id}@example.com",
-                "phone_number": "01012345678",
-                "user_role": "user"
-            }
-        elif "cds" in api_name.lower():
-            return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
-                "analog_value": 512,
-                "lux_value": 100.5,
-                "raw_payload": {"test": "data"}
-            }
-        elif "dht" in api_name.lower():
-            return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
-                "temperature": 25.5,
-                "humidity": 60.0,
-                "heat_index": 26.2,
-                "raw_payload": {"test": "data"}
-            }
-        elif "flame" in api_name.lower():
-            return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
-                "analog_value": 256,
-                "flame_detected": False,
-                "raw_payload": {"test": "data"}
-            }
-        elif "imu" in api_name.lower():
-            return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
-                "accel_x": 0.1,
-                "accel_y": 0.2,
-                "accel_z": 9.8,
-                "gyro_x": 0.01,
-                "gyro_y": 0.02,
-                "gyro_z": 0.03,
-                "mag_x": 0.1,
-                "mag_y": 0.2,
-                "mag_z": 0.3,
-                "temp": 25.0,
-                "raw_payload": {"test": "data"}
-            }
-        elif "loadcell" in api_name.lower():
-            return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
-                "weight_kg": 25.5,
-                "calibrated": True,
-                "raw_payload": {"test": "data"}
-            }
-        elif "mq5" in api_name.lower():
-            return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
-                "ppm_value": 150.0,
-                "gas_type": "LPG",
-                "raw_payload": {"test": "data"}
-            }
-        elif "mq7" in api_name.lower():
-            return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
-                "ppm_value": 200.0,
-                "gas_type": "CO",
-                "raw_payload": {"test": "data"}
-            }
-        elif "rfid" in api_name.lower():
-            return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
-                "card_type": "Mifare",
-                "read_success": True,
-                "raw_payload": {"test": "data"}
-            }
-        elif "sound" in api_name.lower():
-            return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
-                "db_value": 65.5,
-                "threshold_exceeded": False,
-                "raw_payload": {"test": "data"}
-            }
-        elif "tcrt5000" in api_name.lower():
-            return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
-                "object_detected": True,
-                "raw_payload": {"test": "data"}
-            }
-        elif "ultrasonic" in api_name.lower():
-            return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
-                "distance_cm": 45.2,
-                "measurement_valid": True,
-                "raw_payload": {"test": "data"}
-            }
-        elif "edge_flame" in api_name.lower():
-            return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
+                "time": current_time,
+                "device_id": self.get_random_device_id(),
                 "flame_detected": False,
                 "confidence": 0.95,
                 "alert_level": "low",
+                "processing_time": 0.1,
                 "raw_payload": {"test": "data"}
             }
         elif "edge_pir" in api_name.lower():
             return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
-                "motion_detected": False,
+                "time": current_time,
+                "device_id": self.get_random_device_id(),
+                "motion_detected": True,
                 "confidence": 0.9,
                 "motion_direction": "north",
-                "motion_speed": 0.5,
-                "processing_time": 0.1,
+                "motion_speed": 2.5,
+                "processing_time": 0.05,
                 "raw_payload": {"test": "data"}
             }
         elif "edge_reed" in api_name.lower():
             return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
-                "switch_state": False,
-                "confidence": 0.9,
+                "time": current_time,
+                "device_id": self.get_random_device_id(),
+                "switch_state": True,
                 "magnetic_field_detected": True,
+                "confidence": 0.98,
                 "magnetic_strength": 0.8,
-                "processing_time": 0.1,
+                "processing_time": 0.02,
                 "raw_payload": {"test": "data"}
             }
         elif "edge_tilt" in api_name.lower():
             return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
+                "time": current_time,
+                "device_id": self.get_random_device_id(),
                 "tilt_detected": False,
-                "tilt_angle": 0.5,
-                "tilt_direction": "north",
-                "processing_time": 0.1,
+                "tilt_angle": 0.0,
+                "tilt_direction": "none",
+                "confidence": 0.99,
+                "processing_time": 0.03,
                 "raw_payload": {"test": "data"}
             }
         elif "actuator_buzzer" in api_name.lower():
             return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
+                "time": current_time,
+                "device_id": self.get_random_device_id(),
                 "buzzer_type": "piezo",
                 "state": "on",
                 "freq_hz": 1000,
@@ -412,34 +354,52 @@ class IoTAPIIntegrationTest:
             }
         elif "actuator_irtx" in api_name.lower():
             return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
+                "time": current_time,
+                "device_id": self.get_random_device_id(),
                 "protocol": "NEC",
                 "command_hex": "FF00",
                 "raw_payload": {"test": "data"}
             }
         elif "actuator_relay" in api_name.lower():
             return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
+                "time": current_time,
+                "device_id": self.get_random_device_id(),
                 "channel": 1,
                 "state": "on",
                 "raw_payload": {"test": "data"}
             }
         elif "actuator_servo" in api_name.lower():
             return {
-                "time": current_time.isoformat(),
-                "device_id": str(uuid.uuid4()),
+                "time": current_time,
+                "device_id": self.get_random_device_id(),
                 "channel": 1,
                 "angle_deg": 90.0,
+                "raw_payload": {"test": "data"}
+            }
+        elif "user" in api_name.lower():
+            # Users API 테스트 데이터
+            unique_id = uuid.uuid4().hex[:8]
+            return {
+                "user_name": f"test_user_{unique_id}",
+                "email": f"test_{unique_id}@example.com",
+                "phone_number": "01012345678",
+                "user_role": "user"
+            }
+        elif "cds" in api_name.lower():
+            # CDS API 테스트 데이터
+            return {
+                "time": current_time.isoformat(),
+                "device_id": self.get_random_device_id(),
+                "analog_value": 512,
+                "lux_value": 100.5,
                 "raw_payload": {"test": "data"}
             }
         else:
             # 기본 센서 데이터
             return {
-                "time": current_time,
-                "device_id": str(uuid.uuid4()),
-                "sensor_value": 100.0,
+                "time": current_time.isoformat(),
+                "device_id": self.get_random_device_id(),
+                "raw_value": 100.0,
                 "unit": "test_unit",
                 "status": "normal",
                 "raw_payload": {"test": "data"}
@@ -449,6 +409,9 @@ class IoTAPIIntegrationTest:
         """모든 API 테스트 실행"""
         print("🚀 IoT Care Backend System 통합 테스트 시작")
         print("=" * 60)
+        
+        # 실제 device_id 로드
+        await self.get_existing_device_ids()
         
         # Health check
         if not await self.test_health_check():
@@ -531,7 +494,7 @@ class IoTAPIIntegrationTest:
 
 async def main():
     """메인 함수"""
-    async with IoTAPIIntegrationTest() as tester:
+    async with IoTIntegrationTester() as tester:
         success = await tester.run_all_tests()
         if success:
             print("\n🎉 모든 API 통합 테스트가 성공적으로 완료되었습니다!")

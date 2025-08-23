@@ -11,9 +11,9 @@ from fastapi import HTTPException
 from app.interfaces.services.sensor_service_interface import IMQ5Service
 from app.interfaces.repositories.sensor_repository import IMQ5Repository
 from app.api.v1.schemas import (
-    MQ5DataCreate,
-    MQ5DataUpdate,
-    MQ5DataResponse
+    SensorRawMQ5Create,
+    SensorRawMQ5Update,
+    SensorRawMQ5Response
 )
 
 
@@ -23,16 +23,9 @@ class MQ5Service(IMQ5Service):
     def __init__(self, mq5_repository: IMQ5Repository):
         self.mq5_repository = mq5_repository
     
-    async def create_sensor_data(self, data: MQ5DataCreate) -> MQ5DataResponse:
+    async def create_sensor_data(self, data: SensorRawMQ5Create) -> SensorRawMQ5Response:
         """MQ5 가스 센서 데이터 생성"""
         try:
-            # 비즈니스 로직 검증
-            if data.ppm_value is not None and data.ppm_value < 0:
-                raise ValueError("PPM 값은 0 이상이어야 합니다")
-            
-            if data.analog_value is not None and (data.analog_value < 0 or data.analog_value > 1023):
-                raise ValueError("아날로그 값은 0에서 1023 사이여야 합니다")
-            
             # 리포지토리를 통한 데이터 생성
             created_data = await self.mq5_repository.create(data)
             return created_data
@@ -46,7 +39,7 @@ class MQ5Service(IMQ5Service):
         self,
         device_id: str,
         timestamp: datetime
-    ) -> Optional[MQ5DataResponse]:
+    ) -> Optional[SensorRawMQ5Response]:
         """특정 시간의 MQ5 가스 센서 데이터 조회"""
         try:
             data = await self.mq5_repository.get_by_id(device_id, timestamp)
@@ -59,7 +52,7 @@ class MQ5Service(IMQ5Service):
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"데이터 조회 실패: {str(e)}")
     
-    async def get_latest_sensor_data(self, device_id: str) -> Optional[MQ5DataResponse]:
+    async def get_latest_sensor_data(self, device_id: str) -> Optional[SensorRawMQ5Response]:
         """최신 MQ5 가스 센서 데이터 조회"""
         try:
             data = await self.mq5_repository.get_latest(device_id)
@@ -78,44 +71,42 @@ class MQ5Service(IMQ5Service):
         start_time: Optional[datetime] = None,
         end_time: Optional[datetime] = None,
         limit: int = 100
-    ) -> List[MQ5DataResponse]:
+    ) -> List[SensorRawMQ5Response]:
         """MQ5 가스 센서 데이터 목록 조회"""
         try:
-            # 비즈니스 로직 검증
-            if limit < 1 or limit > 1000:
+            # 비즈니스 로직 검증 (기존 코드와 동일)
+            if not (1 <= limit <= 1000):
                 raise ValueError("조회 개수는 1에서 1000 사이여야 합니다")
             
             if start_time and end_time and start_time > end_time:
                 raise ValueError("시작 시간은 종료 시간보다 이전이어야 합니다")
             
+            # 리포지토리에서 데이터를 즉시 조회하여 Pydantic 모델 리스트로 반환받음
             data_list = await self.mq5_repository.get_list(
                 device_id=device_id,
                 start_time=start_time,
                 end_time=end_time,
                 limit_count=limit
             )
-            return data_list
             
+            # 리포지토리에서 이미 Pydantic 모델 리스트를 반환하므로, 추가 변환 없이 바로 반환
+            return data_list
+            # return [SensorRawMQ5Response.model_validate(o) for o in data_list]
+                
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
         except Exception as e:
+            # 리포지토리에서 발생한 예외를 그대로 전파
             raise HTTPException(status_code=500, detail=f"데이터 조회 실패: {str(e)}")
     
     async def update_sensor_data(
         self,
         device_id: str,
         timestamp: datetime,
-        data: MQ5DataUpdate
-    ) -> Optional[MQ5DataResponse]:
+        data: SensorRawMQ5Update
+    ) -> Optional[SensorRawMQ5Response]:
         """MQ5 가스 센서 데이터 수정"""
         try:
-            # 비즈니스 로직 검증
-            if data.ppm_value is not None and data.ppm_value < 0:
-                raise ValueError("PPM 값은 0 이상이어야 합니다")
-            
-            if data.analog_value is not None and (data.analog_value < 0 or data.analog_value > 1023):
-                raise ValueError("아날로그 값은 0에서 1023 사이여야 합니다")
-            
             updated_data = await self.mq5_repository.update(device_id, timestamp, data)
             if not updated_data:
                 raise HTTPException(status_code=404, detail="수정할 데이터를 찾을 수 없습니다")

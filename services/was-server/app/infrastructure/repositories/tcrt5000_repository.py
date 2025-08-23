@@ -12,9 +12,9 @@ from sqlalchemy import select, and_
 from app.interfaces.repositories.sensor_repository import ITCRT5000Repository
 from app.infrastructure.models import SensorRawTCRT5000
 from app.api.v1.schemas import (
-    TCRT5000DataCreate,
-    TCRT5000DataUpdate,
-    TCRT5000DataResponse
+    SensorRawTCRT5000Create,
+    SensorRawTCRT5000Update,
+    SensorRawTCRT5000Response
 )
 
 
@@ -24,19 +24,26 @@ class TCRT5000Repository(ITCRT5000Repository):
     def __init__(self, db: AsyncSession):
         self.db = db
     
-    async def create(self, data: TCRT5000DataCreate) -> TCRT5000DataResponse:
-        """TCRT5000 센서 데이터 생성"""
-        db_data = SensorRawTCRT5000(**data.dict())
+    async def create(self, data: SensorRawTCRT5000Create) -> SensorRawTCRT5000Response:
+        """TCRT5000 근접 센서 데이터 생성"""
+        # 실제 DB 테이블 구조에 맞게 매핑 (time, device_id, raw_payload만 사용)
+        orm_data = {
+            "time": data.time,
+            "device_id": data.device_id,
+            "raw_payload": data.raw_payload
+        }
+        
+        db_data = SensorRawTCRT5000(**orm_data)
         self.db.add(db_data)
         await self.db.commit()
         await self.db.refresh(db_data)
-        return TCRT5000DataResponse.from_orm(db_data)
+        return SensorRawTCRT5000Response.from_orm(db_data)
     
     async def get_by_id(
         self,
         device_id: str,
         timestamp: datetime
-    ) -> Optional[TCRT5000DataResponse]:
+    ) -> Optional[SensorRawTCRT5000Response]:
         """특정 시간의 TCRT5000 센서 데이터 조회"""
         query = select(SensorRawTCRT5000).where(
             and_(
@@ -45,14 +52,14 @@ class TCRT5000Repository(ITCRT5000Repository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data = result.scalar_one_or_none()
         
         if data:
-            return TCRT5000DataResponse.from_orm(data)
+            return SensorRawTCRT5000Response.from_orm(data)
         return None
     
-    async def get_latest(self, device_id: str) -> Optional[TCRT5000DataResponse]:
+    async def get_latest(self, device_id: str) -> Optional[SensorRawTCRT5000Response]:
         """최신 TCRT5000 센서 데이터 조회"""
         query = (
             select(SensorRawTCRT5000)
@@ -60,11 +67,11 @@ class TCRT5000Repository(ITCRT5000Repository):
             .order_by(SensorRawTCRT5000.time.desc())
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data = result.scalars().first()
         
         if data:
-            return TCRT5000DataResponse.from_orm(data)
+            return SensorRawTCRT5000Response.from_orm(data)
         return None
     
     async def get_list(
@@ -73,7 +80,7 @@ class TCRT5000Repository(ITCRT5000Repository):
         start_time: Optional[datetime] = None,
         end_time: Optional[datetime] = None,
         limit_count: int = 100
-    ) -> List[TCRT5000DataResponse]:
+    ) -> List[SensorRawTCRT5000Response]:
         """TCRT5000 센서 데이터 목록 조회"""
         query = select(SensorRawTCRT5000)
         
@@ -88,18 +95,19 @@ class TCRT5000Repository(ITCRT5000Repository):
         # 시간 역순으로 정렬하고 제한
         query = query.order_by(SensorRawTCRT5000.time.desc()).limit(limit_count)
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         data_list = result.scalars().all()
         
         # 결과를 리스트로 변환하여 반환
-        return [TCRT5000DataResponse.from_orm(data) for data in data_list]
+        return [SensorRawTCRT5000Response.from_orm(data) for data in data_list]
     
     async def update(
         self,
         device_id: str,
         timestamp: datetime,
-        data: TCRT5000DataUpdate
-    ) -> Optional[TCRT5000DataResponse]:
+        data:     SensorRawTCRT5000Update,
+
+    ) -> Optional[SensorRawTCRT5000Response]:
         """TCRT5000 센서 데이터 수정"""
         query = select(SensorRawTCRT5000).where(
             and_(
@@ -108,7 +116,7 @@ class TCRT5000Repository(ITCRT5000Repository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         db_data = result.scalar_one_or_none()
         
         if not db_data:
@@ -121,7 +129,7 @@ class TCRT5000Repository(ITCRT5000Repository):
         
         await self.db.commit()
         await self.db.refresh(db_data)
-        return TCRT5000DataResponse.from_orm(db_data)
+        return SensorRawTCRT5000Response.from_orm(db_data)
     
     async def delete(self, device_id: str, timestamp: datetime) -> bool:
         """TCRT5000 센서 데이터 삭제"""
@@ -132,7 +140,7 @@ class TCRT5000Repository(ITCRT5000Repository):
             )
         )
         
-        result = await self.db.execute(query)
+        result = self.db.execute(query)
         db_data = result.scalar_one_or_none()
         
         if not db_data:

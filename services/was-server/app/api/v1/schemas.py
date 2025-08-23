@@ -6,7 +6,7 @@ FastAPI 엔드포인트의 요청/응답 모델을 정의합니다.
 
 from datetime import datetime
 from typing import Optional, List
-from pydantic import BaseModel, EmailStr, Field, validator
+from pydantic import BaseModel, EmailStr, Field, validator, ConfigDict
 from uuid import UUID
 
 
@@ -930,4 +930,198 @@ class DeviceRTCDataResponse(BaseModel):
     raw_payload: Optional[dict] = None
 
     class Config:
-        from_attributes = True 
+        from_attributes = True
+
+
+# ============================================================================
+# Raw 센서 스키마 (ORM 모드 문제 해결)
+# ============================================================================
+
+# Raw CDS 센서 스키마
+class SensorRawCDSCreate(BaseModel):
+    """Raw CDS 센서 데이터 생성 스키마"""
+    time: datetime
+    device_id: str
+    analog_value: Optional[int] = None
+    lux_value: Optional[float] = None
+    raw_payload: Optional[dict] = None
+
+
+class SensorRawCDSResponse(BaseModel):
+    """Raw CDS 센서 데이터 응답 스키마"""
+    time: datetime
+    device_id: str
+    analog_value: Optional[int] = None
+    lux_value: Optional[float] = None
+    raw_payload: Optional[dict] = None
+
+    class Config:
+        from_attributes = True
+
+
+# Raw LoadCell 센서 스키마
+class SensorRawLoadCellCreate(BaseModel):
+    """Raw LoadCell 센서 데이터 생성 스키마"""
+    time: datetime
+    device_id: str
+    raw_payload: Optional[dict] = None
+
+
+class SensorRawLoadCellUpdate(BaseModel):
+    """Raw LoadCell 센서 데이터 수정 스키마"""
+    raw_payload: Optional[dict] = None
+
+
+class SensorRawLoadCellResponse(BaseModel):
+    """Raw LoadCell 센서 데이터 응답 스키마"""
+    time: datetime
+    device_id: str
+    raw_payload: Optional[dict] = None
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+
+# Raw MQ5 센서 스키마
+class SensorRawMQ5Create(BaseModel):
+    """Raw MQ5 센서 데이터 생성 스키마"""
+    time: datetime
+    device_id: str
+    raw_payload: Optional[dict] = None
+
+
+class SensorRawMQ5Update(BaseModel):
+    """Raw MQ5 센서 데이터 수정 스키마"""
+    raw_payload: Optional[dict] = None
+
+
+class SensorRawMQ5Response(BaseModel):
+    """Raw MQ5 센서 데이터 응답 스키마"""
+    time: datetime
+    device_id: str
+    raw_payload: Optional[dict] = None
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+
+# Raw MQ7 센서 스키마
+class SensorRawMQ7Create(BaseModel):
+    """Raw MQ7 센서 데이터 생성 스키마"""
+    time: datetime
+    device_id: str
+    raw_payload: Optional[dict] = None
+
+
+class SensorRawMQ7Update(BaseModel):
+    """Raw MQ7 센서 데이터 수정 스키마"""
+    raw_payload: Optional[dict] = None
+
+
+class SensorRawMQ7Response(BaseModel):
+    """Raw MQ7 센서 데이터 응답 스키마"""
+    time: datetime
+    device_id: str
+    raw_payload: Optional[dict] = None
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+
+# Raw RFID 센서 스키마
+class SensorRawRFIDCreate(BaseModel):
+    """Raw RFID 센서 데이터 생성 스키마"""
+    time: datetime
+    device_id: str
+    raw_payload: Optional[dict] = None
+
+
+class SensorRawRFIDUpdate(BaseModel):
+    """Raw RFID 센서 데이터 수정 스키마"""
+    raw_payload: Optional[dict] = None
+
+
+class SensorRawRFIDResponse(BaseModel):
+    """Raw RFID 센서 데이터 응답 스키마"""
+    time: datetime
+    device_id: str
+    raw_payload: Optional[dict] = None
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+
+# Raw Sound 센서 스키마
+class SensorRawSoundCreate(BaseModel):
+    """Raw Sound 센서 데이터 생성 스키마"""
+    time: datetime
+    device_id: str
+    raw_payload: Optional[dict] = None
+
+
+class SensorRawSoundUpdate(BaseModel):
+    """Raw Sound 센서 데이터 수정 스키마"""
+    raw_payload: Optional[dict] = None
+
+
+class SensorRawSoundResponse(BaseModel):
+    """Raw Sound 센서 데이터 응답 스키마"""
+    time: datetime
+    device_id: str
+    raw_payload: Optional[dict] = None
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+
+# Raw TCRT5000 센서 스키마
+class SensorRawTCRT5000Create(BaseModel):
+    """Raw TCRT5000 센서 데이터 생성 스키마"""
+    time: datetime
+    device_id: str
+    raw_payload: Optional[dict] = None
+
+
+class SensorRawTCRT5000Update(BaseModel):
+    """Raw TCRT5000 센서 데이터 수정 스키마"""
+    raw_payload: Optional[dict] = None
+
+
+class SensorRawTCRT5000Response(BaseModel):
+    """Raw TCRT5000 센서 데이터 응답 스키마"""
+    time: datetime
+    device_id: str
+    raw_payload: Optional[dict] = None
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+
+# Raw Ultrasonic 센서 스키마
+class SensorRawUltrasonicCreate(BaseModel):
+    """Raw Ultrasonic 센서 데이터 생성 스키마"""
+    time: datetime
+    device_id: str
+    raw_payload: Optional[dict] = None
+
+
+class SensorRawUltrasonicUpdate(BaseModel):
+    """Raw Ultrasonic 센서 데이터 수정 스키마"""
+    raw_payload: Optional[dict] = None
+
+
+class SensorRawUltrasonicResponse(BaseModel):
+    """Raw Ultrasonic 센서 데이터 응답 스키마"""
+    time: datetime
+    device_id: str
+    raw_payload: Optional[dict] = None
+
+    class Config:
+        from_attributes = True
+        orm_mode = True 
