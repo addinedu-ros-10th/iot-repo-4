@@ -17,7 +17,6 @@ services:
       - redis
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
     networks:
       - iot-care-network
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -36,7 +35,7 @@ services:
     networks:
       - iot-care-network
 
-  # Caddy 웹서버 (리버스 프록시 + SSL)
+  # Caddy 웹서버 (환경별 설정 자동 적용)
   caddy:
     image: caddy:2-alpine
     container_name: iot-care-caddy
@@ -45,13 +44,23 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./Caddyfile.local:/app/Caddyfile:ro
+      - ./Caddyfile.dev:/app/Caddyfile.dev:ro
+      - ./Caddyfile.prod:/app/Caddyfile.prod:ro
+      - ./scripts/detect_environment.sh:/app/detect_environment.sh:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
       - app
     networks:
       - iot-care-network
+    # 환경별 Caddy 설정 자동 적용
+    command: >
+      sh -c "
+        chmod +x /app/detect_environment.sh &&
+        /app/detect_environment.sh
+      "
 
 volumes:
   redis_data:

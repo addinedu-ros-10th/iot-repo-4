@@ -9,6 +9,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
+      - ./app:/app/app
       - ./logs:/app/logs
       - ./config:/app/config
     env_file:
@@ -25,7 +26,7 @@ services:
     container_name: iot-care-redis-prod
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "16379:6379"
     volumes:
       - redis_prod_data:/data
       - ./config/redis.conf:/usr/local/etc/redis/redis.conf
@@ -33,7 +34,7 @@ services:
     networks:
       - iot-care-prod-network
 
-  # Caddy 웹서버 (운영용 - SSL 자동 적용)
+  # Caddy 웹서버 (프로덕션용 - 환경별 설정 자동 적용)
   caddy:
     image: caddy:2-alpine
     container_name: iot-care-caddy-prod
@@ -42,13 +43,22 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./Caddyfile.prod:/etc/caddy/Caddyfile
+      - ./Caddyfile.local:/app/Caddyfile:ro
+      - ./Caddyfile.dev:/app/Caddyfile.dev:ro
+      - ./Caddyfile.prod:/app/Caddyfile.prod:ro
+      - ./scripts/detect_environment.sh:/app/detect_environment.sh:ro
       - caddy_prod_data:/data
       - caddy_prod_config:/config
     depends_on:
       - app
     networks:
       - iot-care-prod-network
+    # 환경별 Caddy 설정 자동 적용
+    command: >
+      sh -c "
+        chmod +x /app/detect_environment.sh &&
+        /app/detect_environment.sh
+      "
 
 volumes:
   redis_prod_data:
