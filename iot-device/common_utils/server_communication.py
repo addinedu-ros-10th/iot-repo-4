@@ -91,7 +91,7 @@ class WindowClass(QMainWindow, from_class):
         if self.conn:
             self.conn.write(b'H')
         self.server += 1
-        self.test_post_json()
+        # self.test_post_json()
         return
 
     def low(self):
@@ -99,7 +99,7 @@ class WindowClass(QMainWindow, from_class):
         if self.conn:
             self.conn.write(b'L')
         self.server += 1
-        self.test_post_json()
+        # self.test_post_json()
         return
 
     def print(self, cmd):
