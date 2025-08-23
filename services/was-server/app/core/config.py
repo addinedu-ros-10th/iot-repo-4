@@ -7,8 +7,7 @@ Core 설정 모듈
 
 import os
 from typing import Optional
-from pydantic_settings import BaseSettings
-from pydantic import Field
+from pydantic import BaseSettings, Field
 from dotenv import load_dotenv
 
 
