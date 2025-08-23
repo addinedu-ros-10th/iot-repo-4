@@ -119,6 +119,55 @@ class WindowClass(QMainWindow, from_class):
         self.timer.timeout.connect(self.update_pies)
         self.timer.start()
 
+        self.setStyleSheet("""
+    QMainWindow {
+        background-color: #f4f6f8;
+    }
+
+    QLabel {
+        font-size: 14px;
+        color: #333;
+    }
+
+    QLineEdit {
+        background-color: white;
+        border: 1px solid #ccc;
+        padding: 5px;
+        border-radius: 5px;
+    }
+
+    QTableWidget {
+        background-color: white;
+        border: 1px solid #aaa;
+        gridline-color: #ccc;
+        font-size: 12px;
+    }
+
+    QHeaderView::section {
+        background-color: #e0e0e0;
+        font-weight: bold;
+        padding: 5px;
+        border: 1px solid #ccc;
+    }
+
+    QTableWidget::item:selected {
+        background-color: #a0c4ff;
+        color: black;
+    }
+
+    QPushButton {
+        background-color: #4a90e2;
+        color: white;
+        padding: 6px;
+        border: none;
+        border-radius: 4px;
+    }
+
+    QPushButton:hover {
+        background-color: #357ab7;
+    }
+""")
+
 
     def append_log(self, sensor_name, index, raw, norm):
         row = self.table_log.rowCount()
