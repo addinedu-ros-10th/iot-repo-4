@@ -48,13 +48,20 @@ class WindowClass(QMainWindow, from_class):
         self.setupUi(self)
         self.setWindowTitle("Multi Pie Graphs with Per-Sensor Normalization")
 
+        self.x = np.linspace(0, 200, 2000)
+        self.gas = np.linspace(0, 100, len(self.x))
+        self.temperature = 20 + 10 * self.x
+        self.weight_rice = 50 + 30 * np.sin(self.x / 40)
+        self.weight_bed = 100 + 20 * np.cos(self.x / 60)
+        self.weight_laundry = 70 + 10 * np.sin(self.x / 20)
+
         # ✅ 센서별 정규화 범위 (소프트코딩)
         self.sensor_config = {
-            "sensor1": {"min": 0, "max": 2},
-            "sensor2": {"min": 0.5, "max": 2},
-            "sensor3": {"min": 0, "max": 2},
-            "sensor4": {"min": 0, "max": 2},
-            "sensor5": {"min": 0.2, "max": 2}
+            "sensor1": {"min": 0, "max": 100},
+            "sensor2": {"min": 0.5, "max": 200},
+            "sensor3": {"min": 0, "max": 200},
+            "sensor4": {"min": 0, "max": 300},
+            "sensor5": {"min": 0.2, "max": 300}
         }
 
         # ✅ 센서 위젯 등록
@@ -66,6 +73,14 @@ class WindowClass(QMainWindow, from_class):
             "sensor5": self.widgetPlot_pie_5
         }
 
+        self.sensor_values = {
+            "sensor1": self.gas,           # 가스 센서
+            "sensor2": self.temperature,   # 온도
+            "sensor3": self.weight_rice,   # 쌀 무게
+            "sensor4": self.weight_bed,    # 침대 무게
+            "sensor5": self.weight_laundry # 세탁물 무게
+        }
+
         self.sensor_canvases = {}
         for name, widget in self.sensor_widgets.items():
             canvas = PieCanvas(widget)
@@ -75,19 +90,22 @@ class WindowClass(QMainWindow, from_class):
 
         # 테스트용 사인 곡선 (센서별 phase 다르게)
         self.index = 0
-        self.x = np.linspace(0, 2 * np.pi, 200)
-        self.phase = {
-            "sensor1": 0,
-            "sensor2": np.pi / 3,
-            "sensor3": np.pi / 2,
-            "sensor4": np.pi,
-            "sensor5": np.pi * 2
-        }
 
         self.timer = QTimer()
         self.timer.setInterval(100)
         self.timer.timeout.connect(self.update_pies)
         self.timer.start()
+
+        self.decide_crisis_level()
+        self.show_crisis_contents()
+
+    def decide_crisis_level(self):
+        self.label_crlevel.setText("qqq")
+        return
+
+    def show_crisis_contents(self):
+        self.line_crcontents.setText("qqq")
+        return
 
     def normalize(self, name, val):
         """센서별 정규화 처리"""
@@ -97,20 +115,17 @@ class WindowClass(QMainWindow, from_class):
 
         if max_v == min_v:
             return 0.0
-        return min(max((val - min_v) / (max_v - min_v), 0.0), 1.0)
+        return min(max((val - min_v) / (max_v - min_v), 0.0), 2.0)
 
     def update_pies(self):
         for name, canvas in self.sensor_canvases.items():
-            phase_shift = self.phase[name]
-            
-            if phase_shift != "sensor3":
-                y = np.sin(self.x[self.index] + phase_shift) + 1  # 0~2 사이의 값
-            else:
-                y = np.sin(self.x[self.index] + phase_shift) + 1  # 0~2 사이의 값
-            y_norm = self.normalize(name, y)
-            canvas.draw_pie(y_norm)
+            data = self.sensor_values.get(name)
+            if data is not None and self.index < len(data):
+                value = data[self.index]
+                norm = self.normalize(name, value)
+                canvas.draw_pie(norm)
 
-        self.index = (self.index + 1) % len(self.x)
+        self.index += 1
 
 
 if __name__ == "__main__":
