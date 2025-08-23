@@ -18,5 +18,6 @@ void loop() {
   lcd.print("www.eduino.kr"); // 'www.eduino.kr'
   delay(1000);                // 1초대기
   lcd.clear();                // LCD 문자열 삭제
-}// 테스트
+}// 테스트 
+
 
