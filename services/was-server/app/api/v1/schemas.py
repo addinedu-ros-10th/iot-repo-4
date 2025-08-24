@@ -4,8 +4,8 @@ API 스키마 정의
 FastAPI 엔드포인트의 요청/응답 모델을 정의합니다.
 """
 
-from datetime import datetime
-from typing import Optional, List
+from datetime import datetime, date
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, EmailStr, Field, validator, ConfigDict
 from uuid import UUID
 
@@ -1124,4 +1124,322 @@ class SensorRawUltrasonicResponse(BaseModel):
 
     class Config:
         from_attributes = True
-        orm_mode = True 
+        orm_mode = True
+
+
+# ============================================================================
+# 온도 센서 원시 데이터 스키마
+# ============================================================================
+
+class SensorRawTemperatureBase(BaseModel):
+    """온도 센서 원시 데이터 기본 스키마"""
+    temperature_celsius: float = Field(..., description="섭씨 단위의 온도 값")
+    humidity_percent: Optional[float] = Field(None, description="상대 습도 값 (%)")
+    raw_payload: Optional[Dict[str, Any]] = Field(None, description="원시 데이터")
+
+    @validator('temperature_celsius')
+    def validate_temperature(cls, v):
+        if v < -273.15:  # 절대 영도 이하
+            raise ValueError('온도는 절대 영도(-273.15°C) 이상이어야 합니다')
+        if v > 1000:  # 극한 온도 제한
+            raise ValueError('온도는 1000°C 이하여야 합니다')
+        return v
+
+    @validator('humidity_percent')
+    def validate_humidity(cls, v):
+        if v is not None and (v < 0 or v > 100):
+            raise ValueError('습도는 0%에서 100% 사이여야 합니다')
+        return v
+
+class SensorRawTemperatureCreate(SensorRawTemperatureBase):
+    """온도 센서 원시 데이터 생성 스키마"""
+    time: datetime = Field(..., description="측정 시간")
+    device_id: str = Field(..., description="디바이스 ID")
+
+class SensorRawTemperatureUpdate(BaseModel):
+    """온도 센서 원시 데이터 업데이트 스키마"""
+    temperature_celsius: Optional[float] = Field(None)
+    humidity_percent: Optional[float] = Field(None)
+    raw_payload: Optional[Dict[str, Any]] = Field(None)
+
+class SensorRawTemperatureResponse(SensorRawTemperatureBase):
+    """온도 센서 원시 데이터 응답 스키마"""
+    time: datetime
+    device_id: str
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+class SensorRawTemperatureListResponse(BaseModel):
+    """온도 센서 원시 데이터 목록 응답 스키마"""
+    items: List[SensorRawTemperatureResponse]
+    total: int
+    page: int
+    size: int
+    pages: int
+
+# ============================================================================
+# 사용자 관계 관련 스키마
+# ============================================================================
+
+class UserRelationshipBase(BaseModel):
+    """사용자 관계 기본 스키마"""
+    subject_user_id: UUID = Field(..., description="관계의 주체 (돌봄 제공자, 가족, 관리자)")
+    target_user_id: UUID = Field(..., description="관계의 대상 (돌봄을 받는 사용자)")
+    relationship_type: str = Field(..., description="관계 유형")
+    status: str = Field("active", description="관계 상태")
+
+    @validator('relationship_type')
+    def validate_relationship_type(cls, v):
+        allowed_types = ['caregiver', 'family', 'admin']
+        if v not in allowed_types:
+            raise ValueError(f'허용되지 않는 관계 유형입니다. 허용된 유형: {allowed_types}')
+        return v
+
+    @validator('status')
+    def validate_status(cls, v):
+        allowed_statuses = ['pending', 'active', 'inactive']
+        if v not in allowed_statuses:
+            raise ValueError(f'허용되지 않는 상태입니다. 허용된 상태: {allowed_statuses}')
+        return v
+
+
+class UserRelationshipCreate(UserRelationshipBase):
+    """사용자 관계 생성 요청 스키마"""
+    pass
+
+
+class UserRelationshipUpdate(BaseModel):
+    """사용자 관계 수정 요청 스키마"""
+    status: Optional[str] = Field(None, description="관계 상태")
+
+    @validator('status')
+    def validate_status(cls, v):
+        if v is not None:
+            allowed_statuses = ['pending', 'active', 'inactive']
+            if v not in allowed_statuses:
+                raise ValueError(f'허용되지 않는 상태입니다. 허용된 상태: {allowed_statuses}')
+        return v
+
+
+class UserRelationshipResponse(UserRelationshipBase):
+    """사용자 관계 응답 스키마"""
+    relationship_id: UUID
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+
+class UserRelationshipListResponse(BaseModel):
+    """사용자 관계 목록 응답 스키마"""
+    relationships: List[UserRelationshipResponse]
+    total: int
+    page: int
+    size: int
+
+
+# ============================================================================
+# 사용자 프로필 관련 스키마
+# ============================================================================
+
+class UserProfileBase(BaseModel):
+    """사용자 프로필 기본 스키마"""
+    date_of_birth: date = Field(..., description="사용자의 생년월일")
+    gender: str = Field(..., description="성별")
+    address: Optional[str] = Field(None, max_length=500, description="주소")
+    address_detail: Optional[str] = Field(None, max_length=200, description="상세 주소")
+    medical_history: Optional[str] = Field(None, max_length=1000, description="병력")
+    significant_notes: Optional[str] = Field(None, max_length=1000, description="특이사항")
+    current_status: Optional[str] = Field(None, max_length=1000, description="현재 상태")
+
+    @validator('gender')
+    def validate_gender(cls, v):
+        allowed_genders = ['male', 'female', 'other']
+        if v not in allowed_genders:
+            raise ValueError(f'허용되지 않는 성별입니다. 허용된 성별: {allowed_genders}')
+        return v
+
+
+class UserProfileCreate(UserProfileBase):
+    """사용자 프로필 생성 요청 스키마"""
+    pass
+
+
+class UserProfileUpdate(BaseModel):
+    """사용자 프로필 수정 요청 스키마"""
+    address: Optional[str] = Field(None, max_length=500)
+    address_detail: Optional[str] = Field(None, max_length=200)
+    medical_history: Optional[str] = Field(None, max_length=1000)
+    significant_notes: Optional[str] = Field(None, max_length=1000)
+    current_status: Optional[str] = Field(None, max_length=1000)
+
+
+class UserProfileResponse(UserProfileBase):
+    """사용자 프로필 응답 스키마"""
+    user_id: UUID
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+
+class UserProfileListResponse(BaseModel):
+    """사용자 프로필 목록 응답 스키마"""
+    profiles: List[UserProfileResponse]
+    total: int
+    page: int
+    size: int 
+
+# ============================================================================
+# 홈 상태 스냅샷 스키마 (Digital Twin State)
+# ============================================================================
+
+class HomeStateSnapshotBase(BaseModel):
+    """홈 상태 스냅샷 기본 스키마"""
+    entrance_pir_motion: Optional[bool] = Field(None, description="입구 PIR 모션 감지 상태")
+    entrance_rfid_status: Optional[str] = Field(None, description="입구 RFID 상태")
+    entrance_reed_is_closed: Optional[bool] = Field(None, description="입구 리드 스위치 닫힘 상태")
+    livingroom_pir_1_motion: Optional[bool] = Field(None, description="거실 PIR1 모션 감지 상태")
+    livingroom_pir_2_motion: Optional[bool] = Field(None, description="거실 PIR2 모션 감지 상태")
+    livingroom_sound_db: Optional[float] = Field(None, description="거실 소음 데시벨")
+    livingroom_mq7_co_ppm: Optional[float] = Field(None, description="거실 일산화탄소 농도 (PPM)")
+    livingroom_button_state: Optional[str] = Field(None, description="거실 버튼 상태")
+    kitchen_pir_motion: Optional[bool] = Field(None, description="주방 PIR 모션 감지 상태")
+    kitchen_sound_db: Optional[float] = Field(None, description="주방 소음 데시벨")
+    kitchen_mq5_gas_ppm: Optional[float] = Field(None, description="주방 가스 농도 (PPM)")
+    kitchen_loadcell_1_kg: Optional[float] = Field(None, description="주방 로드셀1 무게 (kg)")
+    kitchen_loadcell_2_kg: Optional[float] = Field(None, description="주방 로드셀2 무게 (kg)")
+    kitchen_button_state: Optional[str] = Field(None, description="주방 버튼 상태")
+    kitchen_buzzer_is_on: Optional[bool] = Field(None, description="주방 부저 작동 상태")
+    bedroom_pir_motion: Optional[bool] = Field(None, description="침실 PIR 모션 감지 상태")
+    bedroom_sound_db: Optional[float] = Field(None, description="침실 소음 데시벨")
+    bedroom_mq7_co_ppm: Optional[float] = Field(None, description="침실 일산화탄소 농도 (PPM)")
+    bedroom_loadcell_kg: Optional[float] = Field(None, description="침실 로드셀 무게 (kg)")
+    bedroom_button_state: Optional[str] = Field(None, description="침실 버튼 상태")
+    bathroom_pir_motion: Optional[bool] = Field(None, description="욕실 PIR 모션 감지 상태")
+    bathroom_sound_db: Optional[float] = Field(None, description="욕실 소음 데시벨")
+    bathroom_temp_celsius: Optional[float] = Field(None, description="욕실 온도 (섭씨)")
+    bathroom_button_state: Optional[str] = Field(None, description="욕실 버튼 상태")
+    detected_activity: Optional[str] = Field(None, description="감지된 활동")
+    alert_level: Optional[str] = Field(None, description="경보 수준 (Normal, Attention, Warning, Emergency)")
+    alert_reason: Optional[str] = Field(None, description="경보 발생 이유")
+    action_log: Optional[Dict[str, Any]] = Field(None, description="처리 내역 및 결과 (JSON)")
+    extra_data: Optional[Dict[str, Any]] = Field(None, description="향후 확장을 위한 예비 데이터 (JSON)")
+
+    @validator('alert_level')
+    def validate_alert_level(cls, v):
+        if v and v not in ['Normal', 'Attention', 'Warning', 'Emergency']:
+            raise ValueError('alert_level은 Normal, Attention, Warning, Emergency 중 하나여야 합니다')
+        return v
+
+class HomeStateSnapshotCreate(HomeStateSnapshotBase):
+    """홈 상태 스냅샷 생성 스키마"""
+    time: datetime = Field(..., description="스냅샷 시간")
+    user_id: UUID = Field(..., description="사용자 ID")
+
+class HomeStateSnapshotUpdate(BaseModel):
+    """홈 상태 스냅샷 업데이트 스키마"""
+    entrance_pir_motion: Optional[bool] = Field(None)
+    entrance_rfid_status: Optional[str] = Field(None)
+    entrance_reed_is_closed: Optional[bool] = Field(None)
+    livingroom_pir_1_motion: Optional[bool] = Field(None)
+    livingroom_pir_2_motion: Optional[bool] = Field(None)
+    livingroom_sound_db: Optional[float] = Field(None)
+    livingroom_mq7_co_ppm: Optional[float] = Field(None)
+    livingroom_button_state: Optional[str] = Field(None)
+    kitchen_pir_motion: Optional[bool] = Field(None)
+    kitchen_sound_db: Optional[float] = Field(None)
+    kitchen_mq5_gas_ppm: Optional[float] = Field(None)
+    kitchen_loadcell_1_kg: Optional[float] = Field(None)
+    kitchen_loadcell_2_kg: Optional[float] = Field(None)
+    kitchen_button_state: Optional[str] = Field(None)
+    kitchen_buzzer_is_on: Optional[bool] = Field(None)
+    bedroom_pir_motion: Optional[bool] = Field(None)
+    bedroom_sound_db: Optional[float] = Field(None)
+    bedroom_mq7_co_ppm: Optional[float] = Field(None)
+    bedroom_loadcell_kg: Optional[float] = Field(None)
+    bedroom_button_state: Optional[str] = Field(None)
+    bathroom_pir_motion: Optional[bool] = Field(None)
+    bathroom_sound_db: Optional[float] = Field(None)
+    bathroom_temp_celsius: Optional[float] = Field(None)
+    bathroom_button_state: Optional[str] = Field(None)
+    detected_activity: Optional[str] = Field(None)
+    alert_level: Optional[str] = Field(None)
+    alert_reason: Optional[str] = Field(None)
+    action_log: Optional[Dict[str, Any]] = Field(None)
+    extra_data: Optional[Dict[str, Any]] = Field(None)
+
+class HomeStateSnapshotResponse(HomeStateSnapshotBase):
+    """홈 상태 스냅샷 응답 스키마"""
+    time: datetime
+    user_id: UUID
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+class HomeStateSnapshotListResponse(BaseModel):
+    """홈 상태 스냅샷 목록 응답 스키마"""
+    items: List[HomeStateSnapshotResponse]
+    total: int
+    page: int
+    size: int
+    pages: int
+
+# ============================================================================
+# 버튼 이벤트 센서 스키마
+# ============================================================================
+
+class SensorEventButtonBase(BaseModel):
+    """버튼 이벤트 센서 기본 스키마"""
+    button_state: str = Field(..., description="버튼의 물리적 상태")
+    event_type: str = Field(..., description="버튼 입력의 목적")
+    press_duration_ms: Optional[int] = Field(None, description="버튼 누름 지속 시간 (밀리초)")
+    raw_payload: Optional[Dict[str, Any]] = Field(None, description="원시 데이터")
+
+    @validator('button_state')
+    def validate_button_state(cls, v):
+        if v not in ['PRESSED', 'RELEASED', 'LONG_PRESS']:
+            raise ValueError('button_state는 PRESSED, RELEASED, LONG_PRESS 중 하나여야 합니다')
+        return v
+
+    @validator('event_type')
+    def validate_event_type(cls, v):
+        if v not in ['crisis_acknowledged', 'assistance_request', 'medication_check']:
+            raise ValueError('event_type는 crisis_acknowledged, assistance_request, medication_check 중 하나여야 합니다')
+        return v
+
+class SensorEventButtonCreate(SensorEventButtonBase):
+    """버튼 이벤트 센서 생성 스키마"""
+    time: datetime = Field(..., description="이벤트 발생 시간")
+    device_id: str = Field(..., description="디바이스 ID")
+
+class SensorEventButtonUpdate(BaseModel):
+    """버튼 이벤트 센서 업데이트 스키마"""
+    button_state: Optional[str] = Field(None)
+    event_type: Optional[str] = Field(None)
+    press_duration_ms: Optional[int] = Field(None)
+    raw_payload: Optional[Dict[str, Any]] = Field(None)
+
+class SensorEventButtonResponse(SensorEventButtonBase):
+    """버튼 이벤트 센서 응답 스키마"""
+    time: datetime
+    device_id: str
+
+    class Config:
+        from_attributes = True
+        orm_mode = True
+
+class SensorEventButtonListResponse(BaseModel):
+    """버튼 이벤트 센서 목록 응답 스키마"""
+    items: List[SensorEventButtonResponse]
+    total: int
+    page: int
+    size: int
+    pages: int 

@@ -31,7 +31,24 @@ async def create_tcrt5000_data(
     data: SensorRawTCRT5000Create,
     tcrt5000_service: ITCRT5000Service = Depends(get_tcrt5000_service)
 ):
-    """TCRT5000 근접 센서 데이터 생성"""
+    """
+    TCRT5000 근접 센서 데이터 생성
+    
+    - **time**: 근접 감지 시간 (ISO 8601 형식)
+    - **device_id**: 근접 센서 디바이스 ID (필수)
+    - **raw_payload**: 원시 근접 데이터 (JSON 형태, 선택)
+    
+    TCRT5000은 적외선 근접 센서로, 물체 감지, 자동문, 로봇 등에 사용됩니다.
+    
+    예시:
+    ```json
+    {
+        "time": "2025-08-23T15:00:00.000Z",
+        "device_id": "proximity_sensor_001",
+        "raw_payload": {"detected": true, "distance": 15, "reflection": 0.8}
+    }
+    ```
+    """
     return await tcrt5000_service.create_sensor_data(data)
 
 

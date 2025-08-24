@@ -35,8 +35,8 @@ class UltrasonicRepository(IUltrasonicRepository):
         
         db_data = SensorRawUltrasonic(**orm_data)
         self.db.add(db_data)
-        await self.db.commit()
-        await self.db.refresh(db_data)
+        self.db.commit()
+        self.db.refresh(db_data)
         return SensorRawUltrasonicResponse.from_orm(db_data)
     
     async def get_by_id(

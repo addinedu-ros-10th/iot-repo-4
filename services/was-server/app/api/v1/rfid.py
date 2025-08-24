@@ -26,12 +26,29 @@ def get_rfid_service(db: AsyncSession = Depends(get_db)) -> IRFIDService:
     return container.get_rfid_service(db)
 
 
-@router.post("/create", response_model=SensorRawRFIDUpdate, status_code=201)
+@router.post("/create", response_model=SensorRawRFIDResponse, status_code=201)
 async def create_rfid_data(
     data: SensorRawRFIDCreate,
     rfid_service: IRFIDService = Depends(get_rfid_service)
 ):
-    """RFID 센서 데이터 생성"""
+    """
+    RFID 센서 데이터 생성
+    
+    - **time**: RFID 카드 인식 시간 (ISO 8601 형식)
+    - **device_id**: RFID 리더 디바이스 ID (필수)
+    - **raw_payload**: 원시 RFID 데이터 (JSON 형태, 선택)
+    
+    RFID 센서는 접근 제어, 출입 관리, 자산 추적 등에 사용됩니다.
+    
+    예시:
+    ```json
+    {
+        "time": "2025-08-23T15:00:00.000Z",
+        "device_id": "rfid_reader_001",
+        "raw_payload": {"card_id": "1234567890", "reader_location": "main_entrance"}
+    }
+    ```
+    """
     return await rfid_service.create_sensor_data(data)
 
 

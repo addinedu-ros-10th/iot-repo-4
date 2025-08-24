@@ -31,7 +31,24 @@ async def create_sound_data(
     data: SensorRawSoundCreate,
     sound_service: ISoundService = Depends(get_sound_service)
 ):
-    """Sound 센서 데이터 생성"""
+    """
+    Sound 센서 데이터 생성
+    
+    - **time**: 소리 감지 시간 (ISO 8601 형식)
+    - **device_id**: 소리 센서 디바이스 ID (필수)
+    - **raw_payload**: 원시 소리 데이터 (JSON 형태, 선택)
+    
+    Sound 센서는 소음 모니터링, 보안 감시, 환경 모니터링 등에 사용됩니다.
+    
+    예시:
+    ```json
+    {
+        "time": "2025-08-23T15:00:00.000Z",
+        "device_id": "sound_sensor_001",
+        "raw_payload": {"decibel": 65.5, "frequency": 440, "duration": 2.5}
+    }
+    ```
+    """
     return await sound_service.create_sensor_data(data)
 
 

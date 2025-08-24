@@ -13,9 +13,9 @@ from app.infrastructure.database import get_db
 from app.core.container import container
 from app.interfaces.services.sensor_service_interface import IMQ7Service
 from app.api.v1.schemas import (
-    MQ7DataCreate,
-    MQ7DataUpdate,
-    MQ7DataResponse
+    SensorRawMQ7Create,
+    SensorRawMQ7Update,
+    SensorRawMQ7Response
 )
 
 router = APIRouter()
@@ -26,16 +26,33 @@ def get_mq7_service(db: AsyncSession = Depends(get_db)) -> IMQ7Service:
     return container.get_mq7_service(db)
 
 
-@router.post("/create", response_model=MQ7DataResponse, status_code=201)
+@router.post("/create", response_model=SensorRawMQ7Response, status_code=201)
 async def create_mq7_data(
-    data: MQ7DataCreate,
+    data: SensorRawMQ7Create,
     mq7_service: IMQ7Service = Depends(get_mq7_service)
 ):
-    """MQ7 가스 센서 데이터 생성"""
+    """
+    MQ7 가스 센서 데이터 생성
+    
+    - **time**: 센서 데이터 수집 시간 (ISO 8601 형식)
+    - **device_id**: 센서 디바이스 ID (필수)
+    - **raw_payload**: 원시 센서 데이터 (JSON 형태, 선택)
+    
+    MQ7은 일산화탄소(CO) 가스 센서로, 주로 실내 공기질 모니터링에 사용됩니다.
+    
+    예시:
+    ```json
+    {
+        "time": "2025-08-23T15:00:00.000Z",
+        "device_id": "mq7_sensor_001",
+        "raw_payload": {"co_level": 25, "temperature": 23.5}
+    }
+    ```
+    """
     return await mq7_service.create_sensor_data(data)
 
 
-@router.get("/list", response_model=List[MQ7DataResponse])
+@router.get("/list", response_model=List[SensorRawMQ7Response])
 async def get_mq7_data_list(
     device_id: Optional[str] = Query(None, description="디바이스 ID"),
     start_time: Optional[datetime] = Query(None, description="시작 시간"),
@@ -52,7 +69,7 @@ async def get_mq7_data_list(
     )
 
 
-@router.get("/latest", response_model=Optional[MQ7DataResponse])
+@router.get("/latest", response_model=Optional[SensorRawMQ7Response])
 async def get_latest_mq7_data(
     device_id: str = Query(..., description="디바이스 ID"),
     mq7_service: IMQ7Service = Depends(get_mq7_service)
@@ -61,7 +78,7 @@ async def get_latest_mq7_data(
     return await mq7_service.get_latest_sensor_data(device_id)
 
 
-@router.get("/{device_id}/{timestamp}", response_model=MQ7DataResponse)
+@router.get("/{device_id}/{timestamp}", response_model=SensorRawMQ7Response)
 async def get_mq7_data(
     device_id: str,
     timestamp: datetime,
@@ -71,11 +88,11 @@ async def get_mq7_data(
     return await mq7_service.get_sensor_data(device_id, timestamp)
 
 
-@router.put("/{device_id}/{timestamp}", response_model=MQ7DataResponse)
+@router.put("/{device_id}/{timestamp}", response_model=SensorRawMQ7Response)
 async def update_mq7_data(
     device_id: str,
     timestamp: datetime,
-    data: MQ7DataUpdate,
+    data: SensorRawMQ7Update,
     mq7_service: IMQ7Service = Depends(get_mq7_service)
 ):
     """MQ7 가스 센서 데이터 수정"""

@@ -26,12 +26,6 @@ class SoundService(ISoundService):
     async def create_sensor_data(self, data: SensorRawSoundCreate) -> SensorRawSoundResponse:
         """Sound 센서 데이터 생성"""
         try:
-            # 비즈니스 로직 검증
-            if data.db_value is not None and (data.db_value < 0 or data.db_value > 200):
-                raise ValueError("데시벨 값은 0에서 200 사이여야 합니다")
-            
-            if data.analog_value is not None and (data.analog_value < 0 or data.analog_value > 1023):
-                raise ValueError("아날로그 값은 0에서 1023 사이여야 합니다")
             
             # 리포지토리를 통한 데이터 생성
             created_data = await self.sound_repository.create(data)

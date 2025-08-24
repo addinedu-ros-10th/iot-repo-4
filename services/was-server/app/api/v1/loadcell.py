@@ -31,7 +31,24 @@ async def create_loadcell_data(
     data: SensorRawLoadCellCreate,
     loadcell_service: ILoadCellService = Depends(get_loadcell_service)
 ):
-    """로드셀 센서 데이터 생성"""
+    """
+    로드셀 센서 데이터 생성
+    
+    - **time**: 무게 측정 시간 (ISO 8601 형식)
+    - **device_id**: 로드셀 센서 디바이스 ID (필수)
+    - **raw_payload**: 원시 무게 데이터 (JSON 형태, 선택)
+    
+    로드셀은 무게 측정, 계량, 압력 감지 등에 사용됩니다.
+    
+    예시:
+    ```json
+    {
+        "time": "2025-08-23T15:00:00.000Z",
+        "device_id": "loadcell_sensor_001",
+        "raw_payload": {"weight_kg": 2.5, "calibration_factor": 1.02, "temperature": 22.0}
+    }
+    ```
+    """
     return await loadcell_service.create_sensor_data(data)
 
 

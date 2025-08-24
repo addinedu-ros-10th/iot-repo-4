@@ -35,9 +35,10 @@ class RFIDRepository(IRFIDRepository):
         }
         
         db_data = SensorRawRFID(**orm_data)
+        print(db_data)
         self.db.add(db_data)
-        await self.db.commit()
-        await self.db.refresh(db_data)
+        self.db.commit()
+        self.db.refresh(db_data)
         return SensorRawRFIDResponse.from_orm(db_data)
     
     async def get_by_id(

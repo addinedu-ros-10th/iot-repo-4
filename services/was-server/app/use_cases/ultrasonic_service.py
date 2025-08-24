@@ -26,12 +26,6 @@ class UltrasonicService(IUltrasonicService):
     async def create_sensor_data(self, data: SensorRawUltrasonicCreate) -> SensorRawUltrasonicResponse:
         """Ultrasonic 센서 데이터 생성"""
         try:
-            # 비즈니스 로직 검증
-            if data.distance_cm is not None and (data.distance_cm < 0 or data.distance_cm > 1000):
-                raise ValueError("거리 값은 0에서 1000cm 사이여야 합니다")
-            
-            if data.raw_value is not None and (data.raw_value < 0 or data.raw_value > 65535):
-                raise ValueError("원시 값은 0에서 65535 사이여야 합니다")
             
             # 리포지토리를 통한 데이터 생성
             created_data = await self.ultrasonic_repository.create(data)

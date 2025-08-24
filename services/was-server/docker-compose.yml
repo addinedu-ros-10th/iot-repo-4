@@ -1,4 +1,25 @@
 services:
+  # 환경변수 자동 업데이트 서비스 (프로젝트 시작 시 실행)
+  env-updater:
+    image: alpine:latest
+    container_name: iot-care-env-updater
+    volumes:
+      - ./scripts:/scripts:ro
+      - ./.env.local:/.env.local:rw
+      - ./env_backups:/env_backups
+    working_dir: /scripts
+    command: >
+      sh -c "
+        echo '🔍 환경변수 자동 업데이트 시작...' &&
+        apk add --no-cache bash curl &&
+        chmod +x auto_env_update.sh &&
+        ./auto_env_update.sh &&
+        echo '✅ 환경변수 업데이트 완료'
+      "
+    profiles:
+      - setup
+    restart: "no"
+
   # FastAPI 애플리케이션
   app:
     build: .
@@ -17,7 +38,6 @@ services:
       - redis
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
     networks:
       - iot-care-network
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -36,7 +56,7 @@ services:
     networks:
       - iot-care-network
 
-  # Caddy 웹서버 (리버스 프록시 + SSL)
+  # Caddy 웹서버 (환경별 설정 자동 적용)
   caddy:
     image: caddy:2-alpine
     container_name: iot-care-caddy
@@ -45,13 +65,15 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile
+      - ./Caddyfile.local:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
     depends_on:
       - app
     networks:
       - iot-care-network
+    # 환경별 Caddy 설정 자동 적용
+    command: caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
 
 volumes:
   redis_data:

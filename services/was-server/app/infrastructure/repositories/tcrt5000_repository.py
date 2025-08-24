@@ -35,8 +35,8 @@ class TCRT5000Repository(ITCRT5000Repository):
         
         db_data = SensorRawTCRT5000(**orm_data)
         self.db.add(db_data)
-        await self.db.commit()
-        await self.db.refresh(db_data)
+        self.db.commit()
+        self.db.refresh(db_data)
         return SensorRawTCRT5000Response.from_orm(db_data)
     
     async def get_by_id(

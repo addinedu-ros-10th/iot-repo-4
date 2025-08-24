@@ -9,7 +9,7 @@ services:
     ports:
       - "8001:8000"
     volumes:
-      - ./app:/app
+      - ./app:/app/app
       - ./logs:/app/logs
       - ./config:/app/config
     env_file:
@@ -34,7 +34,7 @@ services:
     networks:
       - iot-care-dev-network
 
-  # Caddy 웹서버 (개발용 - SSL 없음)
+  # Caddy 웹서버 (개발용 - 환경별 설정 자동 적용)
   caddy:
     image: caddy:2-alpine
     container_name: iot-care-caddy-dev
@@ -42,13 +42,22 @@ services:
     ports:
       - "8080:80"
     volumes:
-      - ./Caddyfile.dev:/etc/caddy/Caddyfile
+      - ./Caddyfile.local:/app/Caddyfile:ro
+      - ./Caddyfile.dev:/app/Caddyfile.dev:ro
+      - ./Caddyfile.prod:/app/Caddyfile.prod:ro
+      - ./scripts/detect_environment.sh:/app/detect_environment.sh
       - caddy_dev_data:/data
       - caddy_dev_config:/config
     depends_on:
       - app
     networks:
       - iot-care-dev-network
+    # 환경별 Caddy 설정 자동 적용
+    command: >
+      sh -c "
+        chmod +x /app/detect_environment.sh &&
+        /app/detect_environment.sh
+      "
 
 volumes:
   redis_dev_data:
