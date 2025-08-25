@@ -9,7 +9,7 @@ from datetime import datetime
 
 async def test_api_status():
     """API 상태를 테스트합니다."""
-    base_url = "http://localhost:8000"
+    base_url = "http://localhost"
     
     print(f"🔍 API 상태 확인 시작 - {datetime.now()}")
     print(f"📍 대상 URL: {base_url}")

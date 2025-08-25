@@ -280,3 +280,4 @@ fi
 echo ""
 log_success "✅ 환경변수 자동 업데이트 완료!"
 log_info "📅 완료 시간: $(date)"
+
