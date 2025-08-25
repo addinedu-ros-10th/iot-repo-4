@@ -15,21 +15,47 @@ void setup() {
 }
 
 void loop() {
-  for (int i = 0; i < 6; i++) {
-    int val = digitalRead(inputPins[i]);
+  int val = 0;
+  // for (int i = 0; i < 6; i++) {
+  // val = digitalRead(inputPins[i]);
+  val = digitalRead(12);
 
-    if (val == HIGH) {  
-      // 버튼 눌렸을 때만 출력
-      Serial.print("Button ");
-      Serial.print(i + 1);
-      Serial.println(" pressed");
+  //   if (val == HIGH) {  
+  //     // 버튼 눌렸을 때만 출력
+  //     Serial.print("Button ");
+  //     Serial.print(i + 1);
+  //     Serial.println(" pressed");
 
-      digitalWrite(outputPins[i], HIGH);
-    } 
-    else {
-      digitalWrite(outputPins[i], LOW);
-    }
-  }
+  //     digitalWrite(outputPins[i], HIGH);
+  //   } 
+  //   else {
+  //     digitalWrite(outputPins[i], LOW);
+  //   }
+  // }
+
+
+  unsigned long now = millis() / 1000;
+
+  Serial.print("{");
+  Serial.print("sensor-type : " );
+  Serial.print("MQ-5");
+  Serial.print(", ");
+  Serial.print("sensing-unit : " );
+  Serial.print("on/off");
+  Serial.print(", ");
+  Serial.print("sensor-location : " );
+  Serial.print("ketchen");
+  Serial.print(", ");
+  Serial.print("data-type : " );
+  Serial.print("boolean");
+  Serial.print(", ");
+  Serial.print("value : " );
+  Serial.print(val);
+  Serial.print(", ");
+  Serial.print("timestamp : " );
+  Serial.print(now);
+  Serial.print("}");
+  Serial.println();
 
   delay(50); // 빠른 중복 출력 방지
 }
