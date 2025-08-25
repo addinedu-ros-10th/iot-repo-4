@@ -33,11 +33,13 @@ class LoadCellRepository(ILoadCellRepository):
             "device_id": data.device_id,
             "raw_payload": data.raw_payload
         }
+
+        print(orm_data)
         
         db_data = SensorRawLoadCell(**orm_data)
         self.db.add(db_data)
-        self.db.commit()
-        self.db.refresh(db_data)
+        await self.db.commit()
+        await self.db.refresh(db_data)
         return SensorRawLoadCellResponse.from_orm(db_data)
     
     async def get_by_id(
