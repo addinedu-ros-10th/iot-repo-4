@@ -96,7 +96,7 @@ class LoadCellRepository(ILoadCellRepository):
         # 시간 역순으로 정렬하고 제한
         query = query.order_by(SensorRawLoadCell.time.desc()).limit(limit_count)
         
-        result = self.db.execute(query)
+        result = await self.db.execute(query)
         data_list = result.scalars().all()
         
         # 결과를 리스트로 변환하여 반환
