@@ -59,9 +59,16 @@ hostname -I
 - **`REDIS_HOST`**: Redis 컨테이너 IP (일반적으로 Docker 내부 IP)
 
 #### **AWS EC2 운영 환경 IP 주소**
-- **현재 운영 환경 IP**: `ec2-43-201-96-23.ap-northeast-2.compute.amazonaws.com`
+- **현재 운영 환경 IP**: `ec2-43-201-96-23.ap-northeast-2.compute.amazonaws.com` ✅ **고정 IP 부여됨**
 - **이전 운영 환경 IP**: `ec2-3-34-98-7.ap-northeast-2.compute.amazonaws.com`
 - **업데이트 날짜**: 2025-08-23
+- **IP 타입**: Elastic IP (고정 IP) - IP 주소 변경 없음
+
+#### **SSL 인증서 제한 사항**
+- **IP 주소 제한**: Let's Encrypt는 IP 주소에 직접 SSL 인증서 발급 불가
+- **도메인 필요**: 실제 도메인 이름이 필요 (예: `iot-care.com`)
+- **현재 설정**: HTTP 전용 (보안을 위해 내부 네트워크에서만 접근 권장)
+- **HTTPS 활성화**: Route 53을 통한 실제 도메인 설정 후 가능
 
 #### **환경변수 자동 업데이트 스크립트**
 
