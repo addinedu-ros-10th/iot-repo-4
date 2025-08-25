@@ -34,7 +34,7 @@ class UserBase(BaseModel):
 
     @validator('user_role')
     def validate_user_role(cls, v):
-        allowed_roles = ['admin', 'caregiver', 'family', 'user']
+        allowed_roles = ['admin', 'caregiver', 'family', 'care_target']
         if v not in allowed_roles:
             raise ValueError(f'허용되지 않는 역할입니다. 허용된 역할: {allowed_roles}')
         return v
@@ -65,7 +65,7 @@ class UserUpdate(BaseModel):
     @validator('user_role')
     def validate_user_role(cls, v):
         if v is not None:
-            allowed_roles = ['admin', 'caregiver', 'family', 'user']
+            allowed_roles = ['admin', 'caregiver', 'family', 'care_target']
             if v not in allowed_roles:
                 raise ValueError(f'허용되지 않는 역할입니다. 허용된 역할: {allowed_roles}')
         return v
