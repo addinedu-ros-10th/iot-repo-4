@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
-import '../../data/services/home_state_snapshot_service.dart';
+import '../../data/services/interfaces/home_state_snapshot_service_interface.dart';
 import '../../data/dtos/home_state_snapshot_dto.dart';
 
 /// 홈 상태 스냅샷 데이터를 관리하는 Provider
 class HomeStateSnapshotsProvider extends ChangeNotifier {
-  final HomeStateSnapshotService _snapshotService;
+  final HomeStateSnapshotServiceInterface _snapshotService;
   
   HomeStateSnapshotsProvider(this._snapshotService);
   
@@ -29,10 +29,7 @@ class HomeStateSnapshotsProvider extends ChangeNotifier {
     
     try {
       // 최근 스냅샷들 로드
-      final recentSnapshots = await _snapshotService.getRecentSnapshotsForMonitoring(
-        userId: userId,
-        limit: 100,
-      );
+      final recentSnapshots = await _snapshotService.getRecentSnapshotsForMonitoring(userId);
       
       // 경보 통계 로드
       final alertStats = await _snapshotService.getAlertStatistics(userId);
@@ -151,8 +148,8 @@ class HomeStateSnapshotsProvider extends ChangeNotifier {
     try {
       final pattern = await _snapshotService.getActivityPattern(
         userId: userId,
-        startDate: startDate,
-        endDate: endDate,
+        startTime: startDate,
+        endTime: endDate,
       );
       
       if (kDebugMode) {

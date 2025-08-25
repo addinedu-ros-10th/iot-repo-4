@@ -1,11 +1,11 @@
 import 'package:flutter/foundation.dart';
-import '../../data/services/user_service.dart';
+import '../../data/services/interfaces/user_service_interface.dart';
 import '../../data/dtos/user_dto.dart';
 import '../../data/dtos/user_relationship_dto.dart';
 
 /// 돌봄 대상자 데이터를 관리하는 Provider
 class CareTargetsProvider extends ChangeNotifier {
-  final UserService _userService;
+  final UserServiceInterface _userService;
   
   CareTargetsProvider(this._userService);
   
@@ -74,7 +74,7 @@ class CareTargetsProvider extends ChangeNotifier {
       final profile = await _userService.getUserProfile(targetId);
       
       if (kDebugMode) {
-        print('✅ 돌봄 대상자 프로필 로드 완료: ${profile.userId}');
+        print('✅ 돌봄 대상자 프로필 로드 완료: ${profile?.userId}');
       }
     } catch (e) {
       if (kDebugMode) {

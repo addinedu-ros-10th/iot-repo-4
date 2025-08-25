@@ -6,6 +6,11 @@ import 'presentation/pages/global_dashboard_page.dart';
 import 'data/sources/api_service.dart';
 import 'data/services/user_service.dart';
 import 'data/services/home_state_snapshot_service.dart';
+import 'data/services/mock_user_service.dart';
+import 'data/services/mock_home_state_snapshot_service.dart';
+import 'data/services/interfaces/user_service_interface.dart';
+import 'data/services/interfaces/home_state_snapshot_service_interface.dart';
+import 'data/services/service_factory.dart';
 import 'presentation/state/care_targets_provider.dart';
 import 'presentation/state/home_state_snapshots_provider.dart';
 
@@ -25,31 +30,27 @@ class MyApp extends StatelessWidget {
           create: (_) => ApiService(),
         ),
         
-        // 사용자 서비스 제공
-        Provider<UserService>(
-          create: (context) => UserService(
-            context.read<ApiService>(),
-          ),
+        // 사용자 서비스 제공 (환경에 따라 Mock 또는 실제 API)
+        Provider<UserServiceInterface>(
+          create: (context) => ServiceFactory.createUserService(),
         ),
         
-        // 홈 상태 스냅샷 서비스 제공
-        Provider<HomeStateSnapshotService>(
-          create: (context) => HomeStateSnapshotService(
-            context.read<ApiService>(),
-          ),
+        // 홈 상태 스냅샷 서비스 제공 (환경에 따라 Mock 또는 실제 API)
+        Provider<HomeStateSnapshotServiceInterface>(
+          create: (context) => ServiceFactory.createHomeStateSnapshotService(),
         ),
         
         // 돌봄 대상자 Provider 제공
         ChangeNotifierProvider<CareTargetsProvider>(
           create: (context) => CareTargetsProvider(
-            context.read<UserService>(),
+            context.read<UserServiceInterface>(),
           ),
         ),
         
         // 홈 상태 스냅샷 Provider 제공
         ChangeNotifierProvider<HomeStateSnapshotsProvider>(
           create: (context) => HomeStateSnapshotsProvider(
-            context.read<HomeStateSnapshotService>(),
+            context.read<HomeStateSnapshotServiceInterface>(),
           ),
         ),
       ],
@@ -76,7 +77,7 @@ class MyApp extends StatelessWidget {
             foregroundColor: AppColors.neutralText,
             elevation: 0,
           ),
-          cardTheme: CardTheme(
+          cardTheme: CardThemeData(
             color: AppColors.secondaryBackground,
             elevation: 2,
             shape: RoundedRectangleBorder(
