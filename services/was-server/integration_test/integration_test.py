@@ -26,7 +26,7 @@ from dotenv import load_dotenv
 class IoTIntegrationTester:
     """IoT Care Backend System API 통합 테스트 클래스"""
     
-    def __init__(self, base_url: str = "http://localhost:8000"):
+    def __init__(self, base_url: str = "http://ec2-43-201-96-23.ap-northeast-2.compute.amazonaws.com/"):
         self.base_url = base_url
         self.client = httpx.AsyncClient(timeout=120.0)
         self.test_results = {}
