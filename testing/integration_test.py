@@ -324,8 +324,14 @@ class IoTAPIIntegrationTest:
     
     async def save_test_results(self):
         """테스트 결과 저장"""
+        import os
+        
+        # integration_test 폴더 생성 (없는 경우)
+        output_dir = "integration_test"
+        os.makedirs(output_dir, exist_ok=True)
+        
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"integration_test_results_{timestamp}.json"
+        filename = os.path.join(output_dir, f"integration_test_results_{timestamp}.json")
         
         results = {
             "test_timestamp": datetime.now().isoformat(),
