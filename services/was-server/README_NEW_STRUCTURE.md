@@ -72,7 +72,7 @@
 ### **🛠️ utilities/** - 유틸리티 도구
 - **`testing/`** - 테스트 관련 도구
   - `test_all_apis.py` - API 통합 테스트
-  - `test_api_status.py` - API 상태 확인
+  - `test_api_status_local.py` - API 상태 확인 (포트 미지정)
   - `test_api_endpoints.sh` - API 엔드포인트 테스트 스크립트
   - `integration_test_results_*.json` - 통합 테스트 결과 파일
 

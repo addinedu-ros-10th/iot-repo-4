@@ -72,9 +72,9 @@ iot-repo-4/
 │       └── integration_test/          # 통합 테스트 결과
 ├── 🧪 testing/                        # 전체 시스템 테스트
 │   ├── integration_test.py            # API 통합 테스트
-│   ├── test_api_status.py             # API 상태 확인
+│   ├── test_api_status_port8000.py    # API 상태 확인 (포트 8000)
 │   ├── test_app.py                    # Flask 앱 테스트
-│   └── test_connection.py             # DB 연결 테스트
+│   └── test_flask_connection.py      # Flask 앱 연결 테스트
 ├── 🎛️ iot-device/                     # IoT 하드웨어
 │   └── arduino/                       # Arduino 센서 코드
 ├── 📚 task/                           # 개발 관리 문서
@@ -169,7 +169,7 @@ python app.py
 ```bash
 cd testing
 python integration_test.py
-python test_api_status.py
+python test_api_status_port8000.py
 ```
 
 ## 📱 접속 정보

@@ -83,7 +83,7 @@ pip install -r requirements.txt
 
 ### **Phase 1-3 완료 후**
 1. **패키지 설치 완료 확인**
-2. **연결 테스트 실행** (`python test_connection.py`)
+2. **연결 테스트 실행** (`python test_flask_connection.py`)
 3. **기존 DB 스키마 분석**
 4. **안전한 Alembic 초기화** (`alembic stamp head`)
 

@@ -77,6 +77,25 @@ ls -la 대상_폴더명
 ./scripts/safe_file_operations.sh delete 대상_파일
 ```
 
+### **🔍 외부 참조 확인 절차 (파일명 변경 시 필수!)**
+```bash
+# 1. 변경 전 파일명으로 전체 프로젝트 검색
+grep_search -query "변경할_파일명" -include_pattern "*.py,*.md,*.sh,*.txt,*.yml,*.yaml,*.json"
+
+# 2. 검색 결과 분석
+# - 파일 참조 (import, include 등)
+# - 실행 명령 (python, sh 등)
+# - 문서 참조 (README, 가이드 등)
+
+# 3. 각 참조 파일 수정
+# - 파일명 변경
+# - 경로 수정
+# - 실행 명령 수정
+
+# 4. 수정 후 재검증
+grep_search -query "새_파일명" -include_pattern "*.py,*.md,*.sh,*.txt,*.yml,*.yaml,*.json"
+```
+
 ### **2단계: 사전 검사**
 ```bash
 # 1. 참조 파일들 검색
@@ -90,6 +109,9 @@ grep_search -query "\.\./|/home/|/Users/|C:\\|D:\\" -include_pattern "*"
 # - import 문
 # - 설정 파일
 # - 환경 변수 파일
+
+# 4. 외부 참조 확인 (중요!)
+grep_search -query "변경할_파일명" -include_pattern "*.py,*.md,*.sh,*.txt,*.yml,*.yaml,*.json"
 ```
 
 ### **2단계: 경로 문제 수정**
@@ -188,6 +210,7 @@ services/was-server/
 - [ ] **작업 후 검증 완료**: 파일 이동/복사/삭제 결과 확인
 - [ ] **중복 파일 확인**: `find . -name "파일명"`으로 중복 검사
 - [ ] **중복 파일 내용 분석**: 동일한 파일명이지만 기능이 다른 경우 이름 변경
+- [ ] **외부 참조 확인**: 변경된 파일명을 참조하는 모든 파일 검사 및 수정
 - [ ] **실행 테스트 완료**: 관련 기능 정상 동작 확인
 
 ### **🚀 자동화 도구 사용 시 (권장)**
