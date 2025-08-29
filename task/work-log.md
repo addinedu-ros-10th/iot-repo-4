@@ -279,6 +279,9 @@ apps/mockup_gui/
    - 파일/폴더 체계적 분류 및 이동
    - 테스트 관련 파일들을 `testing/` 폴더로 통합
    - 루트 디렉토리 정리 및 체계적 구조화
+   - **중복 파일 분석 및 이름 변경**: 기능이 다른 동명 파일들을 구분하여 이름 변경
+     - `test_api_status.py` → `test_api_status_local.py` (포트 미지정) / `test_api_status_port8000.py` (포트 8000)
+     - `test_connection.py` → `test_backend_connection.py` (백엔드) / `test_flask_connection.py` (Flask)
 
 4. **개발 지침 문서화**
    - 파일/폴더 관리 개발 지침 생성

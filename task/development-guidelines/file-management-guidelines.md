@@ -28,6 +28,15 @@ grep_search -query "\.\./|/home/|/Users/|C:\\|D:\\" -include_pattern "*.py,*.js,
 - **해결**: 절대 경로 또는 프로젝트 루트 기준 경로로 수정
 - **예시**: `../.env.local` → `../../.env.local` 또는 `os.path.join(project_root, '.env.local')`
 
+### **2-4. 중복 파일 문제**
+- **문제**: 파일명이 같지만 내용이나 기능이 다른 파일들
+- **해결**: 내용 분석 후 기능별로 다른 이름으로 구분
+- **예시**: 
+  - `test_api_status.py` (포트 미지정) → `test_api_status_local.py`
+  - `test_api_status.py` (포트 8000) → `test_api_status_port8000.py`
+  - `test_connection.py` (백엔드) → `test_backend_connection.py`
+  - `test_connection.py` (Flask) → `test_flask_connection.py`
+
 #### **2-2. 하드코딩된 경로 문제**
 - **문제**: `/home/user/project/`, `C:\project\` 등 하드코딩된 경로
 - **해결**: 환경 변수 또는 동적 경로 생성으로 수정
@@ -40,7 +49,35 @@ grep_search -query "\.\./|/home/|/Users/|C:\\|D:\\" -include_pattern "*.py,*.js,
 
 ## 🔍 작업 절차
 
-### **1단계: 사전 검사**
+### **1단계: 현재 위치 확인 (필수!)**
+```bash
+# 1. 현재 작업 디렉토리 확인
+pwd
+
+# 2. 프로젝트 루트 확인
+echo "프로젝트 루트: $(git rev-parse --show-toplevel)"
+
+# 3. 대상 파일/폴더 존재 확인
+ls -la 대상_파일명
+ls -la 대상_폴더명
+```
+
+### **🚀 자동화된 안전 작업 도구 사용 (권장!)**
+```bash
+# 환경 확인
+./scripts/safe_file_operations.sh check
+
+# 안전한 파일 이동
+./scripts/safe_file_operations.sh move 소스_파일 대상_경로
+
+# 안전한 파일 복사
+./scripts/safe_file_operations.sh copy 소스_파일 대상_경로
+
+# 안전한 파일 삭제
+./scripts/safe_file_operations.sh delete 대상_파일
+```
+
+### **2단계: 사전 검사**
 ```bash
 # 1. 참조 파일들 검색
 grep_search -query "대상_파일명" -include_pattern "*"
@@ -141,12 +178,22 @@ services/was-server/
 
 파일/폴더 작업 전 체크리스트:
 
-- [ ] 참조 파일들 검사 완료
-- [ ] 경로 문제 식별 및 수정 완료
-- [ ] 의존성 파일들 확인 완료
-- [ ] 백업 생성 완료 (필요시)
-- [ ] 작업 후 검증 완료
-- [ ] 실행 테스트 완료
+- [ ] **현재 위치 확인**: `pwd` 명령으로 작업 디렉토리 확인
+- [ ] **프로젝트 루트 확인**: `git rev-parse --show-toplevel`로 루트 경로 확인
+- [ ] **대상 파일/폴더 존재 확인**: `ls -la`로 소스 존재 여부 확인
+- [ ] **참조 파일들 검사 완료**: `grep_search`로 의존성 확인
+- [ ] **경로 문제 식별 및 수정 완료**: 상대 경로 vs 절대 경로 검토
+- [ ] **의존성 파일들 확인 완료**: requirements.txt, import 문 등 확인
+- [ ] **백업 생성 완료**: 자동 백업 또는 수동 백업 생성
+- [ ] **작업 후 검증 완료**: 파일 이동/복사/삭제 결과 확인
+- [ ] **중복 파일 확인**: `find . -name "파일명"`으로 중복 검사
+- [ ] **중복 파일 내용 분석**: 동일한 파일명이지만 기능이 다른 경우 이름 변경
+- [ ] **실행 테스트 완료**: 관련 기능 정상 동작 확인
+
+### **🚀 자동화 도구 사용 시 (권장)**
+- [ ] **환경 확인**: `./scripts/safe_file_operations.sh check` 실행
+- [ ] **안전 작업**: `./scripts/safe_file_operations.sh [명령]` 사용
+- [ ] **결과 검증**: 스크립트 출력 메시지 확인
 
 ## 🔗 관련 문서
 
