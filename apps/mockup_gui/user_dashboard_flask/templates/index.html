@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Care 사용자 대시보드</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #0dcaf0;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: 600;
+        }
+        
+        .crisis-level {
+            padding: 0.5rem;
+            border-radius: 10px;
+            margin: 0.25rem 0;
+            font-weight: 500;
+        }
+        
+        .crisis-emergency {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .crisis-warning {
+            background-color: var(--warning-color);
+            color: black;
+        }
+        
+        .crisis-attention {
+            background-color: var(--info-color);
+            color: white;
+        }
+        
+        .crisis-normal {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .simulation-controls {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-radius: 15px;
+            padding: 1rem;
+        }
+        
+        .btn-simulation {
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+        }
+        
+        .user-relationship-node {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .user-relationship-node:hover {
+            transform: scale(1.1);
+        }
+        
+        .activity-item {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .progress-bar-custom {
+            height: 8px;
+            border-radius: 4px;
+        }
+        
+        .table-responsive {
+            border-radius: 15px;
+            overflow: hidden;
+        }
+        
+        .table th {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+        
+        .status-active {
+            background-color: var(--success-color);
+        }
+        
+        .status-inactive {
+            background-color: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- 네비게이션 바 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-heart-pulse-fill me-2"></i>
+                IoT Care 사용자 대시보드
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text">
+                    <i class="bi bi-clock me-1"></i>
+                    <span id="current-time"></span>
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- 시뮬레이션 컨트롤 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="simulation-controls">
+                    <div class="row align-items-center">
+                        <div class="col-md-3">
+                            <h5 class="mb-0">
+                                <i class="bi bi-play-circle me-2"></i>
+                                시뮬레이션 모드
+                            </h5>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="simulationToggle">
+                                <label class="form-check-label" for="simulationToggle">
+                                    활성화
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-light btn-simulation" id="playBtn">
+                                    <i class="bi bi-play-fill"></i> 재생
+                                </button>
+                                <button type="button" class="btn btn-light btn-simulation" id="pauseBtn">
+                                    <i class="bi bi-pause-fill"></i> 일시정지
+                                </button>
+                                <button type="button" class="btn btn-light btn-simulation" id="stopBtn">
+                                    <i class="bi bi-stop-fill"></i> 정지
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="d-flex align-items-center">
+                                <label class="me-2">속도:</label>
+                                <select class="form-select form-select-sm" id="speedSelect" style="width: auto;">
+                                    <option value="1">1x</option>
+                                    <option value="2">2x</option>
+                                    <option value="5">5x</option>
+                                    <option value="10">10x</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="progress progress-bar-custom">
+                                <div class="progress-bar bg-success" id="simulationProgress" style="width: 0%"></div>
+                            </div>
+                            <small class="text-white-50">
+                                진행률: <span id="progressText">0%</span> | 
+                                시간: <span id="currentSimulationTime">00:00:00</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 대시보드 통계 -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-people-fill text-primary" style="font-size: 2rem;"></i>
+                        <h4 class="card-title mt-2" id="totalUsers">-</h4>
+                        <p class="card-text text-muted">전체 사용자</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-device-hdd-fill text-success" style="font-size: 2rem;"></i>
+                        <h4 class="card-title mt-2" id="activeDevices">-</h4>
+                        <p class="card-text text-muted">활성 기기</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-exclamation-triangle-fill text-warning" style="font-size: 2rem;"></i>
+                        <h4 class="card-title mt-2" id="todayAlerts">-</h4>
+                        <p class="card-text text-muted">오늘 알림</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="bi bi-shield-exclamation-fill text-danger" style="font-size: 2rem;"></i>
+                        <h4 class="card-title mt-2" id="crisisSituations">-</h4>
+                        <p class="card-text text-muted">위기 상황</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- 위기 등급 모니터링 -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-shield-check me-2"></i>
+                        위기 등급 모니터링
+                        <button class="btn btn-sm btn-outline-light float-end" id="toggleCrisisMonitoring">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div class="card-body" id="crisisMonitoringContent">
+                        <div class="crisis-level crisis-emergency">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            응급: <span id="emergencyCount">0</span>명
+                        </div>
+                        <div class="crisis-level crisis-warning">
+                            <i class="bi bi-exclamation-circle me-2"></i>
+                            주의: <span id="warningCount">0</span>명
+                        </div>
+                        <div class="crisis-level crisis-attention">
+                            <i class="bi bi-info-circle me-2"></i>
+                            관심: <span id="attentionCount">0</span>명
+                        </div>
+                        <div class="crisis-level crisis-normal">
+                            <i class="bi bi-check-circle me-2"></i>
+                            보통: <span id="normalCount">0</span>명
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 최근 활동 -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-activity me-2"></i>
+                        최근 활동
+                        <button class="btn btn-sm btn-outline-light float-end" id="toggleRecentActivity">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div class="card-body" id="recentActivityContent">
+                        <div id="activityList">
+                            <!-- 활동 목록이 여기에 동적으로 추가됩니다 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 센서 데이터 차트 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-graph-up me-2"></i>
+                        센서 데이터 실시간 모니터링
+                    </div>
+                    <div class="card-body">
+                        <canvas id="sensorChart" height="100"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- 사용자 관계 네트워크 -->
+            <div class="col-md-8 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-diagram-3 me-2"></i>
+                        사용자 관계 네트워크
+                        <div class="float-end">
+                            <select class="form-select form-select-sm d-inline-block" id="userSelect" style="width: auto;">
+                                <option value="">사용자 선택...</option>
+                            </select>
+                            <button class="btn btn-sm btn-outline-light ms-2" id="toggleAllUsers">
+                                전체 보기
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="relationshipGraph" style="height: 400px; border: 1px solid #dee2e6; border-radius: 10px;">
+                            <!-- 관계 그래프가 여기에 그려집니다 -->
+                            <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                                <i class="bi bi-diagram-3 me-2"></i>
+                                사용자를 선택하면 관계 네트워크가 표시됩니다
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 사용자 목록 테이블 -->
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="bi bi-people me-2"></i>
+                        사용자 목록
+                        <button class="btn btn-sm btn-outline-light float-end" id="toggleUserList">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div class="card-body" id="userListContent">
+                        <div class="mb-3">
+                            <select class="form-select" id="roleFilter">
+                                <option value="">전체 역할</option>
+                                <option value="care_target">돌봄대상자</option>
+                                <option value="caregiver">돌봄제공자</option>
+                                <option value="family">가족</option>
+                                <option value="guardian">보호자</option>
+                                <option value="admin">관리자</option>
+                            </select>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover" id="userTable">
+                                <thead>
+                                    <tr>
+                                        <th>이름</th>
+                                        <th>역할</th>
+                                        <th>상태</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="userTableBody">
+                                    <!-- 사용자 목록이 여기에 동적으로 추가됩니다 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 대시보드 JavaScript -->
+    <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

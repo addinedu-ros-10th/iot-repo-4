@@ -7,8 +7,8 @@ import asyncpg
 import os
 from dotenv import load_dotenv
 
-# 환경 변수 로드
-load_dotenv('.env.local')
+# .env.local 파일 로드
+load_dotenv('../.env.local')
 
 async def check_table_structure():
     """데이터베이스 테이블 구조를 확인합니다."""

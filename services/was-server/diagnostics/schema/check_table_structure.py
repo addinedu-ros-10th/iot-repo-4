@@ -9,7 +9,8 @@ from dotenv import load_dotenv
 
 async def check_table_structure():
     """테이블 구조 확인"""
-    load_dotenv('.env.local')
+    # .env.local 파일 로드
+    load_dotenv('../.env.local')
     
     # DB 연결 정보
     db_config = {

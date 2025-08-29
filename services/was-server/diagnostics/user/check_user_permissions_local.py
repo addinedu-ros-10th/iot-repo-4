@@ -8,7 +8,7 @@ import psycopg2
 from dotenv import load_dotenv
 
 # .env.local 파일 로드
-load_dotenv('.env.local')
+load_dotenv('../.env.local')
 
 def check_user_permissions():
     """사용자 계정 권한 확인"""

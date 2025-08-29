@@ -1,18 +1,11 @@
 #!/usr/bin/env python3
 """
-IoT Care Bootstrap Dashboard - Flask 백엔드
-현대적이고 세련된 Bootstrap 기반 사용자 대시보드
+IoT Care 사용자 대시보드 - Flask 백엔드
 """
 
 from flask import Flask, render_template, jsonify, request
-try:
-    import psycopg2
-    import psycopg2.extras
-    PSYCOPG2_AVAILABLE = True
-except ImportError:
-    PSYCOPG2_AVAILABLE = False
-    print("⚠️ psycopg2가 설치되지 않았습니다. 데이터베이스 기능이 제한됩니다.")
-
+import psycopg2
+import psycopg2.extras
 from datetime import datetime, timedelta
 import json
 from typing import List, Dict, Any, Optional
@@ -25,7 +18,7 @@ class DatabaseManager:
     
     def __init__(self):
         self.config = {
-            'host': '192.168.0.26',
+            'host': '192.168.0.2',
             'port': 15432,
             'user': 'svc_dev',
             'password': 'IOT_dev_123!@#',
@@ -35,10 +28,6 @@ class DatabaseManager:
     
     def connect(self) -> bool:
         """데이터베이스 연결"""
-        if not PSYCOPG2_AVAILABLE:
-            print("❌ psycopg2가 설치되지 않아 데이터베이스 연결이 불가능합니다.")
-            return False
-            
         try:
             self.connection = psycopg2.connect(**self.config)
             return True
@@ -53,9 +42,6 @@ class DatabaseManager:
     
     def get_users(self) -> List[Dict[str, Any]]:
         """사용자 목록 조회"""
-        if not PSYCOPG2_AVAILABLE:
-            return []
-            
         try:
             cursor = self.connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cursor.execute("""
@@ -93,9 +79,6 @@ class DatabaseManager:
     
     def get_user_relationships(self, user_id: str) -> List[Dict[str, Any]]:
         """사용자 관계 조회"""
-        if not PSYCOPG2_AVAILABLE:
-            return []
-            
         try:
             cursor = self.connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             
@@ -152,9 +135,6 @@ class DatabaseManager:
     
     def get_data_timeline(self, user_id: str, hours: int = 24) -> List[Dict[str, Any]]:
         """통합 데이터 타임라인 조회"""
-        if not PSYCOPG2_AVAILABLE:
-            return []
-            
         try:
             cursor = self.connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             
@@ -286,7 +266,6 @@ def get_dashboard_stats():
         return jsonify({'success': False, 'error': str(e)})
 
 if __name__ == '__main__':
-    print("🚀 IoT Care Bootstrap Dashboard 시작 중...")
-    print("📱 브라우저에서 http://localhost:5001 으로 접속하세요")
-    app.run(debug=True, host='0.0.0.0', port=5001)
-
+    print("🚀 IoT Care 대시보드 시작 중...")
+    print("📱 브라우저에서 http://localhost:5000 으로 접속하세요")
+    app.run(debug=True, host='0.0.0.0', port=5000)

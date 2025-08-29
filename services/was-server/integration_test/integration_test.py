@@ -34,8 +34,8 @@ class IoTIntegrationTester:
         self.failed_tests = []
         self.existing_device_ids = []
         
-        # 환경 변수 로드
-        load_dotenv('.env.local')
+        # .env.local 파일 로드
+        load_dotenv('../.env.local')
         
     async def __aenter__(self):
         return self

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Raw 센서 데이터 정리 스크립트
+Edge 센서 데이터 정리 스크립트
 외래 키 제약조건을 위반하는 데이터를 정리
 """
 import asyncio
@@ -8,10 +8,10 @@ import asyncpg
 import os
 from dotenv import load_dotenv
 
-async def clean_raw_data():
-    """Raw 센서 데이터 정리"""
-    # 환경 변수 로드
-    load_dotenv('.env.local')
+async def clean_edge_data():
+    """Edge 센서 데이터 정리"""
+    # .env.local 파일 로드
+    load_dotenv('../.env.local')
     
     # DB 연결 정보
     db_config = {
@@ -29,22 +29,15 @@ async def clean_raw_data():
         conn = await asyncpg.connect(**db_config)
         print("✅ DB 연결 성공")
         
-        # Raw 센서 테이블들의 문제 데이터 정리
-        raw_tables = [
-            'sensor_raw_cds',
-            'sensor_raw_dht',
-            'sensor_raw_flame',
-            'sensor_raw_imu',
-            'sensor_raw_loadcell',
-            'sensor_raw_mq5',
-            'sensor_raw_mq7',
-            'sensor_raw_rfid',
-            'sensor_raw_sound',
-            'sensor_raw_tcrt5000',
-            'sensor_raw_ultrasonic'
+        # Edge 센서 테이블들의 문제 데이터 정리
+        edge_tables = [
+            'sensor_edge_flame',
+            'sensor_edge_pir', 
+            'sensor_edge_reed',
+            'sensor_edge_tilt'
         ]
         
-        for table_name in raw_tables:
+        for table_name in edge_tables:
             try:
                 print(f"\n🧹 {table_name} 테이블 정리 중...")
                 
@@ -70,4 +63,4 @@ async def clean_raw_data():
         print(f"❌ DB 연결 실패: {e}")
 
 if __name__ == "__main__":
-    asyncio.run(clean_raw_data()) 
+    asyncio.run(clean_edge_data()) 

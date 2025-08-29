@@ -11,8 +11,8 @@ from datetime import datetime
 
 async def create_test_devices():
     """테스트용 디바이스 생성"""
-    # 환경 변수 로드
-    load_dotenv('.env.local')
+    # .env.local 파일 로드
+    load_dotenv('../.env.local')
     
     # DB 연결 정보
     db_config = {

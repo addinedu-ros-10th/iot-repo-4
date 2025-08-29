@@ -10,8 +10,8 @@ from dotenv import load_dotenv
 
 async def check_edge_data():
     """Edge 센서 데이터 확인"""
-    # 환경 변수 로드
-    load_dotenv('.env.local')
+    # .env.local 파일 로드
+    load_dotenv('../.env.local')
     
     # DB 연결 정보
     db_config = {

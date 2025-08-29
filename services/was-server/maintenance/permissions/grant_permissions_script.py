@@ -8,7 +8,7 @@ import psycopg2
 from dotenv import load_dotenv
 
 # .env.local 파일 로드
-load_dotenv('.env.local')
+load_dotenv('../.env.local')
 
 def grant_permissions_to_svc_app():
     """svc_app 계정에 필요한 권한 부여"""
