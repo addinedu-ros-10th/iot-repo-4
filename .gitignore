@@ -72,7 +72,6 @@ instance/
 docs/_build/
 
 # Raw Document
-doc/project_materials
 doc/readme_references
 
 # PyBuilder
