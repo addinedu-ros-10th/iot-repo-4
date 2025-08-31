@@ -23,8 +23,8 @@ if [ ! -f "pubspec.yaml" ]; then
     echo -e "${YELLOW}올바른 Flutter 프로젝트 경로로 이동합니다...${NC}"
     
     # 프로젝트 루트에서 Flutter 프로젝트 찾기
-    PROJECT_ROOT="/Users/emotionalmachine/Documents/AddInEdu/Project"
-    FLUTTER_PROJECT="$PROJECT_ROOT/apps/user_app"
+PROJECT_ROOT="$(cd ../.. && pwd)"
+FLUTTER_PROJECT="$PROJECT_ROOT/apps/user_app"
     
     if [ -d "$FLUTTER_PROJECT" ]; then
         echo -e "${GREEN}✅ Flutter 프로젝트를 찾았습니다: $FLUTTER_PROJECT${NC}"
@@ -41,21 +41,44 @@ fi
 
 # Flutter 환경 확인
 echo -e "\n${BLUE}🔍 Flutter 환경 확인 중...${NC}"
-if ! command -v flutter &> /dev/null; then
-    echo -e "${RED}❌ Flutter가 설치되지 않았습니다!${NC}"
+
+# Flutter 경로 찾기
+FLUTTER_PATH=""
+if command -v flutter &> /dev/null; then
+    FLUTTER_PATH=$(which flutter)
+    echo -e "${GREEN}✅ Flutter를 찾았습니다: $FLUTTER_PATH${NC}"
+elif [ -f "/home/guehojung/development/flutter/bin/flutter" ]; then
+    FLUTTER_PATH="/home/guehojung/development/flutter/bin/flutter"
+    echo -e "${GREEN}✅ Flutter를 찾았습니다: $FLUTTER_PATH${NC}"
+elif [ -f "$HOME/development/flutter/bin/flutter" ]; then
+    FLUTTER_PATH="$HOME/development/flutter/bin/flutter"
+    echo -e "${GREEN}✅ Flutter를 찾았습니다: $FLUTTER_PATH${NC}"
+else
+    echo -e "${RED}❌ Flutter를 찾을 수 없습니다!${NC}"
     echo -e "${YELLOW}Flutter를 설치하거나 PATH에 추가해주세요.${NC}"
+    echo -e "${YELLOW}일반적인 Flutter 경로:${NC}"
+    echo -e "${YELLOW}  - $HOME/development/flutter/bin/flutter${NC}"
+    echo -e "${YELLOW}  - /usr/local/bin/flutter${NC}"
+    echo -e "${YELLOW}  - /opt/flutter/bin/flutter${NC}"
     exit 1
+fi
+
+# Flutter 실행 권한 확인
+if [ ! -x "$FLUTTER_PATH" ]; then
+    echo -e "${RED}❌ Flutter 실행 권한이 없습니다: $FLUTTER_PATH${NC}"
+    chmod +x "$FLUTTER_PATH"
+    echo -e "${GREEN}✅ 실행 권한을 부여했습니다.${NC}"
 fi
 
 # Flutter doctor 실행
 echo -e "\n${BLUE}🏥 Flutter Doctor 실행 중...${NC}"
-flutter doctor
+"$FLUTTER_PATH" doctor
 
 # 의존성 설치 확인
 echo -e "\n${BLUE}📦 의존성 설치 확인 중...${NC}"
 if [ ! -d ".dart_tool" ] || [ ! -f "pubspec.lock" ]; then
     echo -e "${YELLOW}⚠️  의존성이 설치되지 않았습니다. 설치를 시작합니다...${NC}"
-    flutter pub get
+    "$FLUTTER_PATH" pub get
 fi
 
 # 포트 확인 및 설정
@@ -71,8 +94,8 @@ fi
 
 # Flutter 앱 실행
 echo -e "\n${GREEN}🚀 Flutter 앱을 실행합니다...${NC}"
-echo -e "${BLUE}명령어: flutter run -d chrome --web-port=$PORT${NC}"
+echo -e "${BLUE}명령어: $FLUTTER_PATH run -d chrome --web-port=$PORT${NC}"
 echo -e "${YELLOW}중단하려면 Ctrl+C를 누르세요.${NC}"
 echo "=================================="
 
-flutter run -d chrome --web-port=$PORT
+"$FLUTTER_PATH" run -d chrome --web-port=$PORT
