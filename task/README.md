@@ -186,3 +186,83 @@ task/
 **📊 프로젝트**: IoT Care Project  
 **🏷️ 버전**: v3.1 (IoT 돌봄 서비스 분석 및 프로젝트 정리)
 
+# 개발 관리 문서
+
+## 📋 현재 작업 요청 (2025-01-27)
+
+### 🎯 작업 목표
+로봇 개발자 취업을 위한 포트폴리오 프로젝트의 README 구성 최적화
+
+### 📝 작업 요청 내용
+1. **Repository URL 업데이트**: `https://github.com/addinedu-ros-10th/iot-repo-4`로 변경
+2. **기존 Repository 조사**: 4th~9th 기수 iot-repo-1~6 존재 여부 확인
+3. **README 구성 분석**: 각 Repository의 README 구성 조사 및 비교
+4. **포트폴리오 최적화**: 로봇 개발자 취업 관점에서 README 구성 평가
+5. **최적 README 구성 제안**: 필수 구성 요소를 반영한 최종 README 구성
+
+### 📋 필수 구성 요소
+```
+1. 기획 - User Requirement
+2. 자료조사
+3. 기술조사
+4. 설계 - System Requirements, System Architecture, System Scenario, Interface Specification, Data Structure, 화면 구성도, 상황 감지/알림 룰 설정 및 대응 우선순위
+5. 구현 - 실내 센서 매핑, Github 사용, FastAPI 사용, DB 접속 보안 가이드, 인프라 구축, WAS 서버 개발, IOT Device 개발, PyQt 관제 서비스 개발, 사용자 서비스 개발
+6. Validation - Test Plan, Test Case, Test Report
+7. 발표
+```
+
+## ✅ 작업 체크리스트
+
+### Phase 1: Repository 조사 및 분석 (20분)
+- [x] 4th~9th 기수 iot-repo-1~6 Repository 존재 여부 확인 (체크리스트 생성)
+- [x] 조사 대상 및 범위 명확화 (10th 기수는 조사 대상 아님)
+- [x] 4th~9th 기수 Repository 존재 여부 확인 (36/36 완료)
+- [x] 존재하는 Repository의 README 구성 조사 (3/3 완료)
+- [x] 공통 구성 요소와 개별 구성 요소 정리
+
+### Phase 2: 포트폴리오 최적화 분석 (15분)
+- [x] 로봇 개발자 취업 관점에서 README 구성 평가
+- [x] 반영할 구성과 배제할 구성 결정 및 근거 작성
+- [x] 포트폴리오 최적화 방안 수립 완료
+
+### Phase 3: 최적 README 구성 설계 (15분)
+- [x] 필수 구성 요소를 반영한 README 구조 설계
+- [x] 프로젝트 자료를 활용한 내용 구성 계획
+
+### Phase 4: README 업데이트 및 검증 (10분)
+- [ ] Repository URL 업데이트
+- [ ] 새로운 README 구성 적용
+- [ ] 최종 검증 및 피드백 요청
+
+## ⏰ 액션 플랜 (1시간)
+
+### 0-20분: Repository 조사 및 분석
+- GitHub에서 4th~9th 기수 Repository 존재 여부 확인
+- 존재하는 Repository의 README 구성 스크래핑
+- 공통/개별 구성 요소 분석 및 정리
+
+### 20-35분: 포트폴리오 최적화 분석
+- 로봇 개발자 취업 관점에서 각 구성 요소 평가
+- 반영/배제 결정 및 근거 작성
+- 최적 구성 전략 수립
+
+### 35-50분: 최적 README 구성 설계
+- 필수 구성 요소를 반영한 구조 설계
+- 프로젝트 자료 활용 방안 수립
+- README 템플릿 작성
+
+### 50-60분: README 업데이트 및 검증
+- Repository URL 업데이트
+- 새로운 README 구성 적용
+- 최종 검증 및 피드백 요청
+
+## 📊 현재 진행 상황
+- **시작 시간**: 2025-01-27
+- **목표 완료 시간**: 1시간 내
+- **현재 단계**: Phase 3 - 최적 README 구성 설계 (진행 중)
+- **전체 진행률**: 85%
+
+---
+
+## 📚 기존 개발 관리 문서
+
