@@ -538,7 +538,55 @@ chore: 빌드 프로세스 또는 보조 도구 변경
 
 ---
 
-**문서 버전**: 1.0  
+## 🔗 **관련 문서 및 크로스 레퍼런스**
+
+### **📊 프로젝트 현황 관련**
+- [[../current-development-status.md]] - 전체 프로젝트 상태 및 완성도
+- [[../work-log.md]] - 개발 작업 로그 및 히스토리
+- [[../checklist.md]] - 프로젝트 체크리스트
+
+### **🧪 테스트 관련**
+- [[../testing-scenarios/bootstrap_dashboard_test_scenarios.md]] - TDD 테스트 시나리오
+- [[../testing-results/]] - 테스트 결과 데이터
+- [[../tdd-implementation-plan.md]] - TDD 구현 계획
+- [[../api-integration-test-checklist.md]] - API 통합 테스트
+
+### **🔧 개발 가이드라인**
+- [[../development-guidelines.md]] - 개발 가이드라인
+- [[../api-endpoint-management-guidelines.md]] - API 관리 가이드
+- [[../ai-agent-work-guidelines.md]] - AI 에이전트 협업 가이드
+
+### **📱 애플리케이션 개발**
+- [[../backend-apis/current-status.md]] - 백엔드 API 현황
+- [[../flutter-user-app/development-overview.md]] - Flutter 앱 개발 현황
+- [[../flutter-user-app-context.md]] - Flutter 앱 컨텍스트
+
+---
+
+## 🏷️ **태그 및 분류**
+
+#개발방법론 #TDD #CleanArchitecture #테스트주도개발 #아키텍처 #의존성주입 #리팩토링 #품질관리 #코드품질 #테스트커버리지
+
+---
+
+## 📝 **변경 사항 히스토리**
+
+### **v1.1 (2025-08-27) - 크로스 레퍼런스 시스템 구축**
+- ✅ **새로운 기능**: Obsidian 스타일 위키 링크 시스템 추가
+- ✅ **크로스 레퍼런스**: 관련 문서 섹션 및 상호 링크 구현
+- ✅ **태그 시스템**: 문서 분류 및 검색을 위한 태그 추가
+- ✅ **문서 연결성**: 프로젝트 전체 문서와의 연결성 강화
+
+### **v1.0 (2025-08-23) - 초기 개발 방법론 문서 생성**
+- ✅ **기본 구조**: TDD 및 Clean Architecture 개발 방법론 가이드 문서화
+- ✅ **TDD 가이드**: Red-Green-Refactor 사이클 및 테스트 전략
+- ✅ **Clean Architecture**: 4계층 구조 및 의존성 규칙
+- ✅ **개발 워크플로우**: 일일/주간 개발 사이클 및 커밋 규칙
+
+---
+
+**문서 버전**: 1.1 (크로스 레퍼런스 추가)  
 **작성일**: 2025-08-23  
+**최종 업데이트**: 2025-08-27  
 **작성자**: AI Assistant  
 **프로젝트**: TDD 및 Clean Architecture 개발 방법론 가이드
