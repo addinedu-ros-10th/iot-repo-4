@@ -74,6 +74,46 @@
 **문서**: [System Requirements](doc/project_materials/설계/System%20Requirements/project01-System%20Requirements-310825-081849.pdf)
 - 기능/비기능 요구사항, 우선순위, 검증 기준 명세
 
+##### 기능 요구사항 (Functional Requirements)
+
+| ID | 요구사항 | 설명 | 우선순위 | 검증 기준 |
+|---|---|---|---|---|
+| FR-001 | 센서 데이터 수집 | IoT 센서로부터 실시간 데이터 수집 | High | 1초 이내 데이터 수집, 99.9% 가용성 |
+| FR-002 | 이상 상황 감지 | 낙상, 가스 누출, 무동작 등 이상 패턴 감지 | High | 5초 이내 감지, 95% 정확도 |
+| FR-003 | 실시간 모니터링 | 센서 데이터 실시간 시각화 및 표시 | High | 지연시간 2초 이하, 실시간 업데이트 |
+| FR-004 | 알림 시스템 | 이상 상황 발생 시 즉시 알림 전송 | High | 10초 이내 알림 전송, 다중 채널 지원 |
+| FR-005 | 사용자 인증 | 관리자/사용자/보호자 역할별 접근 제어 | Medium | OAuth 2.0, JWT 토큰, 세션 관리 |
+| FR-006 | 데이터 저장 | 센서 데이터 및 이벤트 로그 영구 저장 | Medium | PostgreSQL, 백업 및 복구 지원 |
+| FR-007 | API 제공 | RESTful API를 통한 데이터 접근 | Medium | OpenAPI 3.0, API 문서화 |
+| FR-008 | 대시보드 | 웹 기반 모니터링 및 관리 인터페이스 | Medium | 반응형 디자인, 크로스 브라우저 지원 |
+| FR-009 | 모바일 앱 | iOS/Android 기반 사용자 앱 | Low | Flutter, 푸시 알림 지원 |
+| FR-010 | 리포트 생성 | 일일/주간/월간 활동 리포트 | Low | PDF/Excel 출력, 자동 생성 |
+
+##### 비기능 요구사항 (Non-Functional Requirements)
+
+| ID | 요구사항 | 설명 | 우선순위 | 검증 기준 |
+|---|---|---|---|---|
+| NFR-001 | 성능 | 시스템 응답 시간 및 처리량 | High | API 응답시간 200ms 이하, 동시 사용자 100명 |
+| NFR-002 | 가용성 | 시스템 가동률 및 장애 복구 | High | 99.9% 가용성, MTTR 30분 이하 |
+| NFR-003 | 보안 | 데이터 보호 및 접근 제어 | High | TLS 1.3, 데이터 암호화, 접근 로그 |
+| NFR-004 | 확장성 | 사용자 및 센서 증가 대응 | Medium | 수평 확장 지원, 로드 밸런싱 |
+| NFR-005 | 호환성 | 다양한 센서 및 플랫폼 지원 | Medium | Arduino, Raspberry Pi, 표준 프로토콜 |
+| NFR-006 | 유지보수성 | 코드 품질 및 문서화 | Medium | Clean Architecture, 80% 이상 테스트 커버리지 |
+| NFR-007 | 사용성 | 직관적이고 쉬운 사용자 인터페이스 | Medium | 사용자 테스트 통과율 90% 이상 |
+| NFR-008 | 국제화 | 다국어 지원 | Low | 한국어/영어 기본 지원, 확장 가능 |
+| NFR-009 | 접근성 | 장애인 접근성 준수 | Low | WCAG 2.1 AA 레벨 준수 |
+| NFR-010 | 모니터링 | 시스템 상태 및 성능 모니터링 | Low | Prometheus, Grafana, 알림 설정 |
+
+##### 시스템 제약사항 (System Constraints)
+
+| ID | 제약사항 | 설명 | 영향도 |
+|---|---|---|---|
+| SC-001 | 하드웨어 제약 | Arduino 메모리 및 처리 능력 제한 | Medium |
+| SC-002 | 네트워크 제약 | 인터넷 연결 의존성 | High |
+| SC-003 | 전력 소비 | 배터리 기반 센서의 전력 효율성 | Medium |
+| SC-004 | 비용 제약 | 센서 및 하드웨어 비용 최적화 | Medium |
+| SC-005 | 규제 준수 | 개인정보보호법, 의료기기 규제 | High |
+
 #### 4.2 System Architecture
 **문서**: [Hardware Architecture](doc/project_materials/설계/System%20Architecture/project01-Hardware%20Architecture-310825-082025.pdf), [Software Architecture](doc/project_materials/설계/System%20Architecture/project01-Software%20Architecture-310825-082247.pdf)
 - 3계층 구조(IoT→API→GUI), 배포/네트워크/구성요소 다이어그램
