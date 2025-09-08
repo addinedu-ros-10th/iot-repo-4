@@ -6,21 +6,38 @@
 
 1. 프로젝트 개요
 2. 팀 구성 및 역할
-3. 기술 스택
-4. 1) 기획 - User Requirement
-5. 2) 자료조사
-6. 3) 기술조사
-7. 4) 설계 (SR, Architecture, Scenario/Sequence/State, Interface, Data/ERD, 화면 구성, 상황 감지/알림 룰)
-8. 5) 구현 (센서 매핑, GitHub, FastAPI, DB 보안, 인프라, WAS, IoT Device, PyQt 관제, 사용자 서비스)
-9. 6) Validation (Test Plan/Case/Report)
-10. 7) 발표
-11. 시스템 아키텍처
-12. 프로젝트 구조 / 빠른 시작 / 접속 정보
-13. 향후 개발 계획 / 기여 / 라이선스 / 문의
+3. 프로젝트 구성 요소
+   - 3.1 기획 - User Requirement
+   - 3.2 자료조사
+   - 3.3 기술조사
+   - 3.4 설계 (System Requirements, Architecture, Scenario, Interface, Data Structure, 화면 구성, 알림 룰)
+   - 3.5 구현 (센서 매핑, GitHub, FastAPI, DB 보안, 인프라, WAS, IoT Device, PyQt 관제, 사용자 서비스)
+   - 3.6 Validation (Test Plan/Case/Report)
+   - 3.7 발표
+4. 시스템 아키텍처
+5. 기술 스택
+6. 프로젝트 구조
+7. 주요 기능
+8. 프로젝트 완성도
+9. 구현 현황 요약
+10. 빠른 시작
+11. 접속 정보
+12. 향후 개발 계획
+13. 미구현 항목 및 구현 제안
+14. 기여하기 / 라이선스 / 문의
 
 ## 🌟 프로젝트 개요
 
 **IoT Care**는 초고령 사회 독거노인을 위한 IoT 기반 통합 돌봄 서비스 플랫폼입니다. 센서 네트워크와 IoT 기술을 활용하여 안전과 정서를 통합 관리하는 혁신적인 솔루션을 제공합니다.
+
+## 👥 팀 구성 및 역할
+
+| 역할 | 이름 | 주요 담당 업무 |
+|---|---|---|
+| **팀장** | 이건명 | IoT 소프트웨어/하드웨어 구현, 자료조사, 설계문서 작성 |
+| **팀원** | 이수 | IoT 소프트웨어/하드웨어 구현, 자료조사, 설계문서 작성 |
+| **팀원** | 임정찬 | IoT 소프트웨어/하드웨어 구현, 자료조사, 발표 |
+| **팀원** | 정규호 | 인프라/소프트웨어 구현, 자료조사, 발표 |
 
 ## 🎯 핵심 비전
 
@@ -89,35 +106,12 @@
 | FR-009 | 모바일 앱 | iOS/Android 기반 사용자 앱 | Low | Flutter, 푸시 알림 지원 |
 | FR-010 | 리포트 생성 | 일일/주간/월간 활동 리포트 | Low | PDF/Excel 출력, 자동 생성 |
 
-##### 비기능 요구사항 (Non-Functional Requirements)
-
-| ID | 요구사항 | 설명 | 우선순위 | 검증 기준 |
-|---|---|---|---|---|
-| NFR-001 | 성능 | 시스템 응답 시간 및 처리량 | High | API 응답시간 200ms 이하, 동시 사용자 100명 |
-| NFR-002 | 가용성 | 시스템 가동률 및 장애 복구 | High | 99.9% 가용성, MTTR 30분 이하 |
-| NFR-003 | 보안 | 데이터 보호 및 접근 제어 | High | TLS 1.3, 데이터 암호화, 접근 로그 |
-| NFR-004 | 확장성 | 사용자 및 센서 증가 대응 | Medium | 수평 확장 지원, 로드 밸런싱 |
-| NFR-005 | 호환성 | 다양한 센서 및 플랫폼 지원 | Medium | Arduino, Raspberry Pi, 표준 프로토콜 |
-| NFR-006 | 유지보수성 | 코드 품질 및 문서화 | Medium | Clean Architecture, 80% 이상 테스트 커버리지 |
-| NFR-007 | 사용성 | 직관적이고 쉬운 사용자 인터페이스 | Medium | 사용자 테스트 통과율 90% 이상 |
-| NFR-008 | 국제화 | 다국어 지원 | Low | 한국어/영어 기본 지원, 확장 가능 |
-| NFR-009 | 접근성 | 장애인 접근성 준수 | Low | WCAG 2.1 AA 레벨 준수 |
-| NFR-010 | 모니터링 | 시스템 상태 및 성능 모니터링 | Low | Prometheus, Grafana, 알림 설정 |
-
-##### 시스템 제약사항 (System Constraints)
-
-| ID | 제약사항 | 설명 | 영향도 |
-|---|---|---|---|
-| SC-001 | 하드웨어 제약 | Arduino 메모리 및 처리 능력 제한 | Medium |
-| SC-002 | 네트워크 제약 | 인터넷 연결 의존성 | High |
-| SC-003 | 전력 소비 | 배터리 기반 센서의 전력 효율성 | Medium |
-| SC-004 | 비용 제약 | 센서 및 하드웨어 비용 최적화 | Medium |
-| SC-005 | 규제 준수 | 개인정보보호법, 의료기기 규제 | High |
-
 #### 4.2 System Architecture
 **문서**: [Hardware Architecture](doc/project_materials/설계/System%20Architecture/project01-Hardware%20Architecture-310825-082025.pdf), [Software Architecture](doc/project_materials/설계/System%20Architecture/project01-Software%20Architecture-310825-082247.pdf)
 - 3계층 구조(IoT→API→GUI), 배포/네트워크/구성요소 다이어그램
-  - 참고 이미지: [hardware_architecture.png](doc/project_materials/설계/System%20Architecture/hardware_architecture.png), [sequence diagram](doc/project_materials/설계/System%20Architecture/software%20architecture%20sequence%20diagram.png)
+  - 참고 이미지: 
+    ![Hardware Architecture](doc/project_materials/설계/System%20Architecture/hardware_architecture.png)
+    ![Sequence Diagram](doc/project_materials/설계/System%20Architecture/software%20architecture%20sequence%20diagram.png)
 
 #### 4.3 System Scenario
 **문서**: [System Scenario](doc/project_materials/설계/System%20Scenario/project01-System%20Scenario-310825-082320.pdf), [Admin](doc/project_materials/설계/System%20Scenario/관리자(Admin)%20시나리오%20-%20sheet.pdf), [User](doc/project_materials/설계/System%20Scenario/돌봄%20대상자(User)%20시나리오%20-%20sheet.pdf), [Guardian](doc/project_materials/설계/System%20Scenario/보호자(Guardian)%20시나리오%20-%20sheet.pdf)
@@ -128,8 +122,10 @@
 - TCP/Serial/HTTP/JSON 규격 및 명령/상태 코드
 
 #### 4.5 Data Structure
-**문서**: [Data Structure](doc/project_materials/설계/Data%20Structure/project01-Data%20Structure-310825-082812.pdf), [ERD](doc/project_materials/설계/Data%20Structure/erd.png)
+**문서**: [Data Structure](doc/project_materials/설계/Data%20Structure/project01-Data%20Structure-310825-082812.pdf)
 - 엔터티/관계, 핵심 테이블/컬럼 정의, 인덱싱 전략 요약
+- ERD 다이어그램:
+  ![ERD](doc/project_materials/설계/Data%20Structure/erd.png)
 
 #### 4.6 화면 구성도
 **문서**: [GUI Reference](doc/project_materials/설계/화면%20구성도/project01-GUI%20Reference-310825-083001.pdf)
@@ -287,6 +283,7 @@
 
 ### **프론트엔드 (Frontend Applications)**
 - **웹 대시보드**: Flask + Bootstrap (Glassmorphism 디자인)
+  ![Dashboard Reference](apps/mockup_gui/reference/image/dashboard.png)
 - **모바일 앱**: Flutter (iOS/Android)
 - **실시간 모니터링**: WebSocket, Server-Sent Events
 
