@@ -33,11 +33,13 @@ class LoadCellRepository(ILoadCellRepository):
             "device_id": data.device_id,
             "raw_payload": data.raw_payload
         }
+
+        print(orm_data)
         
         db_data = SensorRawLoadCell(**orm_data)
         self.db.add(db_data)
-        self.db.commit()
-        self.db.refresh(db_data)
+        await self.db.commit()
+        await self.db.refresh(db_data)
         return SensorRawLoadCellResponse.from_orm(db_data)
     
     async def get_by_id(
@@ -83,6 +85,7 @@ class LoadCellRepository(ILoadCellRepository):
         limit_count: int = 100
     ) -> List[SensorRawLoadCellResponse]:
         """로드셀 센서 데이터 목록 조회"""
+        print(f"device_id: {device_id}, start_time: {start_time}, end_time: {end_time}, limit_count: {limit_count}")
         query = select(SensorRawLoadCell)
         
         # 필터 조건 추가
@@ -96,7 +99,7 @@ class LoadCellRepository(ILoadCellRepository):
         # 시간 역순으로 정렬하고 제한
         query = query.order_by(SensorRawLoadCell.time.desc()).limit(limit_count)
         
-        result = self.db.execute(query)
+        result = await self.db.execute(query)
         data_list = result.scalars().all()
         
         # 결과를 리스트로 변환하여 반환

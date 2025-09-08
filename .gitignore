@@ -14,7 +14,7 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# lib/
 lib64/
 parts/
 sdist/
@@ -71,6 +71,9 @@ instance/
 # Sphinx documentation
 docs/_build/
 
+# Raw Document
+doc/readme_references
+
 # PyBuilder
 .pybuilder/
 target/
@@ -109,7 +112,7 @@ ipython_config.py
 #poetry.toml
 
 # pdm
-#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
+#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
 #   pdm recommends including project-wide configuration in pdm.toml, but excluding .pdm-python.
 #   https://pdm-project.org/en/latest/usage/project/#working-with-version-control
 #pdm.lock
@@ -241,3 +244,28 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# data files
+services/was-server/data/*.sql
+services/was-server/data/*.csv
+
+# Mockup Applications - Allow all files in apps/mockup directory
+# Only exclude specific temporary or generated files
+apps/mockup/*/__pycache__/
+apps/mockup/*/*.pyc
+apps/mockup/*/*.pyo
+apps/mockup/*/*.pyd
+apps/mockup/*/.pytest_cache/
+apps/mockup/*/.coverage
+apps/mockup/*/htmlcov/
+apps/mockup/*/.tox/
+apps/mockup/*/.nox/
+apps/mockup/*/cover/
+apps/mockup/*/.hypothesis/
+apps/mockup/*/nosetests.xml
+apps/mockup/*/coverage.xml
+apps/mockup/*/*.cover
+apps/mockup/*/.mypy_cache/
+apps/mockup/*/.pyre/
+apps/mockup/*/.pytype/
+apps/mockup/*/cython_debug/

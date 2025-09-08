@@ -1,24 +1,24 @@
 services:
   # 환경변수 자동 업데이트 서비스 (프로젝트 시작 시 실행)
-  env-updater:
-    image: alpine:latest
-    container_name: iot-care-env-updater
-    volumes:
-      - ./scripts:/scripts:ro
-      - ./.env.local:/.env.local:rw
-      - ./env_backups:/env_backups
-    working_dir: /scripts
-    command: >
-      sh -c "
-        echo '🔍 환경변수 자동 업데이트 시작...' &&
-        apk add --no-cache bash curl &&
-        chmod +x auto_env_update.sh &&
-        ./auto_env_update.sh &&
-        echo '✅ 환경변수 업데이트 완료'
-      "
-    profiles:
-      - setup
-    restart: "no"
+  # env-updater:
+  #   image: alpine:latest
+  #   container_name: iot-care-env-updater
+  #   volumes:
+  #     - ./scripts:/scripts:ro
+  #     - ./.env.local:/.env.local:rw
+  #     - ./env_backups:/env_backups
+  #   working_dir: /scripts
+  #   command: >
+  #     sh -c "
+  #       echo '🔍 환경변수 자동 업데이트 시작...' &&
+  #       apk add --no-cache bash curl &&
+  #       chmod +x auto_env_update.sh &&
+  #       ./auto_env_update.sh &&
+  #       echo '✅ 환경변수 업데이트 완료'
+  #     "
+  #   profiles:
+  #     - setup
+  #   restart: "no"
 
   # FastAPI 애플리케이션
   app:

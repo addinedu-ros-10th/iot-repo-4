@@ -4,13 +4,18 @@
 애플리케이션의 모든 의존성을 관리하고 제공합니다.
 """
 
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 
 from app.infrastructure.database import get_db_session
 from app.interfaces.repositories.user_repository import IUserRepository
 from app.interfaces.repositories.device_repository import IDeviceRepository
+from app.interfaces.repositories.user_relationship_repository import IUserRelationshipRepository
+from app.interfaces.repositories.user_profile_repository import IUserProfileRepository
+from app.interfaces.repositories.home_state_snapshot_repository import IHomeStateSnapshotRepository
+from app.interfaces.repositories.sensor_event_button_repository import ISensorEventButtonRepository
+from app.interfaces.repositories.sensor_raw_temperature_repository import ISensorRawTemperatureRepository
 from app.interfaces.repositories.sensor_repository import (
     ILoadCellRepository,
     IMQ5Repository,
@@ -32,6 +37,11 @@ from app.interfaces.repositories.actuator_repository import (
 )
 from app.interfaces.repositories.device_rtc_repository import IDeviceRTCStatusRepository
 from app.interfaces.services.user_service_interface import IUserService
+from app.interfaces.services.user_relationship_service_interface import IUserRelationshipService
+from app.interfaces.services.user_profile_service_interface import IUserProfileService
+from app.interfaces.services.home_state_snapshot_service_interface import IHomeStateSnapshotService
+from app.interfaces.services.sensor_event_button_service_interface import ISensorEventButtonService
+from app.interfaces.services.sensor_raw_temperature_service_interface import ISensorRawTemperatureService
 from app.interfaces.services.sensor_service_interface import (
     ILoadCellService,
     IMQ5Service,
@@ -59,6 +69,8 @@ class DependencyContainer:
     
     def __init__(self):
         self._db_session: AsyncSession = None
+        self._repositories: Dict[str, Any] = {}
+        self._services: Dict[str, Any] = {}
     
     async def get_db_session(self) -> AsyncSession:
         """데이터베이스 세션 제공"""
@@ -260,6 +272,79 @@ class DependencyContainer:
         from app.use_cases.device_rtc_service import DeviceRTCStatusService
         device_rtc_repository = self.get_device_rtc_repository(db_session)
         return DeviceRTCStatusService(device_rtc_repository)
+    
+    def get_user_relationship_repository(self, db_session: AsyncSession) -> IUserRelationshipRepository:
+        """사용자 관계 리포지토리 제공"""
+        from app.infrastructure.repositories.user_relationship_repository import UserRelationshipRepository
+        return UserRelationshipRepository(db_session)
+    
+    def get_user_profile_repository(self, db_session: AsyncSession) -> IUserProfileRepository:
+        """사용자 프로필 리포지토리 제공"""
+        from app.infrastructure.repositories.user_profile_repository import UserProfileRepository
+        return UserProfileRepository(db_session)
+    
+    def get_user_relationship_service(self, db_session: AsyncSession) -> IUserRelationshipService:
+        """사용자 관계 서비스 제공"""
+        from app.use_cases.user_relationship_service import UserRelationshipService
+        user_relationship_repository = self.get_user_relationship_repository(db_session)
+        return UserRelationshipService(user_relationship_repository)
+    
+    def get_user_profile_service(self, db_session: AsyncSession) -> IUserProfileService:
+        """사용자 프로필 서비스 제공"""
+        from app.use_cases.user_profile_service import UserProfileService
+        user_profile_repository = self.get_user_profile_repository(db_session)
+        return UserProfileService(user_profile_repository)
+
+    def get_home_state_snapshot_repository(self) -> IHomeStateSnapshotRepository:
+        """홈 상태 스냅샷 리포지토리 의존성 주입"""
+        if "home_state_snapshot_repository" not in self._repositories:
+            from app.infrastructure.repositories.home_state_snapshot_repository import HomeStateSnapshotRepository
+            from app.infrastructure.database import get_db
+            db = next(get_db())
+            self._repositories["home_state_snapshot_repository"] = HomeStateSnapshotRepository(db)
+        return self._repositories["home_state_snapshot_repository"]
+    
+    def get_sensor_event_button_repository(self) -> ISensorEventButtonRepository:
+        """버튼 이벤트 센서 리포지토리 의존성 주입"""
+        if "sensor_event_button_repository" not in self._repositories:
+            from app.infrastructure.repositories.sensor_event_button_repository import SensorEventButtonRepository
+            from app.infrastructure.database import get_db
+            db = next(get_db())
+            self._repositories["sensor_event_button_repository"] = SensorEventButtonRepository(db)
+        return self._repositories["sensor_event_button_repository"]
+    
+    def get_home_state_snapshot_service(self) -> IHomeStateSnapshotService:
+        """홈 상태 스냅샷 서비스 의존성 주입"""
+        if "home_state_snapshot_service" not in self._services:
+            from app.use_cases.home_state_snapshot_service import HomeStateSnapshotService
+            repository = self.get_home_state_snapshot_repository()
+            self._services["home_state_snapshot_service"] = HomeStateSnapshotService(repository)
+        return self._services["home_state_snapshot_service"]
+    
+    def get_sensor_event_button_service(self) -> ISensorEventButtonService:
+        """버튼 이벤트 센서 서비스 의존성 주입"""
+        if "sensor_event_button_service" not in self._services:
+            from app.use_cases.sensor_event_button_service import SensorEventButtonService
+            repository = self.get_sensor_event_button_repository()
+            self._services["sensor_event_button_service"] = SensorEventButtonService(repository)
+        return self._services["sensor_event_button_service"]
+
+    def get_sensor_raw_temperature_repository(self) -> ISensorRawTemperatureRepository:
+        """온도 센서 원시 데이터 리포지토리 의존성 주입"""
+        if "sensor_raw_temperature_repository" not in self._repositories:
+            from app.infrastructure.repositories.sensor_raw_temperature_repository import SensorRawTemperatureRepository
+            from app.infrastructure.database import get_db
+            db = next(get_db())
+            self._repositories["sensor_raw_temperature_repository"] = SensorRawTemperatureRepository(db)
+        return self._repositories["sensor_raw_temperature_repository"]
+    
+    def get_sensor_raw_temperature_service(self) -> ISensorRawTemperatureService:
+        """온도 센서 원시 데이터 서비스 의존성 주입"""
+        if "sensor_raw_temperature_service" not in self._services:
+            from app.use_cases.sensor_raw_temperature_service import SensorRawTemperatureService
+            repository = self.get_sensor_raw_temperature_repository()
+            self._services["sensor_raw_temperature_service"] = SensorRawTemperatureService(repository)
+        return self._services["sensor_raw_temperature_service"]
 
 
 # 전역 컨테이너 인스턴스
@@ -404,4 +489,53 @@ def get_actuator_relay_service(db_session: AsyncSession = Depends(get_db_session
 
 def get_actuator_servo_service(db_session: AsyncSession = Depends(get_db_session)) -> IActuatorServoService:
     """Servo 액추에이터 서비스 제공"""
-    return container.get_actuator_servo_service(db_session) 
+    return container.get_actuator_servo_service(db_session)
+
+def get_user_relationship_repository(db_session: AsyncSession = Depends(get_db_session)) -> IUserRelationshipRepository:
+    """사용자 관계 리포지토리 의존성 주입"""
+    return container.get_user_relationship_repository(db_session)
+
+def get_user_profile_repository(db_session: AsyncSession = Depends(get_db_session)) -> IUserProfileRepository:
+    """사용자 프로필 리포지토리 의존성 주입"""
+    return container.get_user_profile_repository(db_session)
+
+def get_user_relationship_service(db_session: AsyncSession = Depends(get_db_session)) -> IUserRelationshipService:
+    """사용자 관계 서비스 의존성 주입"""
+    return container.get_user_relationship_service(db_session)
+
+def get_user_profile_service(db_session: AsyncSession = Depends(get_db_session)) -> IUserProfileService:
+    """사용자 프로필 서비스 의존성 주입"""
+    return container.get_user_profile_service(db_session) 
+
+# 홈 상태 스냅샷 의존성 주입 함수
+def get_home_state_snapshot_repository() -> IHomeStateSnapshotRepository:
+    """홈 상태 스냅샷 리포지토리 의존성 주입"""
+    container = DependencyContainer()
+    return container.get_home_state_snapshot_repository()
+
+def get_home_state_snapshot_service() -> IHomeStateSnapshotService:
+    """홈 상태 스냅샷 서비스 의존성 주입"""
+    container = DependencyContainer()
+    return container.get_home_state_snapshot_service()
+
+# 버튼 이벤트 센서 의존성 주입 함수
+def get_sensor_event_button_repository() -> ISensorEventButtonRepository:
+    """버튼 이벤트 센서 리포지토리 의존성 주입"""
+    container = DependencyContainer()
+    return container.get_sensor_event_button_repository()
+
+def get_sensor_event_button_service() -> ISensorEventButtonService:
+    """버튼 이벤트 센서 서비스 의존성 주입"""
+    container = DependencyContainer()
+    return container.get_sensor_event_button_service() 
+
+# 온도 센서 원시 데이터 의존성 주입 함수
+def get_sensor_raw_temperature_repository() -> ISensorRawTemperatureRepository:
+    """온도 센서 원시 데이터 리포지토리 의존성 주입"""
+    container = DependencyContainer()
+    return container.get_sensor_raw_temperature_repository()
+
+def get_sensor_raw_temperature_service() -> ISensorRawTemperatureService:
+    """온도 센서 원시 데이터 서비스 의존성 주입"""
+    container = DependencyContainer()
+    return container.get_sensor_raw_temperature_service() 

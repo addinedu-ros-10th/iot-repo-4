@@ -26,8 +26,8 @@ class User:
         if not self.user_name:
             raise ValueError("사용자 이름은 필수입니다.")
         
-        if self.user_role not in ["admin", "caregiver", "user", "family"]:
-            raise ValueError("유효하지 않은 사용자 역할입니다.")
+        if self.user_role not in ["admin", "caregiver", "care_target", "family"]:
+            raise ValueError(f"유효하지 않은 사용자 역할입니다. {self.user_role}")
     
     def is_admin(self) -> bool:
         """관리자 여부 확인"""

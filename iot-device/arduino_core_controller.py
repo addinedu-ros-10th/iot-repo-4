@@ -13,7 +13,7 @@ import serial
 import struct
 
 class Iot_api:
-    def __init__(self, base_url: str = "http://localhost:8000"):
+    def __init__(self, base_url: str = "http://ec2-43-201-96-23.ap-northeast-2.compute.amazonaws.com"):
 
         user = uuid.uuid4()
         self.base_url = base_url
@@ -138,9 +138,9 @@ class Iot_api:
 class Iot_Serial(Iot_api):
     def __init__(self):
         super().__init__()
-
+        self.test_health_check()
         self.port = '/dev/ttyACM0'
-        self.baud = 9600
+        self.baud = 57600
         self.source = {"Load_cell" : 0x00,
                     "MQ5" : 0x01,
                     "MQ7": 0x02,
@@ -161,8 +161,12 @@ class Iot_Serial(Iot_api):
         self.trans_data = ""
     def get_data(self):
         if self.conn.readable():
-            res = self.conn.read_until(b'\n')
-
+            res = self.conn.read_until(b'\r\n')
+            if (len(res) < 10):
+                return
+            else:
+                pass
+                # print(res)
             if not self.SOFcheck(res):
                 print("Error in SOF")
                 return
@@ -173,7 +177,7 @@ class Iot_Serial(Iot_api):
                 print("Not for controller")
                 return
             
-            
+            self.SOURCEcheck(res)
             
 
 
@@ -185,7 +189,7 @@ class Iot_Serial(Iot_api):
             return False
     
     def EOFcheck(self, data):
-        if (data[-1] == 0xFA):
+        if (data[-3] == 0xFA):
             return True
         else:
             return False
@@ -201,22 +205,22 @@ class Iot_Serial(Iot_api):
             self.endpoint = self.api_endpoints["LoadCell"]
             self.trans_data = {
                 "time": datetime.now().isoformat(),
-                "device_id": "1",
-                "raw_payload": {"weight_kg": struct.unpack("f", data[3:8]), "calibration_factor": 0.0, "temperature": 0.0}
+                "device_id": "10fa45f2-f375-41c9-a62a-093efcd01bd3_Load_Cell_1",
+                "raw_payload": {"weight_kg": float(struct.unpack("f", data[3:7])[0]), "calibration_factor": 0.0, "temperature": 0.0}
             }
         elif (data[1] == self.source["MQ5"]):
             self.endpoint = self.api_endpoints["MQ5"]
             self.trans_data = {
                 "time": datetime.now().isoformat(),
-                "device_id": "2",
-                "raw_payload": {"gas_level": struct.unpack("f", data[3:8]), "temperature": 0.0}
-            }
+                "device_id": "10fa45f2-f375-41c9-a62a-093efcd01bd3_MQ5_Gas_Sensor_1",
+                "raw_payload": {"gas_level": float(struct.unpack("f", data[3:7])[0]), "temperature": 0.0}
+            }   
         elif (data[1] == self.source["MQ7"]):
             self.endpoint = self.api_endpoints["MQ7"]
             self.trans_data = {
                 "time": datetime.now().isoformat(),
-                "device_id": "2",
-                "raw_payload": {"co_level": struct.unpack("f", data[3:8]), "temperature": 0.0}
+                "device_id": "10fa45f2-f375-41c9-a62a-093efcd01bd3_MQ7_CO_Sensor_1",
+                "raw_payload": {"co_level": struct.unpack("f", data[3:7][0]), "temperature": 0.0}
             }
         elif (data[1] == self.source["RFID_Out"]):
             self.endpoint = self.api_endpoints["RFID"]
@@ -263,4 +267,18 @@ class Iot_Serial(Iot_api):
                     "IMU" : 0x09,
                     "LED" : 0x0A
                     }
-        
+
+async def main():
+    """메인 함수"""
+    async with Iot_Serial() as tester:
+        success = await tester.test_health_check()
+        if not success:
+            print("\n 서버와의 통신 상태가 불량합니다.")
+            return
+        while (True):
+            tester.get_data()
+            print(tester.trans_data)
+            await tester.create_data(tester.endpoint, tester.trans_data)
+
+if __name__ == "__main__":
+    asyncio.run(main())

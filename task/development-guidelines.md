@@ -1,5 +1,28 @@
 # IoT Care Backend System 개발 가이드라인
 
+> 현재 프로젝트 Repository URL: https://github.com/addinedu-ros-10th/iot-repo-4
+
+## 📌 현재 작업 요청(요약)
+- `doc/readme_references/` 내 참고 README들을 기반으로 구성 요소 추출 및 빈도 분석
+- 공통/개별 구성 도출, 포트폴리오 관점 채택/배제 근거 작성
+- `doc/project_materials/` PDF를 근거로 최적 README(필수 구성 포함) 제안 및 `README.md` 반영 초안 작성
+- 본 문서에 체크리스트/1시간 액션 플랜 업데이트, 단계 완료마다 갱신
+
+## ✅ 체크리스트
+- [ ] 참고 README 헤딩 추출 TSV 생성 (`task/readme_refs_headings_*.tsv`)
+- [ ] 헤딩 빈도 요약 생성 (`task/readme_refs_heading_frequency_*.tsv`)
+- [ ] 공통 vs 개별 구성 도출 표 작성
+- [ ] 포트폴리오 관점 채택/배제 근거 정리
+- [ ] 최적 README 목차 설계(필수 구성 맵핑)
+- [ ] `README.md` 초안 반영
+- [ ] 진행 결과 설명 및 피드백 수집
+
+## ⏱️ 1시간 액션 플랜
+- 0~15분: 헤딩 추출/빈도 요약 산출
+- 15~35분: 공통/개별 구성 집계 및 채택/배제 근거 도출
+- 35~50분: 최적 README 목차 설계(필수 구성 맵핑) 및 초안 작성
+- 50~60분: 문서 갱신(체크리스트/README 초안), 결과 설명 및 피드백 요청
+
 **작성일**: 2025-08-22  
 **마지막 업데이트**: 2025-08-22 11:30:00  
 **프로젝트**: IoT Repository 4 - WAS Server
@@ -59,9 +82,16 @@ hostname -I
 - **`REDIS_HOST`**: Redis 컨테이너 IP (일반적으로 Docker 내부 IP)
 
 #### **AWS EC2 운영 환경 IP 주소**
-- **현재 운영 환경 IP**: `ec2-43-201-96-23.ap-northeast-2.compute.amazonaws.com`
+- **현재 운영 환경 IP**: `ec2-43-201-96-23.ap-northeast-2.compute.amazonaws.com` ✅ **고정 IP 부여됨**
 - **이전 운영 환경 IP**: `ec2-3-34-98-7.ap-northeast-2.compute.amazonaws.com`
 - **업데이트 날짜**: 2025-08-23
+- **IP 타입**: Elastic IP (고정 IP) - IP 주소 변경 없음
+
+#### **SSL 인증서 제한 사항**
+- **IP 주소 제한**: Let's Encrypt는 IP 주소에 직접 SSL 인증서 발급 불가
+- **도메인 필요**: 실제 도메인 이름이 필요 (예: `iot-care.com`)
+- **현재 설정**: HTTP 전용 (보안을 위해 내부 네트워크에서만 접근 권장)
+- **HTTPS 활성화**: Route 53을 통한 실제 도메인 설정 후 가능
 
 #### **환경변수 자동 업데이트 스크립트**
 
